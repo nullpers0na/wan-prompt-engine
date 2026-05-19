@@ -4,8 +4,8 @@ const TEXT_MODEL   = 'mistralai/mistral-nemo';
 function buildUserContent(description, image) {
   if (!image) return description.trim();
   return [
+    { type: 'text', text: `Focus on this description only: ${description.trim()}` },
     { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
-    { type: 'text', text: description.trim() },
   ];
 }
 
