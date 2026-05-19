@@ -382,21 +382,36 @@
       }
       const reader = new FileReader();
       reader.onload = ev => {
-        const dataUrl = ev.target.result;
-        const base64 = dataUrl.split(',')[1];
-        uploadedImage = { data: base64, mediaType: file.type };
-        previewImg.src = dataUrl;
-        previewName.textContent = file.name;
-        previewSize.textContent = formatBytes(file.size);
-        uploadHint.style.display = 'none';
-        uploadPreview.classList.add('visible');
+        const img = new Image();
+        img.onload = () => {
+          // Resize to max 1024px on the longest side, output as JPEG
+          const MAX = 1024;
+          let { width, height } = img;
+          if (width > MAX || height > MAX) {
+            if (width >= height) { height = Math.round(height * MAX / width); width = MAX; }
+            else { width = Math.round(width * MAX / height); height = MAX; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const base64 = dataUrl.split(',')[1];
+          uploadedImage = { data: base64, mediaType: 'image/jpeg' };
+          previewImg.src = dataUrl;
+          previewName.textContent = file.name;
+          previewSize.textContent = `${width}×${height} (compressed)`;
+          uploadHint.style.display = 'none';
+          uploadPreview.classList.add('visible');
+        };
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     }
 
     function clearUpload() {
       uploadedImage = null;
-      fileInput.value = '';
+      try { fileInput.value = ''; } catch (e) {}
       previewImg.src = '';
       uploadPreview.classList.remove('visible');
       uploadHint.style.display = '';
@@ -429,8 +444,9 @@
           body: JSON.stringify(body),
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Unknown error');
+        let data;
+        try { data = await res.json(); } catch (_) { throw new Error(`Server error (${res.status})`); }
+        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
 
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
