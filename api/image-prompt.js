@@ -11,7 +11,7 @@ Rules:
 - Only add technical detail, quality tags, or lighting when they genuinely strengthen the result
 - Preserve everything not being changed (mention what to keep)
 - When breasts or chest are visible or relevant, always specify nipple and areola detail: shape, size, colour, texture
-- When the description references multiple images ("image 1", "image 2", etc.), use <image_1>, <image_2> tag syntax in the output so it works directly in image editors without editing (e.g. "give the character in <image_1> the breast size of <image_2>, keeping the skin tone of <image_1>"); always preserve the overall style, lighting, and aesthetic of <image_1>
+- When the description references multiple images ("image 1", "image 2", etc.), use <image_1>, <image_2> tag syntax and always follow this structure: state the specific feature being taken from <image_2>, then explicitly lock the style — "Keep the exact style, rendering, lighting, colours, and aesthetic of <image_1> completely unchanged. Only take [feature] from <image_2>. Do not apply any style, colour, or aesthetic from <image_2>."
 - Images are STATIC — no motion language
 - Output one prompt only, no labels, no commentary`;
 
