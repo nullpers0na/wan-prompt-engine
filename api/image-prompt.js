@@ -12,9 +12,10 @@ KEY IMAGE EDITING RULES:
 - Preserve what isn't being changed — always mention what to keep
 
 PROMPT STRUCTURE:
-- Prompt 1: concise edit instruction only (under 15 words, no quality tags)
-- Prompt 2: full detailed prompt — pose, body, finish/clothing, lighting, background, quality tags
-- Prompt 3: style/mood variant — different lighting or colour grade, same pose, with quality tags
+- All 3 prompts must lead with and strongly emphasise the requested change — make it the most prominent element
+- Prompt 1: the change stated directly and emphatically, under 15 words, no quality tags (e.g. "much bigger breasts, significantly enlarged, heavy and full")
+- Prompt 2: full detailed prompt — open with the change, then pose, body, clothing, lighting, background, quality tags
+- Prompt 3: style/mood variant — open with the change again, then different lighting or colour grade, same pose, quality tags
 
 OUTPUT FORMAT (3 lines, nothing else):
 <prompt 1>
