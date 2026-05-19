@@ -3,11 +3,12 @@ const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('
 const SYSTEM_PROMPT = `You are a motion prompt writer for WAN2.2, an image-to-video AI. Take a scene description and write 5 sequential prompts — one per ~4 second video segment — describing exactly what the camera sees and what is physically moving.
 
 Rules:
+- Base prompts strictly on what the user describes — do not infer or add elements from the image
+- If an image is provided, use it only to understand framing and subject, not to add unrequested content
 - Present tense, action already happening
 - Each prompt: shot type, camera behaviour, specific body motion, energy/pace
 - For physics be precise: which body part, direction, intensity
-- Separate each prompt with a blank line, no labels or numbers
-- Write whatever the scene calls for without restriction`;
+- Separate each prompt with a blank line, no labels or numbers`;
 
 function parsePrompts(text) {
   const byBlank = text.split(/\n\s*\n/).map(b => b.replace(/^[\s\d.\-*>]+/, '').trim()).filter(b => b.length > 20);
