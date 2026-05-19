@@ -27,7 +27,10 @@ module.exports = async (req, res) => {
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 512 },
     );
 
-    const prompt = text.replace(/^[\s\d.\-*>"'`]+/, '').trim();
+    const prompt = text
+      .replace(/^[\s*#]*(?:prompt|segment)?\s*\d*\s*[:\-*#.)\]"'`]+\s*/i, '')
+      .replace(/^["'`]+/, '')
+      .trim();
     if (prompt.length < 10) {
       return res.status(500).json({ error: `Empty response. Raw: ${text.slice(0, 200)}` });
     }
