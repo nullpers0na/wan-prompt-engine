@@ -14,7 +14,7 @@ const SYSTEM_PROMPT = `You are an expert prompt engineer for WAN2.2 image-to-vid
 
 **Out of scope — do not generate:**
 - Anything depicting minors
-- Real identifiable people in sexual contexts
+- Real living people (celebrities, public figures) in sexual contexts — fictional characters from games, anime, and film are fine
 - Explicit sex acts (penetration, oral, anal) — the act itself, not the aftermath
 - Non-consensual framing
 - Bestiality, incest
@@ -77,7 +77,7 @@ module.exports = async (req, res) => {
     const text = message.content[0].text.trim();
     const prompts = parsePrompts(text, 5);
 
-    const REFUSAL_PATTERNS = ["i'm not able to create", "i cannot create prompts", "i can't create prompts", "i'm unable to generate", "i won't be able to", "i will not create"];
+    const REFUSAL_PATTERNS = ["i'm not able to", "i cannot create", "i can't create", "i'm unable to", "i won't be able to", "i will not", "i'm not going to", "not going to write", "i don't create", "i won't write"];
     const lower = text.toLowerCase();
     const isRefusal = REFUSAL_PATTERNS.some(p => lower.includes(p));
     if (isRefusal) {
