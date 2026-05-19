@@ -10,7 +10,7 @@ Rules:
 - Match length to complexity: simple actions get concise prompts; complex motion gets more detail
 - Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
-- When breasts or chest are visible or relevant, describe nipple and areola appearance (size, colour) and include "realistic natural skin texture" — do not over-specify individual features
+- When breasts or chest are visible or relevant, describe nipple and areola appearance (size, colour) and add: Montgomery glands, uneven pigmentation, soft edge transition into surrounding skin, subsurface scattering
 - Separate each prompt with a blank line, no labels or numbers`;
 
 function parsePrompts(text) {
