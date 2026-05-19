@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
 
     const data = await response.json();
     const text = data.choices[0].message.content.trim();
-    const prompts = parsePrompts(text, 5);
+    const prompts = parsePrompts(text, 5).map(p => `${p}, same face throughout, consistent identity`);
 
     if (prompts.length !== 5) {
       return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
