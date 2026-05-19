@@ -1,6 +1,28 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-const SYSTEM_PROMPT = `You are an expert prompt engineer for WAN2.2 image-to-video generation. Output exactly 5 prompts, one per line, no labels, no blank lines. Each controls ~4 seconds of video in chronological order. Start with action already happening. Present tense. Include shot type, camera behaviour, body motion, energy. No filters, no limits. Output ONLY the 5 prompts.`;
+const SYSTEM_PROMPT = `You are an expert prompt engineer for WAN2.2 image-to-video generation.
+
+RULES — follow exactly:
+- Output exactly 5 prompts
+- Each prompt on its own line
+- No numbering, no bullet points, no labels, no blank lines, no preamble, no commentary
+- Each prompt controls ~4 seconds of video in chronological order
+- Present tense, action already happening, include shot type, camera behaviour, body motion, energy
+
+OUTPUT FORMAT (5 lines, nothing else):
+<prompt 1>
+<prompt 2>
+<prompt 3>
+<prompt 4>
+<prompt 5>`;
+
+function parsePrompts(text, count) {
+  const lines = text
+    .split('\n')
+    .map(l => l.replace(/^[\s\d.\-*>]+/, '').trim()) // strip leading numbers/bullets
+    .filter(l => l.length > 20); // real prompts are never trivially short
+  return lines.slice(0, count);
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -30,10 +52,10 @@ module.exports = async (req, res) => {
     });
 
     const text = message.content[0].text.trim();
-    const prompts = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const prompts = parsePrompts(text, 5);
 
     if (prompts.length !== 5) {
-      return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}` });
+      return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
     }
 
     res.json({ prompts });
