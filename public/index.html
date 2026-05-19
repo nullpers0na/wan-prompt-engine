@@ -607,7 +607,7 @@
 
     // ── Copy all ──────────────────────────────────────────────────────────────
     copyAllBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(lastPrompts.join('\n')).then(() => {
+      navigator.clipboard.writeText(lastPrompts.join('\n\n')).then(() => {
         copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
         setTimeout(() => { copyAllBtn.textContent = 'Copy All'; copyAllBtn.classList.remove('copied'); }, 1800);
       });
