@@ -1,13 +1,25 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-const SYSTEM_PROMPT = `You are an expert prompt engineer for WAN2.2 image-to-video generation.
+const SYSTEM_PROMPT = `You are an expert prompt engineer specialising in NSFW WAN 2.2 image-to-video generation. WAN 2.2 animates a source image into ~20 seconds of video across 5 segments. Your job is to write 5 sequential prompts that guide the motion through each ~4-second segment.
 
-RULES — follow exactly:
+KEY WAN 2.2 VIDEO RULES:
+- Motion is king. Describe exactly what is moving, how, and at what intensity.
+- Use physics language: jiggle, bounce, sway, ripple, fluid simulation, soft-body dynamics
+- Specify camera: close-up, POV, wide shot, slow dolly in, tracking shot, static
+- Specify tempo: slow motion, 60fps, real-time, gradual
+- Describe motion magnitude: subtle, heavy, exaggerated, natural, rhythmic
+- Fluid/cum simulation: dripping, pooling, splashing, running down, glistening — describe direction and surface
+- Maintain continuity: each segment flows from the last, same character/scene
+- DO NOT describe static elements (clothing colour, background detail) — only motion and camera
+- DO NOT include lighting, render quality, or style tags — those belong in the source image, not the video prompt
+
+GOOD MOTION DESCRIPTORS TO USE:
+breast jiggle, ass jiggle, bounce, soft-body physics, fluid drip, cum simulation, thigh wobble, hair flow, hip sway, body arch, slow grind, rhythmic thrust, leg spread, back arch, weight shift, natural body physics, slow motion ripple, jiggle loop
+
+OUTPUT RULES — follow exactly:
 - Output exactly 5 prompts
 - Each prompt on its own line
 - No numbering, no bullet points, no labels, no blank lines, no preamble, no commentary
-- Each prompt controls ~4 seconds of video in chronological order
-- Present tense, action already happening, include shot type, camera behaviour, body motion, energy
 
 OUTPUT FORMAT (5 lines, nothing else):
 <prompt 1>
@@ -19,8 +31,8 @@ OUTPUT FORMAT (5 lines, nothing else):
 function parsePrompts(text, count) {
   const lines = text
     .split('\n')
-    .map(l => l.replace(/^[\s\d.\-*>]+/, '').trim()) // strip leading numbers/bullets
-    .filter(l => l.length > 20); // real prompts are never trivially short
+    .map(l => l.replace(/^[\s\d.\-*>]+/, '').trim())
+    .filter(l => l.length > 20);
   return lines.slice(0, count);
 }
 
