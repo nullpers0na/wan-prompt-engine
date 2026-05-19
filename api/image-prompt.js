@@ -15,13 +15,11 @@ PROMPT STRUCTURE:
 - Prompt 1: concise edit instruction only (under 15 words, no quality tags)
 - Prompt 2: full detailed prompt — pose, body, finish/clothing, lighting, background, quality tags
 - Prompt 3: style/mood variant — different lighting or colour grade, same pose, with quality tags
-- NEGATIVE: one line of negative prompt tags relevant to this scene — bad anatomy, deformed hands, extra limbs, blurry, low quality, watermark, plus anything specific to avoid for this edit
 
-OUTPUT FORMAT (4 lines, nothing else):
+OUTPUT FORMAT (3 lines, nothing else):
 <prompt 1>
 <prompt 2>
-<prompt 3>
-NEGATIVE: <negative prompt>`;
+<prompt 3>`;
 
 function parsePrompts(text, count) {
   const lines = text
@@ -72,17 +70,13 @@ module.exports = async (req, res) => {
 
     const data = await response.json();
     const text = data.choices[0].message.content.trim();
-
-    const negMatch = text.match(/NEGATIVE:\s*(.+)/i);
-    const negative = negMatch ? negMatch[1].trim() : 'bad anatomy, deformed hands, extra limbs, blurry, low quality, watermark, text, ugly, mutation';
-    const cleanText = text.replace(/NEGATIVE:.+/i, '').trim();
-    const prompts = parsePrompts(cleanText, 3);
+    const prompts = parsePrompts(text, 3);
 
     if (prompts.length !== 3) {
       return res.status(500).json({ error: `Expected 3 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
     }
 
-    res.json({ prompts, negative });
+    res.json({ prompts });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || 'API call failed' });
