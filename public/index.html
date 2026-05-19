@@ -534,10 +534,32 @@
           uploadedImage = { data: dataUrl.split(',')[1], mediaType: 'image/jpeg' };
           previewImg.src = dataUrl; previewName.textContent = file.name; previewSize.textContent = `${width}×${height} · compressed`;
           uploadHint.style.display = 'none'; uploadPreview.classList.add('visible'); uploadArea.classList.add('has-preview');
+          autoDescribeCharacter(uploadedImage);
         };
         img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
+    }
+
+    async function autoDescribeCharacter(image) {
+      if (characterEl.value.trim()) return; // don't overwrite if user already typed something
+      characterEl.placeholder = 'Analysing image…';
+      try {
+        const res = await fetch('/api/describe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image }),
+        });
+        if (!res.ok) throw new Error('describe failed');
+        const data = await res.json();
+        if (data.description && !characterEl.value.trim()) {
+          characterEl.value = data.description;
+        }
+      } catch (_) {
+        // silently ignore — field stays empty for user to fill manually
+      } finally {
+        characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…';
+      }
     }
 
     function clearUpload() {
