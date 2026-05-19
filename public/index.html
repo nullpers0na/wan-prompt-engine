@@ -688,10 +688,8 @@
 
       setLoading(true);
       showError(null);
-      segmentsEl.innerHTML = '';
       copyAllBtn.style.display = 'none';
       lastPrompts = [];
-      examplesExpanded = false;
       renderExamples(false);
 
       const character = characterEl.value.trim();
@@ -700,11 +698,14 @@
       const body = { description: fullDescription };
       if (uploadedImage) body.image = uploadedImage;
 
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 30000);
+
       try {
-        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal });
+        clearTimeout(fetchTimeout);
         let data;
         try { data = await res.json(); } catch (_) { throw new Error(`Server error (${res.status})`); }
-        if (res.status === 422 && data.error === 'refusal') throw new Error('Claude declined this one. Try rewording it.');
         if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
 
         lastPrompts = data.prompts;
@@ -715,7 +716,8 @@
         saveHistory({ mode, description, character, prompts: data.prompts });
         renderHistory();
       } catch (err) {
-        showError(err.message);
+        clearTimeout(fetchTimeout);
+        showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
       } finally {
         setLoading(false);
       }
@@ -730,7 +732,18 @@
     });
 
     // ── Render segments ───────────────────────────────────────────────────────
-    function renderSegments(prompts) {
+    segmentsEl.addEventListener('click', e => {
+      const btn = e.target.closest('.segment-copy');
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.idx, 10);
+      navigator.clipboard.writeText(lastPrompts[idx]).then(() => {
+        btn.classList.add('flash');
+        setTimeout(() => btn.classList.remove('flash'), 1400);
+      });
+    });
+
+    function renderSegments(prompts, animate = true) {
+      segmentsEl.innerHTML = '';
       prompts.forEach((text, i) => {
         const seg = document.createElement('div');
         seg.className = 'segment';
@@ -745,18 +758,9 @@
             </svg>
           </button>`;
         segmentsEl.appendChild(seg);
-        setTimeout(() => seg.classList.add('visible'), 40 + i * 70);
+        if (animate) setTimeout(() => seg.classList.add('visible'), 40 + i * 70);
+        else seg.classList.add('visible');
       });
-
-      segmentsEl.addEventListener('click', e => {
-        const btn = e.target.closest('.segment-copy');
-        if (!btn) return;
-        const idx = parseInt(btn.dataset.idx, 10);
-        navigator.clipboard.writeText(lastPrompts[idx]).then(() => {
-          btn.classList.add('flash');
-          setTimeout(() => btn.classList.remove('flash'), 1400);
-        });
-      }, { once: false });
     }
 
     // ── History ───────────────────────────────────────────────────────────────
@@ -790,15 +794,11 @@
           characterEl.value = entry.character || '';
           descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : 'Describe the image edit you want to make…';
           lastPrompts = entry.prompts;
-          segmentsEl.innerHTML = '';
-          entry.prompts.forEach((p, i) => {
-            const seg = document.createElement('div'); seg.className = 'segment';
-            const label = mode === 'video' ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}` : `<span>${IMAGE_LABELS[i]}</span>`;
-            seg.innerHTML = `<div class="segment-label">${label}</div><div class="segment-text">${escapeHtml(p)}</div><button class="segment-copy" title="Copy prompt" data-idx="${i}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button>`;
-            segmentsEl.appendChild(seg); setTimeout(() => seg.classList.add('visible'), 40 + i * 60);
-          });
+          renderSegments(entry.prompts, false);
           copyAllBtn.style.display = 'inline-block';
-          examplesExpanded = false; renderExamples();
+          copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy';
+          splitterNote.style.display = mode === 'video' ? 'block' : 'none';
+          renderExamples();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         historyList.appendChild(el);
