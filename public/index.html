@@ -20,7 +20,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 32px;
     }
 
     header h1 {
@@ -45,6 +45,35 @@
       gap: 20px;
     }
 
+    .mode-toggle {
+      display: flex;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      overflow: hidden;
+      width: fit-content;
+    }
+
+    .mode-btn {
+      font-family: inherit;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #555;
+      padding: 8px 20px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .mode-btn.active {
+      background: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    .mode-btn:hover:not(.active) { color: #888; }
+
     textarea {
       width: 100%;
       min-height: 120px;
@@ -67,6 +96,7 @@
     .actions {
       display: flex;
       gap: 12px;
+      align-items: center;
     }
 
     button {
@@ -158,9 +188,7 @@
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       display: none;
-      margin-left: 4px;
       flex-shrink: 0;
-      align-self: center;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -169,10 +197,15 @@
 <body>
   <header>
     <h1>WAN 2.2 Prompt Engine</h1>
-    <p>Generate 5 video segment prompts from a single description</p>
+    <p>Generate prompts for video segments or image editing</p>
   </header>
 
   <div class="container">
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="video">Video</button>
+      <button class="mode-btn" data-mode="image">Image Edit</button>
+    </div>
+
     <textarea id="description" placeholder="Describe your video scene…" rows="5"></textarea>
 
     <div class="actions">
@@ -187,9 +220,8 @@
   </div>
 
   <script>
-    const TIMESTAMPS = [
-      '~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'
-    ];
+    const VIDEO_TIMESTAMPS = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
+    const IMAGE_LABELS = ['Concise', 'Detailed', 'Styled'];
 
     const generateBtn = document.getElementById('generateBtn');
     const copyAllBtn = document.getElementById('copyAllBtn');
@@ -197,8 +229,24 @@
     const errorEl = document.getElementById('error');
     const segmentsEl = document.getElementById('segments');
     const descriptionEl = document.getElementById('description');
+    const modeBtns = document.querySelectorAll('.mode-btn');
 
+    let mode = 'video';
     let lastPrompts = [];
+
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        mode = btn.dataset.mode;
+        modeBtns.forEach(b => b.classList.toggle('active', b === btn));
+        descriptionEl.placeholder = mode === 'video'
+          ? 'Describe your video scene…'
+          : 'Describe the image edit you want to make…';
+        segmentsEl.innerHTML = '';
+        copyAllBtn.style.display = 'none';
+        errorEl.style.display = 'none';
+        lastPrompts = [];
+      });
+    });
 
     generateBtn.addEventListener('click', async () => {
       const description = descriptionEl.value.trim();
@@ -210,18 +258,17 @@
       copyAllBtn.style.display = 'none';
       lastPrompts = [];
 
+      const endpoint = mode === 'video' ? '/api/generate' : '/api/image-prompt';
+
       try {
-        const res = await fetch('/api/generate', {
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ description }),
         });
 
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Unknown error');
-        }
+        if (!res.ok) throw new Error(data.error || 'Unknown error');
 
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
@@ -249,15 +296,16 @@
       prompts.forEach((text, i) => {
         const seg = document.createElement('div');
         seg.className = 'segment';
+
+        const label = mode === 'video'
+          ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}`
+          : `<span>${IMAGE_LABELS[i]}</span>`;
+
         seg.innerHTML = `
-          <div class="segment-label">
-            <span>SEG ${i + 1}</span>
-            ${TIMESTAMPS[i]}
-          </div>
+          <div class="segment-label">${label}</div>
           <div class="segment-text">${escapeHtml(text)}</div>
         `;
         segmentsEl.appendChild(seg);
-        // Stagger animation
         setTimeout(() => seg.classList.add('visible'), 30 + i * 60);
       });
     }
