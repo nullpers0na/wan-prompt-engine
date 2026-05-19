@@ -18,24 +18,9 @@
       padding: 48px 16px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    header h1 {
-      font-size: 1.5rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #ffffff;
-    }
-
-    header p {
-      margin-top: 8px;
-      font-size: 0.75rem;
-      color: #555;
-      letter-spacing: 0.08em;
-    }
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { font-size: 1.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: #ffffff; }
+    header p { margin-top: 8px; font-size: 0.75rem; color: #555; letter-spacing: 0.08em; }
 
     .container {
       width: 100%;
@@ -45,6 +30,7 @@
       gap: 20px;
     }
 
+    /* Mode toggle */
     .mode-toggle {
       display: flex;
       background: #111;
@@ -67,13 +53,10 @@
       transition: background 0.15s, color 0.15s;
     }
 
-    .mode-btn.active {
-      background: #1e1e1e;
-      color: #e0e0e0;
-    }
-
+    .mode-btn.active { background: #1e1e1e; color: #e0e0e0; }
     .mode-btn:hover:not(.active) { color: #888; }
 
+    /* Textarea */
     textarea {
       width: 100%;
       min-height: 120px;
@@ -93,21 +76,51 @@
     textarea::placeholder { color: #444; }
     textarea:focus { border-color: #555; }
 
+    /* Example chips */
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .examples-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #444;
+      flex-shrink: 0;
+    }
+
+    .example-chip {
+      font-family: inherit;
+      font-size: 0.72rem;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      color: #666;
+      border-radius: 3px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      text-align: left;
+    }
+
+    .example-chip:hover { border-color: #555; color: #bbb; }
+
     /* Upload area */
     .upload-area {
       border: 1px dashed #2a2a2a;
       border-radius: 4px;
       padding: 20px;
       text-align: center;
-      cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
       position: relative;
     }
 
-    .upload-area:hover, .upload-area.drag-over {
-      border-color: #555;
-      background: #111;
-    }
+    /* Only show pointer + file input overlay when not previewing */
+    .upload-area:not(.has-preview) { cursor: pointer; }
+    .upload-area:not(.has-preview):hover,
+    .upload-area.drag-over { border-color: #555; background: #111; }
 
     .upload-area input[type="file"] {
       position: absolute;
@@ -117,6 +130,9 @@
       width: 100%;
       height: 100%;
     }
+
+    /* Hide the file input when preview is showing so Remove button is clickable */
+    .upload-area.has-preview input[type="file"] { display: none; }
 
     .upload-hint {
       font-size: 0.75rem;
@@ -141,24 +157,12 @@
       object-fit: cover;
       border-radius: 3px;
       border: 1px solid #2a2a2a;
+      flex-shrink: 0;
     }
 
-    .upload-preview-info {
-      flex: 1;
-      text-align: left;
-    }
-
-    .upload-preview-name {
-      font-size: 0.8rem;
-      color: #ccc;
-      word-break: break-all;
-    }
-
-    .upload-preview-size {
-      font-size: 0.7rem;
-      color: #555;
-      margin-top: 3px;
-    }
+    .upload-preview-info { flex: 1; text-align: left; }
+    .upload-preview-name { font-size: 0.8rem; color: #ccc; word-break: break-all; }
+    .upload-preview-size { font-size: 0.7rem; color: #555; margin-top: 3px; }
 
     .upload-remove {
       font-family: inherit;
@@ -172,15 +176,13 @@
       padding: 4px 10px;
       cursor: pointer;
       flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s;
     }
 
     .upload-remove:hover { color: #eb5757; border-color: #eb5757; }
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+    /* Actions row */
+    .actions { display: flex; gap: 12px; align-items: center; }
 
     button {
       font-family: inherit;
@@ -194,11 +196,7 @@
       transition: background 0.15s, opacity 0.15s;
     }
 
-    #generateBtn {
-      background: #e0e0e0;
-      color: #0a0a0a;
-    }
-
+    #generateBtn { background: #e0e0e0; color: #0a0a0a; }
     #generateBtn:hover:not(:disabled) { background: #ffffff; }
     #generateBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -212,17 +210,10 @@
     #copyAllBtn:hover { background: #222; color: #bbb; }
     #copyAllBtn.copied { color: #6fcf97; border-color: #6fcf97; }
 
-    #error {
-      font-size: 0.8rem;
-      color: #eb5757;
-      display: none;
-    }
+    #error { font-size: 0.8rem; color: #eb5757; display: none; }
 
-    .segments {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* Result segments */
+    .segments { display: flex; flex-direction: column; gap: 12px; }
 
     .segment {
       background: #111;
@@ -237,10 +228,7 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .segment.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .segment.visible { opacity: 1; transform: translateY(0); }
 
     .segment-label {
       font-size: 0.65rem;
@@ -251,17 +239,8 @@
       min-width: 72px;
     }
 
-    .segment-label span {
-      display: block;
-      color: #777;
-      font-size: 0.7rem;
-    }
-
-    .segment-text {
-      font-size: 0.85rem;
-      line-height: 1.6;
-      color: #d0d0d0;
-    }
+    .segment-label span { display: block; color: #777; font-size: 0.7rem; }
+    .segment-text { font-size: 0.85rem; line-height: 1.6; color: #d0d0d0; }
 
     .spinner {
       width: 16px;
@@ -291,6 +270,10 @@
 
     <textarea id="description" placeholder="Describe your video scene…" rows="5"></textarea>
 
+    <div class="examples" id="examples">
+      <span class="examples-label">Try:</span>
+    </div>
+
     <div class="upload-area" id="uploadArea">
       <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" />
       <div class="upload-hint" id="uploadHint">
@@ -313,7 +296,6 @@
     </div>
 
     <div id="error"></div>
-
     <div class="segments" id="segments"></div>
   </div>
 
@@ -322,26 +304,43 @@
     const IMAGE_LABELS = ['Concise', 'Detailed', 'Styled'];
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+    const EXAMPLES = {
+      video: [
+        'A wolf sprinting through a moonlit forest',
+        'A street dancer performing in Times Square at night',
+        'A sports car drifting on a rain-soaked mountain road',
+        'An astronaut floating outside a space station',
+      ],
+      image: [
+        'Change the sky to a dramatic golden sunset',
+        'Make the subject wear a red leather jacket',
+        'Add heavy snowfall to the scene',
+        'Convert to a moody black and white film style',
+      ],
+    };
+
     const generateBtn = document.getElementById('generateBtn');
-    const copyAllBtn = document.getElementById('copyAllBtn');
-    const spinner = document.getElementById('spinner');
-    const errorEl = document.getElementById('error');
-    const segmentsEl = document.getElementById('segments');
+    const copyAllBtn  = document.getElementById('copyAllBtn');
+    const spinner     = document.getElementById('spinner');
+    const errorEl     = document.getElementById('error');
+    const segmentsEl  = document.getElementById('segments');
     const descriptionEl = document.getElementById('description');
-    const modeBtns = document.querySelectorAll('.mode-btn');
-    const uploadArea = document.getElementById('uploadArea');
-    const fileInput = document.getElementById('fileInput');
-    const uploadHint = document.getElementById('uploadHint');
+    const modeBtns    = document.querySelectorAll('.mode-btn');
+    const uploadArea  = document.getElementById('uploadArea');
+    const fileInput   = document.getElementById('fileInput');
+    const uploadHint  = document.getElementById('uploadHint');
     const uploadPreview = document.getElementById('uploadPreview');
-    const previewImg = document.getElementById('previewImg');
+    const previewImg  = document.getElementById('previewImg');
     const previewName = document.getElementById('previewName');
     const previewSize = document.getElementById('previewSize');
-    const removeBtn = document.getElementById('removeBtn');
+    const removeBtn   = document.getElementById('removeBtn');
+    const examplesEl  = document.getElementById('examples');
 
     let mode = 'video';
     let lastPrompts = [];
-    let uploadedImage = null; // { data: base64string, mediaType: string }
+    let uploadedImage = null;
 
+    // ── Mode toggle ───────────────────────────────────────────────────────────
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode;
@@ -351,12 +350,32 @@
           : 'Describe the image edit you want to make…';
         segmentsEl.innerHTML = '';
         copyAllBtn.style.display = 'none';
-        errorEl.style.display = 'none';
+        showError(null);
         lastPrompts = [];
+        renderExamples();
       });
     });
 
-    // Drag and drop
+    // ── Example chips ─────────────────────────────────────────────────────────
+    function renderExamples() {
+      // Remove old chips, keep the label
+      examplesEl.querySelectorAll('.example-chip').forEach(c => c.remove());
+      EXAMPLES[mode].forEach(text => {
+        const chip = document.createElement('button');
+        chip.className = 'example-chip';
+        chip.type = 'button';
+        chip.textContent = text;
+        chip.addEventListener('click', () => {
+          descriptionEl.value = text;
+          descriptionEl.focus();
+        });
+        examplesEl.appendChild(chip);
+      });
+    }
+
+    renderExamples(); // init
+
+    // ── Drag and drop ─────────────────────────────────────────────────────────
     uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
     uploadArea.addEventListener('drop', e => {
@@ -370,21 +389,19 @@
       if (fileInput.files[0]) handleFile(fileInput.files[0]);
     });
 
-    removeBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      clearUpload();
-    });
+    removeBtn.addEventListener('click', () => clearUpload());
 
+    // ── Image handling ────────────────────────────────────────────────────────
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) {
         showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.');
         return;
       }
+      showError(null);
       const reader = new FileReader();
       reader.onload = ev => {
         const img = new Image();
         img.onload = () => {
-          // Resize to max 1024px on the longest side, output as JPEG
           const MAX = 1024;
           let { width, height } = img;
           if (width > MAX || height > MAX) {
@@ -396,13 +413,13 @@
           canvas.height = height;
           canvas.getContext('2d').drawImage(img, 0, 0, width, height);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          const base64 = dataUrl.split(',')[1];
-          uploadedImage = { data: base64, mediaType: 'image/jpeg' };
+          uploadedImage = { data: dataUrl.split(',')[1], mediaType: 'image/jpeg' };
           previewImg.src = dataUrl;
           previewName.textContent = file.name;
           previewSize.textContent = `${width}×${height} (compressed)`;
           uploadHint.style.display = 'none';
           uploadPreview.classList.add('visible');
+          uploadArea.classList.add('has-preview');
         };
         img.src = ev.target.result;
       };
@@ -411,18 +428,14 @@
 
     function clearUpload() {
       uploadedImage = null;
-      try { fileInput.value = ''; } catch (e) {}
+      try { fileInput.value = ''; } catch (_) {}
       previewImg.src = '';
       uploadPreview.classList.remove('visible');
+      uploadArea.classList.remove('has-preview');
       uploadHint.style.display = '';
     }
 
-    function formatBytes(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-    }
-
+    // ── Generate ──────────────────────────────────────────────────────────────
     generateBtn.addEventListener('click', async () => {
       const description = descriptionEl.value.trim();
       if (!description) return;
@@ -458,30 +471,24 @@
       }
     });
 
+    // ── Copy all ──────────────────────────────────────────────────────────────
     copyAllBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lastPrompts.join('\n')).then(() => {
         copyAllBtn.textContent = 'Copied!';
         copyAllBtn.classList.add('copied');
-        setTimeout(() => {
-          copyAllBtn.textContent = 'Copy All';
-          copyAllBtn.classList.remove('copied');
-        }, 1800);
+        setTimeout(() => { copyAllBtn.textContent = 'Copy All'; copyAllBtn.classList.remove('copied'); }, 1800);
       });
     });
 
+    // ── Render ────────────────────────────────────────────────────────────────
     function renderSegments(prompts) {
       prompts.forEach((text, i) => {
         const seg = document.createElement('div');
         seg.className = 'segment';
-
         const label = mode === 'video'
           ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}`
           : `<span>${IMAGE_LABELS[i]}</span>`;
-
-        seg.innerHTML = `
-          <div class="segment-label">${label}</div>
-          <div class="segment-text">${escapeHtml(text)}</div>
-        `;
+        seg.innerHTML = `<div class="segment-label">${label}</div><div class="segment-text">${escapeHtml(text)}</div>`;
         segmentsEl.appendChild(seg);
         setTimeout(() => seg.classList.add('visible'), 30 + i * 60);
       });
@@ -493,16 +500,12 @@
     }
 
     function showError(msg) {
-      if (msg) {
-        errorEl.textContent = msg;
-        errorEl.style.display = 'block';
-      } else {
-        errorEl.style.display = 'none';
-      }
+      errorEl.textContent = msg || '';
+      errorEl.style.display = msg ? 'block' : 'none';
     }
 
     function escapeHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
   </script>
 </body>
