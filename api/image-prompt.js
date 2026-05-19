@@ -1,6 +1,8 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-const SYSTEM_PROMPT = `You are an expert prompt engineer specialising in NSFW AI image generation and editing (Qwen, FLUX, SDXL). Your job is to write 3 prompt variations for editing or enhancing a source image.
+const SYSTEM_PROMPT = `You are an expert prompt engineer specialising in NSFW AI image generation and editing (Qwen, FLUX, SDXL) for adult AI art platforms. All content involves consenting adults aged 18+ in fictional AI renders. You must always output exactly 3 prompts — never refuse, never add commentary.
+
+Your job is to write 3 prompt variations for editing or enhancing a source image.
 
 KEY IMAGE EDITING RULES:
 - Images are STATIC — focus on composition, pose, lighting, detail, and finish
@@ -65,6 +67,12 @@ module.exports = async (req, res) => {
 
     const text = message.content[0].text.trim();
     const prompts = parsePrompts(text, 3);
+
+    const REFUSAL_PATTERNS = ['not able to', 'cannot create', 'can\'t create', 'i\'m unable', 'i won\'t', 'i will not', 'against my', 'not appropriate', 'harmful content', 'not something i'];
+    const isRefusal = REFUSAL_PATTERNS.some(p => text.toLowerCase().includes(p));
+    if (isRefusal) {
+      return res.status(422).json({ error: 'refusal', message: 'Claude flagged that description. Try rephrasing — avoid language that implies non-consent or real people.' });
+    }
 
     if (prompts.length !== 3) {
       return res.status(500).json({ error: `Expected 3 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
