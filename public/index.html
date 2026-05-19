@@ -6,27 +6,25 @@
   <title>WAN 2.2 Prompt Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --purple: #7c3aed;
-      --purple-light: #a78bfa;
-      --cyan: #06b6d4;
-      --cyan-light: #67e8f9;
-      --bg: #06060f;
-      --surface: rgba(255,255,255,0.04);
+      --rose:       #e8357a;
+      --rose-light: #f472b6;
+      --magenta:    #9b1d6e;
+      --crimson:    #6b0f3a;
+      --bg:         #07000d;
+      --surface:    rgba(255,255,255,0.04);
       --surface-hover: rgba(255,255,255,0.07);
-      --border: rgba(255,255,255,0.08);
-      --border-hover: rgba(255,255,255,0.18);
-      --text: #e2e8f0;
-      --text-muted: #64748b;
-      --text-dim: #334155;
-      --gradient: linear-gradient(135deg, var(--purple), var(--cyan));
+      --border:     rgba(232,53,122,0.15);
+      --border-hover: rgba(232,53,122,0.4);
+      --text:       #f0dde8;
+      --text-muted: #8b6476;
+      --text-dim:   #4a2d3a;
+      --gradient:   linear-gradient(135deg, var(--rose), var(--magenta));
     }
-
-    html { scroll-behavior: smooth; }
 
     body {
       background: var(--bg);
@@ -36,63 +34,87 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 60px 16px 80px;
+      padding: 60px 16px 100px;
       overflow-x: hidden;
     }
 
-    /* ── Background ─────────────────────────────────────────────────────────── */
-    body::before, body::after {
-      content: '';
+    /* ── Background glows ────────────────────────────────────────────────────── */
+    .bg-glow {
       position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
+      inset: 0;
       pointer-events: none;
       z-index: 0;
+      overflow: hidden;
     }
 
-    body::before {
-      width: 700px;
-      height: 700px;
-      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
-      top: -200px;
+    .bg-glow::before {
+      content: '';
+      position: absolute;
+      width: 900px;
+      height: 900px;
+      background: radial-gradient(circle, rgba(155,29,110,0.2) 0%, transparent 65%);
+      top: -300px;
       left: 50%;
       transform: translateX(-50%);
-      animation: driftA 18s ease-in-out infinite alternate;
+      animation: driftA 20s ease-in-out infinite alternate;
     }
 
-    body::after {
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
-      bottom: 0;
+    .bg-glow::after {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(232,53,122,0.12) 0%, transparent 65%);
+      bottom: -100px;
       right: -100px;
-      animation: driftB 22s ease-in-out infinite alternate;
+      animation: driftB 26s ease-in-out infinite alternate;
     }
 
     @keyframes driftA {
-      from { transform: translateX(-60%) translateY(0); }
-      to   { transform: translateX(-40%) translateY(40px); }
+      from { transform: translateX(-55%) translateY(0px); }
+      to   { transform: translateX(-45%) translateY(50px); }
     }
-
     @keyframes driftB {
-      from { transform: translateX(0) translateY(0); }
-      to   { transform: translateX(-40px) translateY(-60px); }
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-50px, -80px); }
     }
 
-    /* Subtle grid */
+    /* ── Subtle grid ─────────────────────────────────────────────────────────── */
     .grid-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        linear-gradient(rgba(232,53,122,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,53,122,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
     }
 
-    /* ── Layout ─────────────────────────────────────────────────────────────── */
+    /* ── Abstract SVG curve silhouettes ──────────────────────────────────────── */
+    .silhouette {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.07;
+    }
+
+    .silhouette-left {
+      left: -80px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 340px;
+    }
+
+    .silhouette-right {
+      right: -60px;
+      top: 30%;
+      width: 280px;
+      transform: scaleX(-1);
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────────────── */
     .container {
       position: relative;
       z-index: 1;
@@ -103,10 +125,10 @@
       gap: 18px;
     }
 
-    /* ── Header ─────────────────────────────────────────────────────────────── */
+    /* ── Header ──────────────────────────────────────────────────────────────── */
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       position: relative;
       z-index: 1;
     }
@@ -115,12 +137,12 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 64px;
-      height: 64px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      margin-bottom: 20px;
+      width: 68px;
+      height: 68px;
+      background: rgba(155,29,110,0.15);
+      border: 1px solid rgba(232,53,122,0.3);
+      border-radius: 20px;
+      margin-bottom: 22px;
       position: relative;
     }
 
@@ -128,47 +150,68 @@
       content: '';
       position: absolute;
       inset: -1px;
-      border-radius: 18px;
+      border-radius: 20px;
       background: var(--gradient);
       z-index: -1;
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
-    .logo svg { width: 30px; height: 30px; }
+    .logo svg { width: 34px; height: 34px; }
 
     header h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 30%, var(--purple-light) 70%, var(--cyan-light) 100%);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.8rem;
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #f9d0e4 20%, var(--rose-light) 60%, var(--rose) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      line-height: 1.1;
     }
 
     header p {
-      font-size: 0.875rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
       font-weight: 400;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .header-rule {
-      width: 60px;
-      height: 2px;
-      background: var(--gradient);
-      margin: 16px auto 0;
-      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 18px;
     }
 
-    /* ── Mode toggle ────────────────────────────────────────────────────────── */
+    .header-rule::before,
+    .header-rule::after {
+      content: '';
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,53,122,0.5));
+    }
+
+    .header-rule::after { transform: scaleX(-1); }
+
+    .header-rule-diamond {
+      width: 6px;
+      height: 6px;
+      background: var(--rose);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* ── Mode toggle ─────────────────────────────────────────────────────────── */
     .mode-toggle {
       display: flex;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       width: fit-content;
       padding: 3px;
@@ -179,26 +222,20 @@
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.8rem;
       font-weight: 500;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
       cursor: pointer;
       border: none;
       background: transparent;
       color: var(--text-muted);
-      padding: 7px 20px;
-      border-radius: 7px;
+      padding: 8px 22px;
+      border-radius: 9px;
       transition: background 0.2s, color 0.2s;
     }
 
-    .mode-btn.active {
-      background: var(--gradient);
-      color: #fff;
-    }
-
+    .mode-btn.active { background: var(--gradient); color: #fff; }
     .mode-btn:hover:not(.active) { color: var(--text); background: var(--surface-hover); }
 
-    /* ── Textarea ───────────────────────────────────────────────────────────── */
-    .textarea-wrap { position: relative; }
-
+    /* ── Textarea ────────────────────────────────────────────────────────────── */
     textarea {
       width: 100%;
       min-height: 130px;
@@ -208,7 +245,6 @@
       color: var(--text);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.95rem;
-      font-weight: 400;
       padding: 16px 18px;
       resize: vertical;
       outline: none;
@@ -217,13 +253,12 @@
     }
 
     textarea::placeholder { color: var(--text-dim); }
-
     textarea:focus {
-      border-color: rgba(124,58,237,0.5);
-      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+      border-color: rgba(232,53,122,0.4);
+      box-shadow: 0 0 0 3px rgba(232,53,122,0.08);
     }
 
-    /* ── Example chips ──────────────────────────────────────────────────────── */
+    /* ── Example chips ───────────────────────────────────────────────────────── */
     .examples {
       display: flex;
       flex-wrap: wrap;
@@ -232,9 +267,9 @@
     }
 
     .examples-label {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 500;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-dim);
       flex-shrink: 0;
@@ -242,28 +277,27 @@
 
     .example-chip {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 400;
+      font-size: 0.76rem;
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text-muted);
       border-radius: 20px;
-      padding: 5px 13px;
+      padding: 5px 14px;
       cursor: pointer;
       transition: border-color 0.2s, color 0.2s, background 0.2s;
     }
 
     .example-chip:hover {
-      border-color: var(--purple-light);
-      color: var(--purple-light);
-      background: rgba(124,58,237,0.08);
+      border-color: rgba(232,53,122,0.5);
+      color: var(--rose-light);
+      background: rgba(232,53,122,0.08);
     }
 
-    /* ── Upload area ────────────────────────────────────────────────────────── */
+    /* ── Upload area ─────────────────────────────────────────────────────────── */
     .upload-area {
       border: 1px dashed var(--border);
       border-radius: 12px;
-      padding: 22px;
+      padding: 24px;
       text-align: center;
       transition: border-color 0.2s, background 0.2s;
       position: relative;
@@ -271,11 +305,10 @@
     }
 
     .upload-area:not(.has-preview) { cursor: pointer; }
-
     .upload-area:not(.has-preview):hover,
     .upload-area.drag-over {
-      border-color: rgba(124,58,237,0.4);
-      background: rgba(124,58,237,0.05);
+      border-color: rgba(232,53,122,0.35);
+      background: rgba(232,53,122,0.04);
     }
 
     .upload-area input[type="file"] {
@@ -298,55 +331,42 @@
     }
 
     .upload-icon {
-      width: 36px;
-      height: 36px;
-      background: rgba(124,58,237,0.12);
-      border: 1px solid rgba(124,58,237,0.25);
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      background: rgba(155,29,110,0.12);
+      border: 1px solid rgba(232,53,122,0.2);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
 
-    .upload-icon svg { width: 18px; height: 18px; color: var(--purple-light); }
+    .upload-icon svg { width: 20px; height: 20px; color: var(--rose-light); }
 
-    .upload-hint-text {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
+    .upload-hint-text { font-size: 0.84rem; color: var(--text-muted); }
+    .upload-hint-text span { color: var(--rose-light); font-weight: 500; }
+    .upload-hint-sub { font-size: 0.72rem; color: var(--text-dim); }
 
-    .upload-hint-text span { color: var(--purple-light); font-weight: 500; }
-
-    .upload-hint-sub {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-    }
-
-    .upload-preview {
-      display: none;
-      align-items: center;
-      gap: 14px;
-    }
-
+    .upload-preview { display: none; align-items: center; gap: 14px; }
     .upload-preview.visible { display: flex; }
 
     .upload-preview img {
       width: 72px;
       height: 72px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
 
     .upload-preview-info { flex: 1; text-align: left; }
     .upload-preview-name { font-size: 0.85rem; color: var(--text); word-break: break-all; font-weight: 500; }
-    .upload-preview-size { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .upload-preview-size { font-size: 0.74rem; color: var(--text-muted); margin-top: 4px; }
 
     .upload-remove {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 500;
       background: none;
       border: 1px solid var(--border);
@@ -358,9 +378,9 @@
       transition: color 0.2s, border-color 0.2s;
     }
 
-    .upload-remove:hover { color: #f87171; border-color: rgba(248,113,113,0.4); }
+    .upload-remove:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
 
-    /* ── Actions ────────────────────────────────────────────────────────────── */
+    /* ── Actions ─────────────────────────────────────────────────────────────── */
     .actions { display: flex; gap: 12px; align-items: center; }
 
     button {
@@ -370,25 +390,25 @@
       cursor: pointer;
       border: none;
       border-radius: 10px;
-      padding: 11px 26px;
+      padding: 12px 28px;
       transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
     }
 
     #generateBtn {
       background: var(--gradient);
       color: #fff;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.35);
-      letter-spacing: 0.02em;
+      box-shadow: 0 4px 24px rgba(232,53,122,0.35);
+      letter-spacing: 0.03em;
     }
 
     #generateBtn:hover:not(:disabled) {
       opacity: 0.9;
       transform: translateY(-1px);
-      box-shadow: 0 6px 28px rgba(124,58,237,0.5);
+      box-shadow: 0 6px 32px rgba(232,53,122,0.55);
     }
 
     #generateBtn:active:not(:disabled) { transform: translateY(0); }
-    #generateBtn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+    #generateBtn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
     #copyAllBtn {
       background: var(--surface);
@@ -398,20 +418,20 @@
     }
 
     #copyAllBtn:hover { background: var(--surface-hover); color: var(--text); }
-    #copyAllBtn.copied { color: #4ade80; border-color: rgba(74,222,128,0.3); }
+    #copyAllBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
 
-    /* ── Error ──────────────────────────────────────────────────────────────── */
+    /* ── Error ───────────────────────────────────────────────────────────────── */
     #error {
       font-size: 0.82rem;
-      color: #f87171;
-      background: rgba(248,113,113,0.08);
-      border: 1px solid rgba(248,113,113,0.2);
+      color: #fca5a5;
+      background: rgba(252,165,165,0.07);
+      border: 1px solid rgba(252,165,165,0.2);
       border-radius: 8px;
       padding: 10px 14px;
       display: none;
     }
 
-    /* ── Segments ───────────────────────────────────────────────────────────── */
+    /* ── Segments ────────────────────────────────────────────────────────────── */
     .segments { display: flex; flex-direction: column; gap: 10px; }
 
     .segment {
@@ -432,19 +452,18 @@
     .segment::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
+      left: 0; top: 0; bottom: 0;
       width: 3px;
       background: var(--gradient);
       border-radius: 3px 0 0 3px;
     }
 
+    .segment:hover { border-color: rgba(232,53,122,0.25); }
     .segment.visible { opacity: 1; transform: translateY(0); }
 
     .segment-label {
       font-family: 'Space Mono', monospace;
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       letter-spacing: 0.1em;
       color: var(--text-dim);
       white-space: nowrap;
@@ -454,24 +473,20 @@
 
     .segment-label span {
       display: block;
-      font-size: 0.68rem;
-      color: var(--purple-light);
+      font-size: 0.66rem;
+      color: var(--rose-light);
       margin-bottom: 2px;
       font-weight: 700;
     }
 
-    .segment-text {
-      font-size: 0.9rem;
-      line-height: 1.65;
-      color: var(--text);
-    }
+    .segment-text { font-size: 0.9rem; line-height: 1.65; color: var(--text); }
 
-    /* ── Spinner ────────────────────────────────────────────────────────────── */
+    /* ── Spinner ─────────────────────────────────────────────────────────────── */
     .spinner {
       width: 18px;
       height: 18px;
-      border: 2px solid rgba(124,58,237,0.2);
-      border-top-color: var(--purple-light);
+      border: 2px solid rgba(232,53,122,0.15);
+      border-top-color: var(--rose-light);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       display: none;
@@ -482,31 +497,60 @@
   </style>
 </head>
 <body>
+  <div class="bg-glow"></div>
   <div class="grid-bg"></div>
+
+  <!-- Abstract curve silhouettes -->
+  <svg class="silhouette silhouette-left" viewBox="0 0 340 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M280 0 C280 0 340 80 320 180 C300 280 200 300 220 420 C240 540 340 580 320 700" stroke="url(#sl1)" stroke-width="2" fill="none"/>
+    <path d="M240 0 C240 0 310 100 280 220 C250 340 160 360 180 480 C200 600 300 640 270 700" stroke="url(#sl1)" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M200 50 C200 50 280 150 250 280 C220 410 130 420 150 540 C170 660 260 680 240 700" stroke="url(#sl1)" stroke-width="0.5" fill="none" opacity="0.3"/>
+    <defs>
+      <linearGradient id="sl1" x1="0" y1="0" x2="0" y2="700" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#e8357a" stop-opacity="0"/>
+        <stop offset="0.4" stop-color="#e8357a"/>
+        <stop offset="1" stop-color="#9b1d6e" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <svg class="silhouette silhouette-right" viewBox="0 0 280 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 0 C60 0 0 70 20 160 C40 250 140 270 120 380 C100 490 0 530 30 600" stroke="url(#sr1)" stroke-width="2" fill="none"/>
+    <path d="M100 0 C100 0 30 90 60 190 C90 290 180 310 160 420 C140 530 40 560 70 600" stroke="url(#sr1)" stroke-width="1" fill="none" opacity="0.5"/>
+    <defs>
+      <linearGradient id="sr1" x1="0" y1="0" x2="0" y2="600" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#e8357a" stop-opacity="0"/>
+        <stop offset="0.4" stop-color="#e8357a"/>
+        <stop offset="1" stop-color="#9b1d6e" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+  </svg>
 
   <header>
     <div class="logo">
-      <!-- Aperture / shutter icon -->
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="3" fill="url(#g1)"/>
-        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" stroke="url(#g1)" stroke-width="1.5" fill="none"/>
-        <path d="M12 5l2.5 4.33H9.5L12 5z" fill="url(#g1)" opacity=".7"/>
-        <path d="M18.66 8.5l-2.5 4.33-2.5-4.33h5z" fill="url(#g1)" opacity=".5"/>
-        <path d="M16.16 15.5H11.16l2.5-4.33 2.5 4.33z" fill="url(#g1)" opacity=".7"/>
-        <path d="M12 19l-2.5-4.33h5L12 19z" fill="url(#g1)" opacity=".5"/>
-        <path d="M5.34 15.5l2.5-4.33 2.5 4.33h-5z" fill="url(#g1)" opacity=".7"/>
-        <path d="M7.84 8.5h5l-2.5 4.33L7.84 8.5z" fill="url(#g1)" opacity=".5"/>
+      <!-- Rose / bloom icon -->
+      <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="17" cy="17" r="4" fill="url(#lg)"/>
+        <path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#lg)" opacity="0.9"/>
+        <path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#lg)" opacity="0.75"/>
+        <path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#lg)" opacity="0.9"/>
+        <path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#lg)" opacity="0.75"/>
+        <path d="M25.2 8.8 C25.2 8.8 23 15 19 17 C17.5 17.7 16 17 17 17 C18 17 18.3 15.5 20 14 C22 12 25.2 8.8 25.2 8.8Z" fill="url(#lg)" opacity="0.6"/>
+        <path d="M25.2 25.2 C25.2 25.2 19 23 17 19 C16.3 17.5 17 16 17 17 C17 18 18.5 18.3 20 20 C22 22 25.2 25.2 25.2 25.2Z" fill="url(#lg)" opacity="0.6"/>
+        <path d="M8.8 25.2 C8.8 25.2 11 19 15 17 C16.5 16.3 18 17 17 17 C16 17 15.7 18.5 14 20 C12 22 8.8 25.2 8.8 25.2Z" fill="url(#lg)" opacity="0.6"/>
+        <path d="M8.8 8.8 C8.8 8.8 15 11 17 15 C17.7 16.5 17 18 17 17 C17 16 15.5 15.7 14 14 C12 12 8.8 8.8 8.8 8.8Z" fill="url(#lg)" opacity="0.6"/>
         <defs>
-          <linearGradient id="g1" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#a78bfa"/>
-            <stop offset="1" stop-color="#67e8f9"/>
+          <linearGradient id="lg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#f9d0e4"/>
+            <stop offset="0.5" stop-color="#e8357a"/>
+            <stop offset="1" stop-color="#9b1d6e"/>
           </linearGradient>
         </defs>
       </svg>
     </div>
     <h1>WAN 2.2 Prompt Engine</h1>
-    <p>Generate cinematic prompts for video segments and image editing</p>
-    <div class="header-rule"></div>
+    <p>Cinematic &middot; Sensual &middot; Precise</p>
+    <div class="header-rule"><div class="header-rule-diamond"></div></div>
   </header>
 
   <div class="container">
@@ -515,7 +559,7 @@
       <button class="mode-btn" data-mode="image">Image Edit</button>
     </div>
 
-    <textarea id="description" placeholder="Describe your video scene…" rows="5"></textarea>
+    <textarea id="description" placeholder="Describe your scene…" rows="5"></textarea>
 
     <div class="examples" id="examples">
       <span class="examples-label">Try:</span>
@@ -531,8 +575,8 @@
             <path d="M21 15l-5-5L5 21"/>
           </svg>
         </div>
-        <div class="upload-hint-text">Drop an image or <span>click to browse</span></div>
-        <div class="upload-hint-sub">Optional &mdash; helps Claude understand the visual context &middot; JPEG, PNG, WebP</div>
+        <div class="upload-hint-text">Drop a reference image or <span>click to browse</span></div>
+        <div class="upload-hint-sub">Optional &mdash; helps Claude understand the scene &middot; JPEG, PNG, WebP</div>
       </div>
       <div class="upload-preview" id="uploadPreview">
         <img id="previewImg" src="" alt="preview" />
@@ -595,7 +639,6 @@
     let lastPrompts = [];
     let uploadedImage = null;
 
-    // ── Mode toggle ───────────────────────────────────────────────────────────
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode;
@@ -611,7 +654,6 @@
       });
     });
 
-    // ── Examples ──────────────────────────────────────────────────────────────
     function renderExamples() {
       examplesEl.querySelectorAll('.example-chip').forEach(c => c.remove());
       EXAMPLES[mode].forEach(text => {
@@ -626,7 +668,6 @@
 
     renderExamples();
 
-    // ── Upload ────────────────────────────────────────────────────────────────
     uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
     uploadArea.addEventListener('drop', e => {
@@ -681,7 +722,6 @@
       uploadHint.style.display = '';
     }
 
-    // ── Generate ──────────────────────────────────────────────────────────────
     generateBtn.addEventListener('click', async () => {
       const description = descriptionEl.value.trim();
       if (!description) return;
@@ -717,7 +757,6 @@
       }
     });
 
-    // ── Copy all ──────────────────────────────────────────────────────────────
     copyAllBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lastPrompts.join('\n')).then(() => {
         copyAllBtn.textContent = 'Copied!';
@@ -726,7 +765,6 @@
       });
     });
 
-    // ── Render segments ───────────────────────────────────────────────────────
     function renderSegments(prompts) {
       prompts.forEach((text, i) => {
         const seg = document.createElement('div');
