@@ -211,6 +211,12 @@
     #copyAllBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
     .splitter-note { margin-top: 12px; font-size: 0.74rem; color: var(--text-dim); text-align: center; letter-spacing: 0.01em; }
     .splitter-note strong { color: var(--text-muted); font-weight: 500; }
+    .negative-box { margin-top: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .negative-header { display: flex; align-items: center; justify-content: space-between; }
+    .negative-textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; font-size: 0.82rem; line-height: 1.5; resize: vertical; min-height: 48px; }
+    .negative-copy { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; font-weight: 500; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 5px 12px; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+    .negative-copy:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
+    .negative-copy.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
 
     /* ── Error ─────────────────────────────────────────────────────────────── */
     #error { font-size: 0.82rem; color: #fca5a5; background: rgba(252,165,165,0.07); border: 1px solid rgba(252,165,165,0.2); border-radius: 8px; padding: 10px 14px; display: none; word-break: break-word; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
@@ -371,6 +377,13 @@
       <div id="error"></div>
       <div class="segments" id="segments"></div>
       <div class="splitter-note" id="splitterNote" style="display:none">Paste into <strong>CLIPPromptSplitter5</strong> — blank line between each segment</div>
+      <div class="negative-box" id="negativeBox" style="display:none">
+        <div class="negative-header">
+          <label class="field-label" style="margin:0">Negative Prompt</label>
+          <button class="negative-copy" id="negativeCopy">Copy</button>
+        </div>
+        <textarea id="negativePrompt" class="negative-textarea" rows="2" spellcheck="false"></textarea>
+      </div>
 
       <div class="history-section" id="historySection" style="display:none">
         <div class="history-header" id="historyHeader">
@@ -473,6 +486,9 @@
     const expandBtn      = document.getElementById('expandBtn');
     const historySection = document.getElementById('historySection');
     const splitterNote   = document.getElementById('splitterNote');
+    const negativeBox    = document.getElementById('negativeBox');
+    const negativePrompt = document.getElementById('negativePrompt');
+    const negativeCopy   = document.getElementById('negativeCopy');
     const historyHeader  = document.getElementById('historyHeader');
     const historyToggle  = document.getElementById('historyToggle');
     const historyList    = document.getElementById('historyList');
@@ -492,6 +508,7 @@
         segmentsEl.innerHTML = '';
         copyAllBtn.style.display = 'none';
         splitterNote.style.display = 'none';
+        negativeBox.style.display = 'none';
         showError(null);
         lastPrompts = [];
         examplesExpanded = false;
@@ -602,6 +619,12 @@
         renderSegments(data.prompts);
         copyAllBtn.style.display = 'inline-block';
         splitterNote.style.display = mode === 'video' ? 'block' : 'none';
+        if (mode === 'image' && data.negative) {
+          negativePrompt.value = data.negative;
+          negativeBox.style.display = 'block';
+        } else {
+          negativeBox.style.display = 'none';
+        }
         saveHistory({ mode, description, character, prompts: data.prompts });
         renderHistory();
       } catch (err) {
@@ -612,6 +635,13 @@
     });
 
     // ── Copy all ──────────────────────────────────────────────────────────────
+    negativeCopy.addEventListener('click', () => {
+      navigator.clipboard.writeText(negativePrompt.value).then(() => {
+        negativeCopy.textContent = 'Copied!'; negativeCopy.classList.add('copied');
+        setTimeout(() => { negativeCopy.textContent = 'Copy'; negativeCopy.classList.remove('copied'); }, 1800);
+      });
+    });
+
     copyAllBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lastPrompts.join('\n\n')).then(() => {
         copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
