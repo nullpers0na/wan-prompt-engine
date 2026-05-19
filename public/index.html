@@ -209,6 +209,8 @@
     #copyAllBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; }
     #copyAllBtn:hover { background: var(--surface-hover); color: var(--text); }
     #copyAllBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
+    .splitter-note { margin-top: 12px; font-size: 0.74rem; color: var(--text-dim); text-align: center; letter-spacing: 0.01em; }
+    .splitter-note strong { color: var(--text-muted); font-weight: 500; }
 
     /* ── Error ─────────────────────────────────────────────────────────────── */
     #error { font-size: 0.82rem; color: #fca5a5; background: rgba(252,165,165,0.07); border: 1px solid rgba(252,165,165,0.2); border-radius: 8px; padding: 10px 14px; display: none; }
@@ -368,6 +370,7 @@
 
       <div id="error"></div>
       <div class="segments" id="segments"></div>
+      <div class="splitter-note" id="splitterNote" style="display:none">Paste into <strong>CLIPPromptSplitter5</strong> — blank line between each segment</div>
 
       <div class="history-section" id="historySection" style="display:none">
         <div class="history-header" id="historyHeader">
@@ -469,6 +472,7 @@
     const refreshBtn     = document.getElementById('refreshBtn');
     const expandBtn      = document.getElementById('expandBtn');
     const historySection = document.getElementById('historySection');
+    const splitterNote   = document.getElementById('splitterNote');
     const historyHeader  = document.getElementById('historyHeader');
     const historyToggle  = document.getElementById('historyToggle');
     const historyList    = document.getElementById('historyList');
@@ -487,6 +491,7 @@
         descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : 'Describe the image edit you want to make…';
         segmentsEl.innerHTML = '';
         copyAllBtn.style.display = 'none';
+        splitterNote.style.display = 'none';
         showError(null);
         lastPrompts = [];
         examplesExpanded = false;
@@ -596,6 +601,7 @@
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
         copyAllBtn.style.display = 'inline-block';
+        splitterNote.style.display = mode === 'video' ? 'block' : 'none';
         saveHistory({ mode, description, character, prompts: data.prompts });
         renderHistory();
       } catch (err) {
