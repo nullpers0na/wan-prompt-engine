@@ -9,6 +9,7 @@ Rules:
 - Lead with the core change, stated emphatically
 - Add technical detail, quality tags, and lighting that support the requested edit
 - Preserve everything not being changed (mention what to keep)
+- When breasts or chest are visible or relevant, always specify nipple and areola detail: shape, size, colour, texture
 - Images are STATIC — no motion language
 - Output one prompt only, no labels, no commentary`;
 

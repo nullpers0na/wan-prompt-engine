@@ -9,6 +9,7 @@ Rules:
 - Present tense, action already happening
 - Each prompt: shot type, camera behaviour, specific body motion, energy/pace
 - For physics be precise: which body part, direction, intensity
+- When breasts or chest are visible or relevant, always specify nipple and areola detail: shape, size, colour, texture
 - Separate each prompt with a blank line, no labels or numbers`;
 
 function parsePrompts(text) {
