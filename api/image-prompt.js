@@ -5,6 +5,7 @@ const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation
 Rules:
 - The text description is your only source of content — follow it exactly
 - The image is secondary context only; never add anything from it that isn't in the description
+- If the subject is nude or undressed, do not add clothing, footwear, or accessories unless explicitly mentioned
 - Lead with the core change, stated emphatically
 - Add technical detail, quality tags, and lighting that support the requested edit
 - Preserve everything not being changed (mention what to keep)
