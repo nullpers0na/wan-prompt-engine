@@ -450,7 +450,7 @@
 
   <script>
     const VIDEO_TIMESTAMPS = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
-    const IMAGE_LABELS     = ['Concise', 'Detailed', 'Styled'];
+    const IMAGE_LABELS     = ['Prompt'];
     const ALLOWED_TYPES    = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const HISTORY_KEY      = 'wan_history';
     const HISTORY_MAX      = 10;
@@ -667,6 +667,7 @@
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
         copyAllBtn.style.display = 'inline-block';
+        copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy';
         splitterNote.style.display = mode === 'video' ? 'block' : 'none';
         saveHistory({ mode, description, character, prompts: data.prompts });
         renderHistory();
@@ -681,7 +682,7 @@
     copyAllBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lastPrompts.join('\n\n')).then(() => {
         copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
-        setTimeout(() => { copyAllBtn.textContent = 'Copy All'; copyAllBtn.classList.remove('copied'); }, 1800);
+        setTimeout(() => { copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy'; copyAllBtn.classList.remove('copied'); }, 1800);
       });
     });
 

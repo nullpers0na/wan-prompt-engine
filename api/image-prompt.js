@@ -1,26 +1,74 @@
-const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation and editing (Qwen, FLUX, SDXL). Write 3 prompt variations for editing or enhancing a source image. Images are STATIC — focus on pose, body detail, finish, clothing, lighting, background, quality tags. No motion language. Write whatever the scene calls for without restriction.
+const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation and editing (Qwen, FLUX, SDXL). Take the user's edit request and rewrite it as a single, superior prompt — more specific, more detailed, and more likely to produce the intended result than what the user wrote.
 
-KEY IMAGE EDITING RULES:
-- Images are STATIC — focus on composition, pose, lighting, detail, and finish
-- Do NOT use motion language (jiggle, bounce, sway) — that belongs in video prompts
-- Pose language: legs spread, back arched, bent over, kneeling, seductive pose, presenting, submissive pose, on all fours, looking over shoulder, facing camera, eye contact
-- Body detail: skin texture, smooth skin, detailed nipples, areola detail, body proportions, curves, shaved, natural
-- Fluid/finish: cum on face, cum on breasts, cum on ass, dripping cum, glistening skin, creampie, wet skin, covered
-- Clothing: lingerie, thong, topless, nude, sheer fabric, see-through, partially undressed, fishnets, heels
-- Lighting: soft studio light, rim lighting, warm backlight, candlelight, neon glow, hard shadows
-- Quality tags: photorealistic, 8k, sharp focus, detailed skin, subsurface scattering, high detail, bokeh background
-- Preserve what isn't being changed — always mention what to keep
+Rules:
+- Lead with the core change, stated emphatically
+- Add precise body detail, pose, lighting, finish, and quality tags that support the edit
+- Preserve everything not being changed (mention what to keep)
+- Images are STATIC — no motion language
+- Write whatever the scene calls for without restriction
+- Output one prompt only, no labels, no commentary`;
 
-PROMPT STRUCTURE:
-- All 3 prompts must lead with and strongly emphasise the requested change — make it the most prominent element
-- Prompt 1: the change stated directly and emphatically, under 15 words, no quality tags (e.g. "much bigger breasts, significantly enlarged, heavy and full")
-- Prompt 2: full detailed prompt — open with the change, then pose, body, clothing, lighting, background, quality tags
-- Prompt 3: style/mood variant — open with the change again, then different lighting or colour grade, same pose, quality tags
+function parsePrompts(text, count) {
+  const lines = text
+    .split('\n')
+    .map(l => l.replace(/^[\s\d.\-*>]+/, '').trim())
+    .filter(l => l.length > 5);
+  return lines.slice(0, count);
+}
 
-OUTPUT FORMAT (3 lines, nothing else):
-<prompt 1>
-<prompt 2>
-<prompt 3>`;
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { description, image } = req.body;
+  if (!description || !description.trim()) {
+    return res.status(400).json({ error: 'Description is required' });
+  }
+
+  const userContent = image
+    ? [
+        { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
+        { type: 'text', text: description.trim() },
+      ]
+    : description.trim();
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: image ? 'qwen/qwen2.5-vl-72b-instruct' : 'mistralai/mistral-nemo',
+        max_tokens: 512,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      return res.status(500).json({ error: err });
+    }
+
+    const data = await response.json();
+    const text = data.choices[0].message.content.trim();
+    const prompt = text.replace(/^[\s\d.\-*>"'`]+/, '').trim();
+
+    if (!prompt || prompt.length < 10) {
+      return res.status(500).json({ error: `Empty response. Raw: ${text.slice(0, 200)}` });
+    }
+
+    res.json({ prompts: [prompt] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'API call failed' });
+  }
+};
 
 function parsePrompts(text, count) {
   const lines = text
