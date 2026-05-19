@@ -13,14 +13,19 @@ Rules:
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
 - Separate each prompt with a blank line only — absolutely no labels, numbers, headers, or asterisks of any kind`;
 
-function stripLabel(s) {
-  return s.replace(/^(prompt\s*\d+\s*[:\-*#]+\s*|\s*[\d]+[.):\-]\s*|[\s\d.\-*>#]+)/i, '').trim();
-}
-
 function parsePrompts(text) {
-  const byBlank = text.split(/\n\s*\n/).map(b => stripLabel(b)).filter(b => b.length > 20);
+  const byBlank = text.split(/\n\s*\n/).map(block => {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    // Drop a first line that is purely a label (e.g. "Prompt 1:**", "**1.**", "Segment 2:")
+    if (lines.length > 1 && /^[\s*#]*(?:prompt|segment)?\s*\d+\W*$/i.test(lines[0])) lines.shift();
+    // Also strip any inline label prefix from the first remaining line
+    if (lines.length) lines[0] = lines[0].replace(/^[\s*#]*(?:prompt|segment)?\s*\d+\s*[:\-*#.)\]]+\s*/i, '').trim();
+    return lines.join(' ').trim();
+  }).filter(b => b.length > 20);
   if (byBlank.length >= 5) return byBlank.slice(0, 5);
-  return text.split('\n').map(l => stripLabel(l)).filter(l => l.length > 20).slice(0, 5);
+  return text.split('\n')
+    .map(l => l.replace(/^[\s*#]*(?:prompt|segment)?\s*\d+\s*[:\-*#.)\]]+\s*/i, '').trim())
+    .filter(l => l.length > 20).slice(0, 5);
 }
 
 module.exports = async (req, res) => {
