@@ -211,6 +211,11 @@
     #copyAllBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; }
     #copyAllBtn:hover { background: var(--surface-hover); color: var(--text); }
     #copyAllBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
+    #regenBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; padding: 12px 16px; }
+    #regenBtn:hover { background: var(--surface-hover); color: var(--text); }
+    #copyNumBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; padding: 12px 14px; font-size: 0.78rem; }
+    #copyNumBtn:hover { background: var(--surface-hover); color: var(--text); }
+    #copyNumBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
     .splitter-note { margin-top: 12px; font-size: 0.74rem; color: var(--text-dim); text-align: center; letter-spacing: 0.01em; }
     .splitter-note strong { color: var(--text-muted); font-weight: 500; }
 
@@ -248,6 +253,12 @@
     .segment:hover .segment-copy { opacity: 1; }
     .segment-copy:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.3); }
     .segment-copy.flash { color: #4ade80; border-color: rgba(74,222,128,0.3); opacity: 1; }
+    .segment-text[contenteditable="true"] { outline: none; border-radius: 4px; box-shadow: 0 0 0 2px rgba(232,53,122,0.3); padding: 2px 6px; margin: -2px -6px; cursor: text; }
+    .segment-reorder { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; opacity: 0; transition: opacity 0.2s; }
+    .segment:hover .segment-reorder { opacity: 1; }
+    .segment-reorder button { background: none; border: none; color: var(--text-dim); padding: 2px 4px; font-size: 0.65rem; line-height: 1; border-radius: 4px; cursor: pointer; transition: color 0.15s; }
+    .segment-reorder button:hover { color: var(--rose-light); }
+    .segment-reorder button:disabled { opacity: 0.2; cursor: default; }
 
     /* ── History ───────────────────────────────────────────────────────────── */
     .history-section { width: 100%; margin-top: 8px; }
@@ -318,9 +329,11 @@
       #generateBtn { flex: 1; padding: 14px 20px; font-size: 0.9rem; }
       #copyAllBtn { padding: 14px 18px; }
 
-      /* Segments — always show copy button (no hover on mobile) */
+      /* Segments — always show copy and reorder buttons (no hover on mobile) */
       .segment { padding: 12px 12px 12px 14px; gap: 10px; }
       .segment-copy { opacity: 1; }
+      .segment-reorder { opacity: 1; }
+      #regenBtn, #copyNumBtn { padding: 14px 12px; }
       .segment-label { min-width: 56px; font-size: 0.58rem; }
       .segment-label span { font-size: 0.62rem; }
       .segment-text { font-size: 0.86rem; }
@@ -433,7 +446,9 @@
 
       <div class="actions">
         <button id="generateBtn">Generate Prompts</button>
+        <button id="regenBtn" title="Regenerate">↻</button>
         <button id="copyAllBtn">Copy All</button>
+        <button id="copyNumBtn" title="Copy as numbered list">1,2,3</button>
       </div>
 
       <div id="error"></div>
@@ -517,16 +532,24 @@
     let shuffledExamples = [];
     let mode = 'video';
     let lastPrompts = [];
+    let lastBody = null;
+    let lastEndpoint = null;
     let uploadedImage = null;
     let historyOpen = false;
 
+    const CHARACTER_KEY = 'wan_character';
+
     const generateBtn    = document.getElementById('generateBtn');
     const copyAllBtn     = document.getElementById('copyAllBtn');
+    const regenBtn       = document.getElementById('regenBtn');
+    const copyNumBtn     = document.getElementById('copyNumBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
     const errorEl        = document.getElementById('error');
     const segmentsEl     = document.getElementById('segments');
     const descriptionEl  = document.getElementById('description');
     const characterEl    = document.getElementById('characterInput');
+    characterEl.value = localStorage.getItem(CHARACTER_KEY) || '';
+    characterEl.addEventListener('input', () => localStorage.setItem(CHARACTER_KEY, characterEl.value));
     const modeBtns       = document.querySelectorAll('.mode-btn');
     const uploadArea     = document.getElementById('uploadArea');
     const fileInput      = document.getElementById('fileInput');
@@ -600,6 +623,8 @@
         descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : 'Describe the image edit you want to make…';
         segmentsEl.innerHTML = '';
         copyAllBtn.style.display = 'none';
+        regenBtn.style.display = 'none';
+        copyNumBtn.style.display = 'none';
         splitterNote.style.display = 'none';
         showError(null);
         lastPrompts = [];
@@ -697,6 +722,8 @@
       const endpoint = mode === 'video' ? '/api/generate' : '/api/image-prompt';
       const body = { description: fullDescription };
       if (uploadedImage) body.image = uploadedImage;
+      lastEndpoint = endpoint;
+      lastBody = body;
 
       const controller = new AbortController();
       const fetchTimeout = setTimeout(() => controller.abort(), 30000);
@@ -710,9 +737,7 @@
 
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
-        copyAllBtn.style.display = 'inline-block';
-        copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy';
-        splitterNote.style.display = mode === 'video' ? 'block' : 'none';
+        showOutputButtons();
         saveHistory({ mode, description, character, prompts: data.prompts });
         renderHistory();
       } catch (err) {
@@ -723,12 +748,50 @@
       }
     });
 
-    // ── Copy all ──────────────────────────────────────────────────────────────
+    // ── Output buttons ────────────────────────────────────────────────────────
+    function showOutputButtons() {
+      copyAllBtn.style.display = 'inline-block';
+      copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy';
+      regenBtn.style.display = lastBody ? 'inline-block' : 'none';
+      copyNumBtn.style.display = mode === 'video' ? 'inline-block' : 'none';
+      splitterNote.style.display = mode === 'video' ? 'block' : 'none';
+    }
+
     copyAllBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lastPrompts.join('\n\n')).then(() => {
         copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
         setTimeout(() => { copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy'; copyAllBtn.classList.remove('copied'); }, 1800);
       });
+    });
+
+    copyNumBtn.addEventListener('click', () => {
+      const text = lastPrompts.map((p, i) => `${i + 1}. ${p}`).join('\n\n');
+      navigator.clipboard.writeText(text).then(() => {
+        copyNumBtn.textContent = 'Copied!'; copyNumBtn.classList.add('copied');
+        setTimeout(() => { copyNumBtn.textContent = '1,2,3'; copyNumBtn.classList.remove('copied'); }, 1800);
+      });
+    });
+
+    regenBtn.addEventListener('click', async () => {
+      if (!lastBody || !lastEndpoint) return;
+      setLoading(true);
+      showError(null);
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 30000);
+      try {
+        const res = await fetch(lastEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(lastBody), signal: controller.signal });
+        clearTimeout(fetchTimeout);
+        let data;
+        try { data = await res.json(); } catch (_) { throw new Error(`Server error (${res.status})`); }
+        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+        lastPrompts = data.prompts;
+        renderSegments(data.prompts);
+      } catch (err) {
+        clearTimeout(fetchTimeout);
+        showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
+      } finally {
+        setLoading(false);
+      }
     });
 
     // ── Render segments ───────────────────────────────────────────────────────
@@ -748,20 +811,52 @@
         const seg = document.createElement('div');
         seg.className = 'segment';
         const label = mode === 'video' ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}` : `<span>${IMAGE_LABELS[i]}</span>`;
+        const reorderBtns = mode === 'video' ? `
+          <div class="segment-reorder">
+            <button data-move="-1" data-idx="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>▲</button>
+            <button data-move="1"  data-idx="${i}" title="Move down" ${i === prompts.length - 1 ? 'disabled' : ''}>▼</button>
+          </div>` : '';
         seg.innerHTML = `
           <div class="segment-label">${label}</div>
-          <div class="segment-text">${escapeHtml(text)}</div>
+          <div class="segment-text" contenteditable="false" data-idx="${i}">${escapeHtml(text)}</div>
           <button class="segment-copy" title="Copy prompt" data-idx="${i}">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="5" y="5" width="9" height="9" rx="1.5"/>
               <path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/>
             </svg>
-          </button>`;
+          </button>${reorderBtns}`;
+
+        // Tap/click segment text to edit
+        const textEl = seg.querySelector('.segment-text');
+        textEl.addEventListener('click', () => {
+          textEl.contentEditable = 'true';
+          textEl.focus();
+          const range = document.createRange(); range.selectNodeContents(textEl);
+          range.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        });
+        textEl.addEventListener('blur', () => {
+          textEl.contentEditable = 'false';
+          lastPrompts[i] = textEl.textContent.trim();
+        });
+        textEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); textEl.blur(); } });
+
         segmentsEl.appendChild(seg);
         if (animate) setTimeout(() => seg.classList.add('visible'), 40 + i * 70);
         else seg.classList.add('visible');
       });
     }
+
+    segmentsEl.addEventListener('click', e => {
+      const moveBtn = e.target.closest('[data-move]');
+      if (moveBtn) {
+        const idx = parseInt(moveBtn.dataset.idx, 10);
+        const dir = parseInt(moveBtn.dataset.move, 10);
+        const newIdx = idx + dir;
+        if (newIdx < 0 || newIdx >= lastPrompts.length) return;
+        [lastPrompts[idx], lastPrompts[newIdx]] = [lastPrompts[newIdx], lastPrompts[idx]];
+        renderSegments(lastPrompts, false);
+      }
+    });
 
     // ── History ───────────────────────────────────────────────────────────────
     function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; } }
@@ -794,10 +889,9 @@
           characterEl.value = entry.character || '';
           descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : 'Describe the image edit you want to make…';
           lastPrompts = entry.prompts;
+          lastBody = null; lastEndpoint = null;
           renderSegments(entry.prompts, false);
-          copyAllBtn.style.display = 'inline-block';
-          copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy';
-          splitterNote.style.display = mode === 'video' ? 'block' : 'none';
+          showOutputButtons();
           renderExamples();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
