@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WAN 2.2 Prompt Engine</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #555;
+      letter-spacing: 0.08em;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 0.875rem;
+      padding: 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+      line-height: 1.6;
+    }
+
+    textarea::placeholder { color: #444; }
+    textarea:focus { border-color: #555; }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 22px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    #generateBtn {
+      background: #e0e0e0;
+      color: #0a0a0a;
+    }
+
+    #generateBtn:hover:not(:disabled) { background: #ffffff; }
+    #generateBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #copyAllBtn {
+      background: #1a1a1a;
+      color: #888;
+      border: 1px solid #2a2a2a;
+      display: none;
+    }
+
+    #copyAllBtn:hover { background: #222; color: #bbb; }
+    #copyAllBtn.copied { color: #6fcf97; border-color: #6fcf97; }
+
+    #error {
+      font-size: 0.8rem;
+      color: #eb5757;
+      display: none;
+    }
+
+    .segments {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .segment {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 4px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .segment.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .segment-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: #555;
+      white-space: nowrap;
+      padding-top: 2px;
+      min-width: 72px;
+    }
+
+    .segment-label span {
+      display: block;
+      color: #777;
+      font-size: 0.7rem;
+    }
+
+    .segment-text {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #d0d0d0;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #333;
+      border-top-color: #888;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      margin-left: 4px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>WAN 2.2 Prompt Engine</h1>
+    <p>Generate 5 video segment prompts from a single description</p>
+  </header>
+
+  <div class="container">
+    <textarea id="description" placeholder="Describe your video scene…" rows="5"></textarea>
+
+    <div class="actions">
+      <button id="generateBtn">Generate</button>
+      <div class="spinner" id="spinner"></div>
+      <button id="copyAllBtn">Copy All</button>
+    </div>
+
+    <div id="error"></div>
+
+    <div class="segments" id="segments"></div>
+  </div>
+
+  <script>
+    const TIMESTAMPS = [
+      '~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'
+    ];
+
+    const generateBtn = document.getElementById('generateBtn');
+    const copyAllBtn = document.getElementById('copyAllBtn');
+    const spinner = document.getElementById('spinner');
+    const errorEl = document.getElementById('error');
+    const segmentsEl = document.getElementById('segments');
+    const descriptionEl = document.getElementById('description');
+
+    let lastPrompts = [];
+
+    generateBtn.addEventListener('click', async () => {
+      const description = descriptionEl.value.trim();
+      if (!description) return;
+
+      setLoading(true);
+      errorEl.style.display = 'none';
+      segmentsEl.innerHTML = '';
+      copyAllBtn.style.display = 'none';
+      lastPrompts = [];
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Unknown error');
+        }
+
+        lastPrompts = data.prompts;
+        renderSegments(data.prompts);
+        copyAllBtn.style.display = 'inline-block';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    copyAllBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(lastPrompts.join('\n')).then(() => {
+        copyAllBtn.textContent = 'Copied!';
+        copyAllBtn.classList.add('copied');
+        setTimeout(() => {
+          copyAllBtn.textContent = 'Copy All';
+          copyAllBtn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    function renderSegments(prompts) {
+      prompts.forEach((text, i) => {
+        const seg = document.createElement('div');
+        seg.className = 'segment';
+        seg.innerHTML = `
+          <div class="segment-label">
+            <span>SEG ${i + 1}</span>
+            ${TIMESTAMPS[i]}
+          </div>
+          <div class="segment-text">${escapeHtml(text)}</div>
+        `;
+        segmentsEl.appendChild(seg);
+        // Stagger animation
+        setTimeout(() => seg.classList.add('visible'), 30 + i * 60);
+      });
+    }
+
+    function setLoading(on) {
+      generateBtn.disabled = on;
+      spinner.style.display = on ? 'block' : 'none';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+</body>
+</html>
