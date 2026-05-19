@@ -84,13 +84,10 @@ module.exports = async (req, res) => {
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
-      messages: [
-        { role: 'user', content: userContent },
-        { role: 'assistant', content: 'Prompt 1:' },
-      ],
+      messages: [{ role: 'user', content: userContent }],
     });
 
-    const text = ('Prompt 1:' + message.content[0].text).trim();
+    const text = message.content[0].text.trim();
     const prompts = parsePrompts(text, 3);
 
     const REFUSAL_PATTERNS = ["i'm not able to", "i cannot create", "i can't create", "i'm unable to", "i won't be able to", "i will not", "i'm not going to", "not going to write", "i don't create", "i won't write"];

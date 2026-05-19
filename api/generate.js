@@ -27,16 +27,29 @@ Each prompt controls ~4 seconds of video. Write 5 sequential prompts. Start with
 
 Separate each prompt with a blank line. No labels, no numbers, no commentary.
 
-Example output:
-Static close-up shot, breasts jiggling heavily with each impact, soft-body physics rippling outward, rhythmic and exaggerated, skin flushed.
+Example — BDSM scene:
 
-Wide shot, subject bent over, hands bound behind back, ass cheeks rippling on each spank, red marks developing, submissive body language, weight shifting forward.
+Static close-up, hands bound above head with rope, subject pulling against restraints, wrists reddening, breasts bouncing with each sharp impact from open-hand slap, heavy jiggle physics.
 
-POV shot, face close to camera, mouth open, expression overwhelmed, hair dishevelled, chin and chest glistening with cum, eyes barely focused.
+Medium shot from behind, ass cheeks rippling from repeated strikes, red handprint marks developing on skin, thighs quivering, knees slightly buckled, submissive stance.
 
-Medium shot from behind, hips swaying slowly, thighs quivering, cum dripping down inner thigh, movement weighted and spent.
+Close-up on face and throat, hand gripping throat firmly, jaw tilted up, eyes wide and watering, shallow rapid breathing visible in chest, lips parted.
 
-Static wide shot, full body collapsed forward, chest rising with heavy breathing, fluid pooling beneath, legs still spread, body completely spent.`;
+Wide shot, full body, bent forward over surface, hips rocking back rhythmically, breasts swaying beneath, hair falling forward, body weight shifting with each motion.
+
+Static medium shot, subject collapsed onto surface, chest heaving, wrists still bound, red marks across ass and thighs, cum glistening on lower back, completely spent.
+
+Example — jiggle/physics scene:
+
+Close-up static shot, large natural breasts jiggling heavily in slow motion, soft-body physics rippling outward from centre, exaggerated bounce, skin warm and smooth.
+
+Medium shot, subject jumping lightly in place, breasts bouncing with each landing, nipples erect, movement looping naturally, real-time pacing.
+
+Side-angle shot, subject bending forward slowly, breasts hanging and swaying with gravity, deep natural droop, subtle oscillation continuing after movement stops.
+
+Static wide shot, ass cheeks jiggling from a firm slap, ripple propagating outward across both cheeks, impact point reddening, thighs absorbing the force.
+
+Close-up from behind, ass in frame, slow rhythmic grind, each cheek moving independently, soft flesh deforming naturally, low energy sensual pace.`;
 
 function parsePrompts(text, count) {
   // Try splitting on blank lines first (model outputs \n\n between prompts)
@@ -71,13 +84,10 @@ module.exports = async (req, res) => {
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
-      messages: [
-        { role: 'user', content: userContent },
-        { role: 'assistant', content: 'Static' },
-      ],
+      messages: [{ role: 'user', content: userContent }],
     });
 
-    const text = ('Static' + message.content[0].text).trim();
+    const text = message.content[0].text.trim();
     const prompts = parsePrompts(text, 5);
 
     const REFUSAL_PATTERNS = ["i'm not able to", "i cannot create", "i can't create", "i'm unable to", "i won't be able to", "i will not", "i'm not going to", "not going to write", "i don't create", "i won't write"];
