@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'mistralai/mistral-nemo',
+        model: image ? 'mistralai/pixtral-12b' : 'mistralai/mistral-nemo',
         max_tokens: 1024,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
