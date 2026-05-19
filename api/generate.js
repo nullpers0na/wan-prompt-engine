@@ -11,12 +11,16 @@ Rules:
 - Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
-- Separate each prompt with a blank line, no labels or numbers`;
+- Separate each prompt with a blank line only — absolutely no labels, numbers, headers, or asterisks of any kind`;
+
+function stripLabel(s) {
+  return s.replace(/^(prompt\s*\d+\s*[:\-*#]+\s*|\s*[\d]+[.):\-]\s*|[\s\d.\-*>#]+)/i, '').trim();
+}
 
 function parsePrompts(text) {
-  const byBlank = text.split(/\n\s*\n/).map(b => b.replace(/^[\s\d.\-*>]+/, '').trim()).filter(b => b.length > 20);
+  const byBlank = text.split(/\n\s*\n/).map(b => stripLabel(b)).filter(b => b.length > 20);
   if (byBlank.length >= 5) return byBlank.slice(0, 5);
-  return text.split('\n').map(l => l.replace(/^[\s\d.\-*>]+/, '').trim()).filter(l => l.length > 20).slice(0, 5);
+  return text.split('\n').map(l => stripLabel(l)).filter(l => l.length > 20).slice(0, 5);
 }
 
 module.exports = async (req, res) => {
