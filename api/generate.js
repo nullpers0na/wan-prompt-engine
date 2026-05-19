@@ -7,19 +7,26 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { description } = req.body;
+  const { description, image } = req.body;
   if (!description || !description.trim()) {
     return res.status(400).json({ error: 'Description is required' });
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+  const userContent = image
+    ? [
+        { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
+        { type: 'text', text: description.trim() },
+      ]
+    : description.trim();
+
   try {
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: description.trim() }],
+      messages: [{ role: 'user', content: userContent }],
     });
 
     const text = message.content[0].text.trim();

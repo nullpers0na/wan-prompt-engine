@@ -93,6 +93,89 @@
     textarea::placeholder { color: #444; }
     textarea:focus { border-color: #555; }
 
+    /* Upload area */
+    .upload-area {
+      border: 1px dashed #2a2a2a;
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: #555;
+      background: #111;
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-hint {
+      font-size: 0.75rem;
+      color: #444;
+      letter-spacing: 0.08em;
+      pointer-events: none;
+    }
+
+    .upload-hint span { color: #666; }
+
+    .upload-preview {
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .upload-preview.visible { display: flex; }
+
+    .upload-preview img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid #2a2a2a;
+    }
+
+    .upload-preview-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .upload-preview-name {
+      font-size: 0.8rem;
+      color: #ccc;
+      word-break: break-all;
+    }
+
+    .upload-preview-size {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 3px;
+    }
+
+    .upload-remove {
+      font-family: inherit;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid #333;
+      color: #666;
+      border-radius: 3px;
+      padding: 4px 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .upload-remove:hover { color: #eb5757; border-color: #eb5757; }
+
     .actions {
       display: flex;
       gap: 12px;
@@ -208,6 +291,21 @@
 
     <textarea id="description" placeholder="Describe your video scene…" rows="5"></textarea>
 
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" />
+      <div class="upload-hint" id="uploadHint">
+        Drop an image here or <span>click to browse</span> &mdash; optional, helps guide the prompt
+      </div>
+      <div class="upload-preview" id="uploadPreview">
+        <img id="previewImg" src="" alt="preview" />
+        <div class="upload-preview-info">
+          <div class="upload-preview-name" id="previewName"></div>
+          <div class="upload-preview-size" id="previewSize"></div>
+        </div>
+        <button class="upload-remove" id="removeBtn" type="button">Remove</button>
+      </div>
+    </div>
+
     <div class="actions">
       <button id="generateBtn">Generate</button>
       <div class="spinner" id="spinner"></div>
@@ -222,6 +320,7 @@
   <script>
     const VIDEO_TIMESTAMPS = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
     const IMAGE_LABELS = ['Concise', 'Detailed', 'Styled'];
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
     const generateBtn = document.getElementById('generateBtn');
     const copyAllBtn = document.getElementById('copyAllBtn');
@@ -230,9 +329,18 @@
     const segmentsEl = document.getElementById('segments');
     const descriptionEl = document.getElementById('description');
     const modeBtns = document.querySelectorAll('.mode-btn');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadHint = document.getElementById('uploadHint');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const previewImg = document.getElementById('previewImg');
+    const previewName = document.getElementById('previewName');
+    const previewSize = document.getElementById('previewSize');
+    const removeBtn = document.getElementById('removeBtn');
 
     let mode = 'video';
     let lastPrompts = [];
+    let uploadedImage = null; // { data: base64string, mediaType: string }
 
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -248,23 +356,77 @@
       });
     });
 
+    // Drag and drop
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    removeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      clearUpload();
+    });
+
+    function handleFile(file) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const dataUrl = ev.target.result;
+        const base64 = dataUrl.split(',')[1];
+        uploadedImage = { data: base64, mediaType: file.type };
+        previewImg.src = dataUrl;
+        previewName.textContent = file.name;
+        previewSize.textContent = formatBytes(file.size);
+        uploadHint.style.display = 'none';
+        uploadPreview.classList.add('visible');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearUpload() {
+      uploadedImage = null;
+      fileInput.value = '';
+      previewImg.src = '';
+      uploadPreview.classList.remove('visible');
+      uploadHint.style.display = '';
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
     generateBtn.addEventListener('click', async () => {
       const description = descriptionEl.value.trim();
       if (!description) return;
 
       setLoading(true);
-      errorEl.style.display = 'none';
+      showError(null);
       segmentsEl.innerHTML = '';
       copyAllBtn.style.display = 'none';
       lastPrompts = [];
 
       const endpoint = mode === 'video' ? '/api/generate' : '/api/image-prompt';
+      const body = { description };
+      if (uploadedImage) body.image = uploadedImage;
 
       try {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description }),
+          body: JSON.stringify(body),
         });
 
         const data = await res.json();
@@ -274,8 +436,7 @@
         renderSegments(data.prompts);
         copyAllBtn.style.display = 'inline-block';
       } catch (err) {
-        errorEl.textContent = err.message;
-        errorEl.style.display = 'block';
+        showError(err.message);
       } finally {
         setLoading(false);
       }
@@ -313,6 +474,15 @@
     function setLoading(on) {
       generateBtn.disabled = on;
       spinner.style.display = on ? 'block' : 'none';
+    }
+
+    function showError(msg) {
+      if (msg) {
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+      } else {
+        errorEl.style.display = 'none';
+      }
     }
 
     function escapeHtml(str) {
