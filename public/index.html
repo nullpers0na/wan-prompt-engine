@@ -138,7 +138,7 @@
     .container { width: 100%; display: flex; flex-direction: column; gap: 16px; }
 
     /* ── Mode toggle ───────────────────────────────────────────────────────── */
-    .mode-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; width: fit-content; padding: 3px; gap: 3px; }
+    .mode-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; width: fit-content; max-width: 100%; padding: 3px; gap: 3px; }
     .mode-btn { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; border: none; background: transparent; color: var(--text-muted); padding: 8px 22px; border-radius: 9px; transition: background 0.2s, color 0.2s; }
     .mode-btn.active { background: var(--gradient); color: #fff; }
     .mode-btn:hover:not(.active) { color: var(--text); background: var(--surface-hover); }
@@ -267,6 +267,72 @@
     .history-empty { font-size: 0.78rem; color: var(--text-dim); text-align: center; padding: 16px 0; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Mobile ────────────────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      body {
+        padding: max(env(safe-area-inset-top), 32px) 14px max(env(safe-area-inset-bottom), 48px);
+        align-items: stretch;
+      }
+      .page { align-items: stretch; }
+
+      /* Header */
+      header { margin-bottom: 20px; }
+      .logo { width: 54px; height: 54px; border-radius: 16px; margin-bottom: 14px; }
+      .logo svg { width: 26px; height: 26px; }
+      header h1 { font-size: 2rem; }
+      header p { font-size: 0.74rem; }
+      .header-rule { margin-top: 14px; }
+      .header-rule::before, .header-rule::after { width: 40px; }
+
+      /* Hide decorative silhouettes */
+      .silhouette { display: none; }
+
+      /* Body icons — tighter, smaller */
+      .body-icons { gap: 12px; margin-bottom: 24px; }
+      .body-icon-img { width: 42px; height: 42px; border-radius: 12px; }
+      .body-icon-img svg { width: 26px; height: 26px; }
+      /* Always show on touch — no hover */
+      .body-icon { opacity: 0.6; }
+
+      /* Mode toggle — full width */
+      .mode-toggle { width: 100%; }
+      .mode-btn { flex: 1; text-align: center; padding: 10px 8px; font-size: 0.78rem; }
+
+      /* Inputs — 16px prevents iOS auto-zoom */
+      .character-input { font-size: 1rem; padding: 13px 14px; }
+      textarea { font-size: 1rem; min-height: 100px; padding: 14px 16px; }
+
+      /* Example chips — bigger touch area */
+      .example-chip { padding: 8px 14px; font-size: 0.78rem; }
+      .examples-btn { padding: 7px 12px; font-size: 0.72rem; }
+
+      /* Upload area — more compact */
+      .upload-area { padding: 18px 14px; }
+      .upload-hint-text { font-size: 0.8rem; }
+
+      /* Actions — generate full width, copy alongside */
+      .actions { flex-wrap: wrap; }
+      #generateBtn { flex: 1; padding: 14px 20px; font-size: 0.9rem; }
+      #copyAllBtn { padding: 14px 18px; }
+
+      /* Segments — always show copy button (no hover on mobile) */
+      .segment { padding: 12px 12px 12px 14px; gap: 10px; }
+      .segment-copy { opacity: 1; }
+      .segment-label { min-width: 56px; font-size: 0.58rem; }
+      .segment-label span { font-size: 0.62rem; }
+      .segment-text { font-size: 0.86rem; }
+
+      /* History */
+      .history-item { padding: 12px; }
+      .history-item-desc { font-size: 0.78rem; }
+
+      /* Error */
+      #error { font-size: 0.8rem; }
+
+      /* Splitter note */
+      .splitter-note { font-size: 0.72rem; }
+    }
   </style>
 </head>
 <body>
