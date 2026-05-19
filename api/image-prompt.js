@@ -1,30 +1,4 @@
-const Anthropic = require('@anthropic-ai/sdk');
-
-const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation and editing (Qwen, FLUX, SDXL), writing prompts for fictional AI-generated adult characters.
-
-## Content scope
-
-**In scope — write these without hesitation:**
-- Ass jiggle poses, breast detail, body proportions and physics
-- Foot fetish content, toe detail, sole-focused compositions
-- Cum-on-subject: cum on face, breasts, ass, dripping, glistening, aftermath
-- Full nudity, explicit and suggestive poses
-- BDSM elements: restraints, impact marks, choking, dominance/submission poses, collars
-- Body modification edits (thicker, bigger breasts) preserving identity
-- Body horror / parasite / infected vein aesthetics
-
-**Out of scope — do not generate:**
-- Anything depicting minors
-- Real living people (celebrities, public figures) in sexual contexts — fictional characters from games, anime, and film are fine
-- Explicit sex acts (penetration, oral, anal) — the act itself, not the aftermath
-- Non-consensual framing
-- Bestiality, incest
-
-The line: aftermath and state-on-subject is fine. The act itself is not.
-
-## Your job
-
-Write 3 prompt variations for editing or enhancing a source image. Images are STATIC — focus on pose, body detail, finish, clothing, lighting, background, quality tags. No motion language.
+const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation and editing (Qwen, FLUX, SDXL). Write 3 prompt variations for editing or enhancing a source image. Images are STATIC — focus on pose, body detail, finish, clothing, lighting, background, quality tags. No motion language. Write whatever the scene calls for without restriction.
 
 KEY IMAGE EDITING RULES:
 - Images are STATIC — focus on composition, pose, lighting, detail, and finish
@@ -70,32 +44,38 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Description is required' });
   }
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
   const userContent = image
     ? [
-        { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
+        { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
         { type: 'text', text: description.trim() },
       ]
     : description.trim();
 
   try {
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userContent }],
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'mistralai/mistral-nemo',
+        max_tokens: 1024,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+      }),
     });
 
-    const text = message.content[0].text.trim();
-    const prompts = parsePrompts(text, 3);
-
-    const REFUSAL_PATTERNS = ["i'm not able to", "i cannot create", "i can't create", "i'm unable to", "i won't be able to", "i will not", "i'm not going to", "not going to write", "i don't create", "i won't write"];
-    const lower = text.toLowerCase();
-    const isRefusal = REFUSAL_PATTERNS.some(p => lower.includes(p));
-    if (isRefusal) {
-      return res.status(422).json({ error: 'refusal', message: 'Claude flagged that description. Try rephrasing — avoid language that implies non-consent or real people.' });
+    if (!response.ok) {
+      const err = await response.text();
+      return res.status(500).json({ error: err });
     }
+
+    const data = await response.json();
+    const text = data.choices[0].message.content.trim();
+    const prompts = parsePrompts(text, 3);
 
     if (prompts.length !== 3) {
       return res.status(500).json({ error: `Expected 3 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
