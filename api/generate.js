@@ -7,7 +7,8 @@ Rules:
 - The image is secondary context only; never add anything from it that isn't in the description
 - Never mention footwear (shoes, heels, boots, sandals, slippers, socks, bare feet included) or clothing unless the user explicitly asks for it
 - Present tense, action already happening
-- Each prompt: shot type, camera behaviour, specific body motion, energy/pace
+- Match length to complexity: simple actions get concise prompts; complex motion gets more detail
+- Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
 - When breasts or chest are visible or relevant, always specify nipple and areola detail: shape, size, colour, texture
 - Separate each prompt with a blank line, no labels or numbers`;
