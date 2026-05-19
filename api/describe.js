@@ -16,10 +16,9 @@ slim brunette, large natural breasts, pale skin, tattoo sleeve, late 20s, partia
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { image } = req.body;
-  if (!image?.data || !image?.mediaType) return res.status(400).json({ error: 'Image is required' });
-
   try {
+    const { image } = req.body || {};
+    if (!image?.data || !image?.mediaType) return res.status(400).json({ error: 'Image is required' });
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
       [

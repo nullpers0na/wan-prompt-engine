@@ -22,10 +22,9 @@ function parsePrompts(text) {
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { description, image } = req.body;
-  if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
-
   try {
+    const { description, image } = req.body || {};
+    if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
       buildUserContent(description, image),
