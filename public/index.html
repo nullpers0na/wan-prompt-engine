@@ -14,12 +14,10 @@
       --rose:       #e8357a;
       --rose-light: #f472b6;
       --magenta:    #9b1d6e;
-      --crimson:    #6b0f3a;
       --bg:         #07000d;
       --surface:    rgba(255,255,255,0.04);
       --surface-hover: rgba(255,255,255,0.07);
       --border:     rgba(232,53,122,0.15);
-      --border-hover: rgba(232,53,122,0.4);
       --text:       #f0dde8;
       --text-muted: #8b6476;
       --text-dim:   #4a2d3a;
@@ -38,7 +36,7 @@
       overflow-x: hidden;
     }
 
-    /* ── Background glows ────────────────────────────────────────────────────── */
+    /* ── Background glows ──────────────────────────────────────────────────── */
     .bg-glow {
       position: fixed;
       inset: 0;
@@ -50,11 +48,9 @@
     .bg-glow::before {
       content: '';
       position: absolute;
-      width: 900px;
-      height: 900px;
+      width: 900px; height: 900px;
       background: radial-gradient(circle, rgba(155,29,110,0.2) 0%, transparent 65%);
-      top: -300px;
-      left: 50%;
+      top: -300px; left: 50%;
       transform: translateX(-50%);
       animation: driftA 20s ease-in-out infinite alternate;
     }
@@ -62,29 +58,23 @@
     .bg-glow::after {
       content: '';
       position: absolute;
-      width: 600px;
-      height: 600px;
+      width: 600px; height: 600px;
       background: radial-gradient(circle, rgba(232,53,122,0.12) 0%, transparent 65%);
-      bottom: -100px;
-      right: -100px;
+      bottom: -100px; right: -100px;
       animation: driftB 26s ease-in-out infinite alternate;
     }
 
     @keyframes driftA {
-      from { transform: translateX(-55%) translateY(0px); }
+      from { transform: translateX(-55%) translateY(0); }
       to   { transform: translateX(-45%) translateY(50px); }
     }
     @keyframes driftB {
-      from { transform: translate(0, 0); }
-      to   { transform: translate(-50px, -80px); }
+      from { transform: translate(0,0); }
+      to   { transform: translate(-50px,-80px); }
     }
 
-    /* ── Subtle grid ─────────────────────────────────────────────────────────── */
     .grid-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background-image:
         linear-gradient(rgba(232,53,122,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(232,53,122,0.03) 1px, transparent 1px);
@@ -92,29 +82,53 @@
       mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
     }
 
-    /* ── Abstract SVG curve silhouettes ──────────────────────────────────────── */
+    /* ── Silhouette curves ─────────────────────────────────────────────────── */
     .silhouette {
       position: fixed;
       pointer-events: none;
       z-index: 0;
       opacity: 0.07;
     }
+    .silhouette-left  { left: -80px; top: 50%; transform: translateY(-50%); width: 340px; }
+    .silhouette-right { right: -60px; top: 30%; width: 280px; transform: scaleX(-1); }
 
-    .silhouette-left {
-      left: -80px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 340px;
+    /* ── Body icons row ────────────────────────────────────────────────────── */
+    .body-icons {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
     }
 
-    .silhouette-right {
-      right: -60px;
-      top: 30%;
-      width: 280px;
-      transform: scaleX(-1);
+    .body-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      opacity: 0.5;
+      transition: opacity 0.3s;
     }
 
-    /* ── Layout ──────────────────────────────────────────────────────────────── */
+    .body-icon:hover { opacity: 0.9; }
+
+    .body-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--rose-light);
+    }
+
+    .body-icon-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────────────── */
     .container {
       position: relative;
       z-index: 1;
@@ -125,20 +139,14 @@
       gap: 18px;
     }
 
-    /* ── Header ──────────────────────────────────────────────────────────────── */
-    header {
-      text-align: center;
-      margin-bottom: 24px;
-      position: relative;
-      z-index: 1;
-    }
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    header { text-align: center; margin-bottom: 8px; position: relative; z-index: 1; }
 
     .logo {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 68px;
-      height: 68px;
+      width: 68px; height: 68px;
       background: rgba(155,29,110,0.15);
       border: 1px solid rgba(232,53,122,0.3);
       border-radius: 20px;
@@ -175,7 +183,6 @@
     header p {
       font-size: 0.82rem;
       color: var(--text-muted);
-      font-weight: 400;
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
@@ -186,27 +193,19 @@
       gap: 14px;
       justify-content: center;
       margin-top: 18px;
+      margin-bottom: 32px;
     }
 
-    .header-rule::before,
-    .header-rule::after {
+    .header-rule::before, .header-rule::after {
       content: '';
-      width: 60px;
-      height: 1px;
+      width: 60px; height: 1px;
       background: linear-gradient(90deg, transparent, rgba(232,53,122,0.5));
     }
 
     .header-rule::after { transform: scaleX(-1); }
+    .header-rule-diamond { width: 6px; height: 6px; background: var(--rose); transform: rotate(45deg); flex-shrink: 0; }
 
-    .header-rule-diamond {
-      width: 6px;
-      height: 6px;
-      background: var(--rose);
-      transform: rotate(45deg);
-      flex-shrink: 0;
-    }
-
-    /* ── Mode toggle ─────────────────────────────────────────────────────────── */
+    /* ── Mode toggle ───────────────────────────────────────────────────────── */
     .mode-toggle {
       display: flex;
       background: var(--surface);
@@ -214,8 +213,7 @@
       border-radius: 12px;
       overflow: hidden;
       width: fit-content;
-      padding: 3px;
-      gap: 3px;
+      padding: 3px; gap: 3px;
     }
 
     .mode-btn {
@@ -235,7 +233,7 @@
     .mode-btn.active { background: var(--gradient); color: #fff; }
     .mode-btn:hover:not(.active) { color: var(--text); background: var(--surface-hover); }
 
-    /* ── Textarea ────────────────────────────────────────────────────────────── */
+    /* ── Textarea ──────────────────────────────────────────────────────────── */
     textarea {
       width: 100%;
       min-height: 130px;
@@ -258,12 +256,11 @@
       box-shadow: 0 0 0 3px rgba(232,53,122,0.08);
     }
 
-    /* ── Example chips ───────────────────────────────────────────────────────── */
-    .examples {
+    /* ── Examples ──────────────────────────────────────────────────────────── */
+    .examples-row {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
       align-items: center;
+      gap: 10px;
     }
 
     .examples-label {
@@ -275,6 +272,31 @@
       flex-shrink: 0;
     }
 
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .refresh-btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .refresh-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
+
     .example-chip {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.76rem;
@@ -285,6 +307,7 @@
       padding: 5px 14px;
       cursor: pointer;
       transition: border-color 0.2s, color 0.2s, background 0.2s;
+      text-align: left;
     }
 
     .example-chip:hover {
@@ -293,7 +316,7 @@
       background: rgba(232,53,122,0.08);
     }
 
-    /* ── Upload area ─────────────────────────────────────────────────────────── */
+    /* ── Upload ────────────────────────────────────────────────────────────── */
     .upload-area {
       border: 1px dashed var(--border);
       border-radius: 12px;
@@ -312,12 +335,8 @@
     }
 
     .upload-area input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
+      position: absolute; inset: 0; opacity: 0;
+      cursor: pointer; width: 100%; height: 100%;
     }
 
     .upload-area.has-preview input[type="file"] { display: none; }
@@ -331,8 +350,7 @@
     }
 
     .upload-icon {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       background: rgba(155,29,110,0.12);
       border: 1px solid rgba(232,53,122,0.2);
       border-radius: 12px;
@@ -352,8 +370,7 @@
     .upload-preview.visible { display: flex; }
 
     .upload-preview img {
-      width: 72px;
-      height: 72px;
+      width: 72px; height: 72px;
       object-fit: cover;
       border-radius: 10px;
       border: 1px solid var(--border);
@@ -380,7 +397,7 @@
 
     .upload-remove:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
 
-    /* ── Actions ─────────────────────────────────────────────────────────────── */
+    /* ── Actions ───────────────────────────────────────────────────────────── */
     .actions { display: flex; gap: 12px; align-items: center; }
 
     button {
@@ -420,7 +437,7 @@
     #copyAllBtn:hover { background: var(--surface-hover); color: var(--text); }
     #copyAllBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
 
-    /* ── Error ───────────────────────────────────────────────────────────────── */
+    /* ── Error ─────────────────────────────────────────────────────────────── */
     #error {
       font-size: 0.82rem;
       color: #fca5a5;
@@ -431,7 +448,7 @@
       display: none;
     }
 
-    /* ── Segments ────────────────────────────────────────────────────────────── */
+    /* ── Segments ──────────────────────────────────────────────────────────── */
     .segments { display: flex; flex-direction: column; gap: 10px; }
 
     .segment {
@@ -471,20 +488,12 @@
       min-width: 68px;
     }
 
-    .segment-label span {
-      display: block;
-      font-size: 0.66rem;
-      color: var(--rose-light);
-      margin-bottom: 2px;
-      font-weight: 700;
-    }
-
+    .segment-label span { display: block; font-size: 0.66rem; color: var(--rose-light); margin-bottom: 2px; font-weight: 700; }
     .segment-text { font-size: 0.9rem; line-height: 1.65; color: var(--text); }
 
-    /* ── Spinner ─────────────────────────────────────────────────────────────── */
+    /* ── Spinner ───────────────────────────────────────────────────────────── */
     .spinner {
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border: 2px solid rgba(232,53,122,0.15);
       border-top-color: var(--rose-light);
       border-radius: 50%;
@@ -500,11 +509,10 @@
   <div class="bg-glow"></div>
   <div class="grid-bg"></div>
 
-  <!-- Abstract curve silhouettes -->
+  <!-- Silhouette curves -->
   <svg class="silhouette silhouette-left" viewBox="0 0 340 700" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M280 0 C280 0 340 80 320 180 C300 280 200 300 220 420 C240 540 340 580 320 700" stroke="url(#sl1)" stroke-width="2" fill="none"/>
     <path d="M240 0 C240 0 310 100 280 220 C250 340 160 360 180 480 C200 600 300 640 270 700" stroke="url(#sl1)" stroke-width="1" fill="none" opacity="0.5"/>
-    <path d="M200 50 C200 50 280 150 250 280 C220 410 130 420 150 540 C170 660 260 680 240 700" stroke="url(#sl1)" stroke-width="0.5" fill="none" opacity="0.3"/>
     <defs>
       <linearGradient id="sl1" x1="0" y1="0" x2="0" y2="700" gradientUnits="userSpaceOnUse">
         <stop stop-color="#e8357a" stop-opacity="0"/>
@@ -528,17 +536,12 @@
 
   <header>
     <div class="logo">
-      <!-- Rose / bloom icon -->
       <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="17" cy="17" r="4" fill="url(#lg)"/>
         <path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#lg)" opacity="0.9"/>
         <path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#lg)" opacity="0.75"/>
         <path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#lg)" opacity="0.9"/>
         <path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#lg)" opacity="0.75"/>
-        <path d="M25.2 8.8 C25.2 8.8 23 15 19 17 C17.5 17.7 16 17 17 17 C18 17 18.3 15.5 20 14 C22 12 25.2 8.8 25.2 8.8Z" fill="url(#lg)" opacity="0.6"/>
-        <path d="M25.2 25.2 C25.2 25.2 19 23 17 19 C16.3 17.5 17 16 17 17 C17 18 18.5 18.3 20 20 C22 22 25.2 25.2 25.2 25.2Z" fill="url(#lg)" opacity="0.6"/>
-        <path d="M8.8 25.2 C8.8 25.2 11 19 15 17 C16.5 16.3 18 17 17 17 C16 17 15.7 18.5 14 20 C12 22 8.8 25.2 8.8 25.2Z" fill="url(#lg)" opacity="0.6"/>
-        <path d="M8.8 8.8 C8.8 8.8 15 11 17 15 C17.7 16.5 17 18 17 17 C17 16 15.5 15.7 14 14 C12 12 8.8 8.8 8.8 8.8Z" fill="url(#lg)" opacity="0.6"/>
         <defs>
           <linearGradient id="lg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse">
             <stop stop-color="#f9d0e4"/>
@@ -553,6 +556,63 @@
     <div class="header-rule"><div class="header-rule-diamond"></div></div>
   </header>
 
+  <!-- Body form icons -->
+  <div class="body-icons">
+    <!-- Lips -->
+    <div class="body-icon">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12 C4 12 8 9 14 12 C20 9 24 12 24 12 C24 12 22 18 14 18 C6 18 4 12 4 12Z"/>
+        <path d="M14 12 C14 12 11 14 14 15 C17 14 14 12 14 12Z" fill="currentColor" stroke="none" opacity="0.5"/>
+      </svg>
+      <span class="body-icon-label">Lips</span>
+    </div>
+    <!-- Curves / hourglass body -->
+    <div class="body-icon">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M9 2 C9 2 5 7 5 10 C5 13 10 14 10 14 C10 14 5 15 5 18 C5 21 9 26 9 26"/>
+        <path d="M19 2 C19 2 23 7 23 10 C23 13 18 14 18 14 C18 14 23 15 23 18 C23 21 19 26 19 26"/>
+      </svg>
+      <span class="body-icon-label">Form</span>
+    </div>
+    <!-- Breast silhouette -->
+    <div class="body-icon">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M2 18 C2 18 4 10 9 10 C12 10 13 13 14 13 C15 13 16 10 19 10 C24 10 26 18 26 18"/>
+        <path d="M2 18 Q14 22 26 18"/>
+      </svg>
+      <span class="body-icon-label">Bust</span>
+    </div>
+    <!-- Waist & hips -->
+    <div class="body-icon">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M8 4 C6 8 6 10 8 12 C10 14 10 14 10 14 C10 14 8 16 7 20 C6 24 5 26 5 26"/>
+        <path d="M20 4 C22 8 22 10 20 12 C18 14 18 14 18 14 C18 14 20 16 21 20 C22 24 23 26 23 26"/>
+        <line x1="8" y1="12" x2="20" y2="12" stroke-width="1"/>
+      </svg>
+      <span class="body-icon-label">Hips</span>
+    </div>
+    <!-- Legs -->
+    <div class="body-icon">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M9 3 C9 3 8 10 9 14 C10 18 10 22 9 26"/>
+        <path d="M19 3 C19 3 20 10 19 14 C18 18 18 22 19 26"/>
+        <path d="M9 14 C9 14 14 16 19 14"/>
+      </svg>
+      <span class="body-icon-label">Legs</span>
+    </div>
+    <!-- Foot -->
+    <div class="body-icon">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 10 C6 10 5 18 7 22 C8 24 10 24 20 23 C22 23 23 21 22 20 C21 19 18 19 18 19"/>
+        <path d="M6 10 C6 10 7 5 10 5 C13 5 13 10 13 10"/>
+        <line x1="10" y1="20" x2="10" y2="24"/>
+        <line x1="13" y1="20" x2="13" y2="24"/>
+        <line x1="16" y1="20" x2="16" y2="23.5"/>
+      </svg>
+      <span class="body-icon-label">Feet</span>
+    </div>
+  </div>
+
   <div class="container">
     <div class="mode-toggle">
       <button class="mode-btn active" data-mode="video">Video Segments</button>
@@ -561,8 +621,11 @@
 
     <textarea id="description" placeholder="Describe your scene…" rows="5"></textarea>
 
-    <div class="examples" id="examples">
+    <div class="examples-row">
       <span class="examples-label">Try:</span>
+      <div class="examples" id="examples"></div>
+      <button class="refresh-btn" id="refreshBtn" type="button">&#8635; Shuffle</button>
+      <button class="refresh-btn" id="expandBtn" type="button">Show more</button>
     </div>
 
     <div class="upload-area" id="uploadArea">
@@ -603,20 +666,72 @@
     const IMAGE_LABELS     = ['Concise', 'Detailed', 'Styled'];
     const ALLOWED_TYPES    = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-    const EXAMPLES = {
+    const ALL_EXAMPLES = {
       video: [
         'Topless woman walking slowly toward camera, heavy breast jiggle, soft-body physics, slow motion 60fps',
         'Close-up of ass in thong, slow rhythmic bounce and jiggle, tracking shot from behind, natural physics',
         'Woman arching her back slowly, breasts bouncing, cum dripping down chest, fluid simulation, static camera',
         'POV hips grinding slowly, ass jiggle, thigh wobble, gradual tempo increase, smooth motion loop',
+        'Slow pan up bare legs from ankles to thighs, skin detail, soft studio lighting, shallow depth of field',
+        'Woman in heels walking away from camera, ass sway, slow motion, tracking shot at waist height',
+        'Close-up of breasts bouncing in slow motion, topless, soft light, natural jiggle physics, loop-friendly',
+        'Woman arching back on bed, breasts falling to side with natural weight, slow motion, static overhead shot',
+        'Cum dripping slowly down inner thighs, fluid simulation, extreme close-up, warm studio light',
+        'Woman turning slowly in place, full body, ass jiggle on each step, hair movement, soft backlight',
+        'Close-up of feet in heels, slow step toward camera, leg muscles flexing, shallow focus',
+        'Woman bending forward slowly, ass presenting, thong, soft-body jiggle, slow zoom from behind',
+        'Side profile, woman bouncing on her knees, breasts jiggling heavily, soft-body dynamics, 60fps',
+        'Extreme close-up of nipples hardening, slow zoom in, soft studio lighting, static camera',
+        'Woman lying on back, legs raised slowly, thighs spreading, static overhead camera, slow motion',
+        'Cum landing on ass in slow motion, fluid splatter simulation, extreme close-up, warm backlight',
+        'Tracking shot of legs walking in stockings and heels, slow motion, floor level camera, shallow focus',
+        'Woman sitting and crossing her legs slowly, thigh jiggle, skirt riding up, soft light, static camera',
+        'Close-up of ass clapping in slow motion, heavy soft-body jiggle, rhythmic motion, warm studio light',
+        'Woman pulling her top down slowly, breasts spilling out, natural jiggle, slow motion, static front shot',
+        'POV standing over woman lying down looking up, she arches back slowly, breasts rising, slow motion',
+        'Fluid dripping from fingers slowly onto chest, cum simulation, close-up, soft directional light',
+        'Woman in doggy position, ass jiggle, thigh wobble, camera slowly dollying in from behind',
+        'Close-up of inner thighs, slow squeeze and release, skin detail, soft warm light, static camera',
       ],
       image: [
         'Pose her bent over presenting, ass toward camera, legs spread, keep existing lighting',
         'Add cum on face and breasts, glistening wet skin, dripping, photorealistic, 8k, sharp detail',
         'Make lingerie sheer and see-through, detailed skin underneath, soft studio lighting, high detail',
         'Change pose to on all fours looking over shoulder, seductive eye contact, keep background and lighting',
+        'Add thigh-high stockings and heels, keep pose and body, warm rim lighting, photorealistic',
+        'Enhance breast size and shape, natural skin texture, keep all other details, 8k sharp focus',
+        'Add a creampie, dripping, photorealistic fluid, keep pose and lighting, high detail',
+        'Change background to luxury hotel bedroom, soft candlelight, keep subject pose and body',
+        'Make her expression more seductive, parted lips, bedroom eyes, keep body and lighting',
+        'Add wet glistening skin, water droplets, post-shower look, soft warm lighting, sharp detail',
+        'Remove clothing completely, natural skin, keep pose, lighting, and background identical',
+        'Add neon pink lighting from the left, deep shadows right side, keep pose and subject unchanged',
+        'Change pose to legs spread lying back, keep face, body, and lighting, 8k photorealistic',
+        'Add cum dripping from mouth, chin, and neck, glistening, photorealistic fluid, keep everything else',
+        'Make nipples more prominent and detailed, keep body and lighting identical, sharp 8k detail',
+        'Add a collar and leash, keep pose and body, soft studio lighting, photorealistic accessories',
+        'Change outfit to crotchless fishnet bodysuit, keep pose and lighting, detailed skin visible through mesh',
+        'Add a second woman behind her, hands on hips, keep original subject unchanged, soft studio light',
+        'Make skin more oiled and shiny, glistening highlights, keep pose and background, 8k detail',
+        'Zoom into ass close-up, crop to waist down, keep lighting and skin detail, sharp focus',
+        'Add anal plug, keep pose and body unchanged, photorealistic, 8k, detailed',
+        'Change hair to long flowing blonde, keep face body and lighting identical',
+        'Add red lipstick and heavy eye makeup, keep body and lighting, photorealistic face detail',
+        'Make the setting an outdoor pool at night, keep subject pose and body, moonlight and pool glow',
       ],
     };
+
+    const CHIPS_DEFAULT = 4;
+    let examplesExpanded = false;
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
     const generateBtn   = document.getElementById('generateBtn');
     const copyAllBtn    = document.getElementById('copyAllBtn');
@@ -634,11 +749,15 @@
     const previewSize   = document.getElementById('previewSize');
     const removeBtn     = document.getElementById('removeBtn');
     const examplesEl    = document.getElementById('examples');
+    const refreshBtn    = document.getElementById('refreshBtn');
+    const expandBtn     = document.getElementById('expandBtn');
 
     let mode = 'video';
     let lastPrompts = [];
     let uploadedImage = null;
+    let shuffledExamples = [];
 
+    // ── Mode toggle ───────────────────────────────────────────────────────────
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode;
@@ -650,13 +769,20 @@
         copyAllBtn.style.display = 'none';
         showError(null);
         lastPrompts = [];
+        examplesExpanded = false;
         renderExamples();
       });
     });
 
-    function renderExamples() {
-      examplesEl.querySelectorAll('.example-chip').forEach(c => c.remove());
-      EXAMPLES[mode].forEach(text => {
+    // ── Examples ──────────────────────────────────────────────────────────────
+    function renderExamples(keepOrder = false) {
+      if (!keepOrder) {
+        shuffledExamples = shuffle(ALL_EXAMPLES[mode]);
+        examplesExpanded = false;
+      }
+      const picks = examplesExpanded ? shuffledExamples : shuffledExamples.slice(0, CHIPS_DEFAULT);
+      examplesEl.innerHTML = '';
+      picks.forEach(text => {
         const chip = document.createElement('button');
         chip.className = 'example-chip';
         chip.type = 'button';
@@ -664,10 +790,14 @@
         chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); });
         examplesEl.appendChild(chip);
       });
+      expandBtn.textContent = examplesExpanded ? 'Show less' : 'Show more';
     }
 
+    refreshBtn.addEventListener('click', () => renderExamples(false));
+    expandBtn.addEventListener('click', () => { examplesExpanded = !examplesExpanded; renderExamples(true); });
     renderExamples();
 
+    // ── Upload ────────────────────────────────────────────────────────────────
     uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
     uploadArea.addEventListener('drop', e => {
@@ -722,6 +852,7 @@
       uploadHint.style.display = '';
     }
 
+    // ── Generate ──────────────────────────────────────────────────────────────
     generateBtn.addEventListener('click', async () => {
       const description = descriptionEl.value.trim();
       if (!description) return;
@@ -731,6 +862,7 @@
       segmentsEl.innerHTML = '';
       copyAllBtn.style.display = 'none';
       lastPrompts = [];
+      renderExamples(); // rotate chips on each generate
 
       const endpoint = mode === 'video' ? '/api/generate' : '/api/image-prompt';
       const body = { description };
@@ -757,6 +889,7 @@
       }
     });
 
+    // ── Copy all ──────────────────────────────────────────────────────────────
     copyAllBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lastPrompts.join('\n')).then(() => {
         copyAllBtn.textContent = 'Copied!';
@@ -765,6 +898,7 @@
       });
     });
 
+    // ── Render ────────────────────────────────────────────────────────────────
     function renderSegments(prompts) {
       prompts.forEach((text, i) => {
         const seg = document.createElement('div');
