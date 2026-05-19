@@ -184,7 +184,7 @@
     .upload-area { border: 1px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; transition: border-color 0.2s, background 0.2s; position: relative; background: var(--surface); }
     .upload-area:not(.has-preview) { cursor: pointer; }
     .upload-area:not(.has-preview):hover, .upload-area.drag-over { border-color: rgba(232,53,122,0.35); background: rgba(232,53,122,0.04); }
-    .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
     .upload-area.has-preview input[type="file"] { display: none; }
     .upload-hint { pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .upload-icon { width: 40px; height: 40px; background: rgba(155,29,110,0.12); border: 1px solid rgba(232,53,122,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
@@ -662,8 +662,10 @@
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
       showError(null);
       const reader = new FileReader();
+      reader.onerror = () => showError('Could not read file.');
       reader.onload = ev => {
         const img = new Image();
+        img.onerror = () => showError('Could not load image.');
         img.onload = () => {
           const MAX = 1024; let { width, height } = img;
           if (width > MAX || height > MAX) { if (width >= height) { height = Math.round(height * MAX / width); width = MAX; } else { width = Math.round(width * MAX / height); height = MAX; } }
@@ -695,10 +697,11 @@
           characterEl.value = data.description;
         }
       } catch (_) {
-        // silently ignore — field stays empty for user to fill manually
-      } finally {
-        characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…';
+        characterEl.placeholder = 'Auto-describe failed — enter manually';
+        setTimeout(() => { characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…'; }, 3000);
+        return;
       }
+      characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…';
     }
 
     function clearUpload() {
