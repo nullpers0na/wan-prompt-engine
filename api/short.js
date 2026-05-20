@@ -14,7 +14,8 @@ Rules:
 - Focus on the specific motion, physics, and camera — be precise about body part, direction, intensity
 - When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Present tense, action already happening
-- Always include "consistent face, preserved identity, same character throughout, no ghosting, no face drift, single subject" unless the user explicitly asks for a facial expression change
+- Only animate what the description explicitly asks for — do not add background movement, environmental animation, or camera motion unless the user describes it
+- Always include "consistent face, preserved identity, same character throughout, no ghosting, no face drift, single subject, static background" unless the user explicitly asks for a facial expression or background change
 - No elaborate scene-setting, no quality tags, no filler
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque
 - For the NEGATIVE line: include only terms specific to this prompt (e.g. if the prompt involves slow motion include "fast motion, choppy"; if breasts are the focus include "flat chest"; if cum is present include "clean, dry") — do not include general quality negatives, those are added automatically`;
