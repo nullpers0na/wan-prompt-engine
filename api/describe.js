@@ -8,7 +8,7 @@ OUTPUT RULES:
 - One line only, no preamble, no commentary
 - Comma-separated descriptors, lowercase
 - Maximum 35 words
-- Lead with character name and game if recognised
+- Lead with character name and game if recognised — if not recognised, skip straight to physical descriptors, do not mention identification or use terms like "unidentified character"
 - Be blunt and specific about body proportions and vibe — do not soften or omit
 - End with the overall vibe read
 - Do not mention background, setting, or pose — only the character
