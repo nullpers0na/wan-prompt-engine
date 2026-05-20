@@ -858,12 +858,7 @@
 
         // Tap/click segment text to edit
         const textEl = seg.querySelector('.segment-text');
-        textEl.addEventListener('click', () => {
-          textEl.contentEditable = 'true';
-          textEl.focus();
-          const range = document.createRange(); range.selectNodeContents(textEl);
-          range.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
-        });
+        textEl.addEventListener('mousedown', () => { textEl.contentEditable = 'true'; });
         textEl.addEventListener('blur', () => {
           textEl.contentEditable = 'false';
           lastPrompts[i] = textEl.textContent.trim();
