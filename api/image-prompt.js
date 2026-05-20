@@ -11,7 +11,7 @@ Rules:
 - When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Match length to complexity: simple edits get concise prompts; complex scenes get more detail
 - Only add technical detail, quality tags, or lighting when they genuinely strengthen the result
-- Preserve everything not being changed (mention what to keep)
+- Only describe what is being changed — do not list or lock attributes from the image that aren't part of the edit request, as the generator will treat them as active instructions and change them
 - Always preserve the original face exactly — keep facial features, expression, identity, and likeness completely unchanged unless the user explicitly asks to change the face
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
