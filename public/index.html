@@ -210,6 +210,12 @@
     .upload-remove { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; font-weight: 500; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s; }
     .upload-remove:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
 
+    /* ── Image reference toggle ────────────────────────────────────────────── */
+    .img-ref-toggle { display: none; align-items: center; gap: 8px; padding: 2px 0; }
+    .img-ref-toggle.visible { display: flex; }
+    .img-ref-toggle input[type="checkbox"] { accent-color: var(--rose); width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+    .img-ref-toggle label { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; user-select: none; }
+
     /* ── Actions ───────────────────────────────────────────────────────────── */
     .actions { display: flex; gap: 12px; align-items: center; }
     button { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; border-radius: 10px; padding: 12px 28px; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s; }
@@ -481,6 +487,11 @@
         </div>
       </div>
 
+      <div class="img-ref-toggle" id="imgRefToggle">
+        <input type="checkbox" id="imgRefCheck" checked />
+        <label for="imgRefCheck">Use image as reference when generating prompt</label>
+      </div>
+
       <div class="actions">
         <button id="generateBtn">Generate Prompts</button>
         <button id="regenBtn" title="Regenerate">↻</button>
@@ -628,6 +639,8 @@
     const refreshBtn     = document.getElementById('refreshBtn');
     const expandBtn      = document.getElementById('expandBtn');
     const clearDescBtn     = document.getElementById('clearDescBtn');
+    const imgRefToggle     = document.getElementById('imgRefToggle');
+    const imgRefCheck      = document.getElementById('imgRefCheck');
     const negativeBox      = document.getElementById('negativeBox');
     const negativeTextarea = document.getElementById('negativeTextarea');
     const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
@@ -753,6 +766,7 @@
           uploadedImage = { data: dataUrl.split(',')[1], mediaType: 'image/jpeg' };
           previewImg.src = dataUrl; previewName.textContent = file.name; previewSize.textContent = `${width}×${height} · compressed`;
           uploadHint.style.display = 'none'; uploadPreview.classList.add('visible'); uploadArea.classList.add('has-preview');
+          imgRefToggle.classList.add('visible'); imgRefCheck.checked = true;
           autoDescribeCharacter(uploadedImage);
         };
         img.src = ev.target.result;
@@ -785,6 +799,7 @@
     function clearUpload() {
       uploadedImage = null; try { fileInput.value = ''; } catch (_) {}
       previewImg.src = ''; uploadPreview.classList.remove('visible'); uploadArea.classList.remove('has-preview'); uploadHint.style.display = '';
+      imgRefToggle.classList.remove('visible');
     }
 
     // ── Generate ──────────────────────────────────────────────────────────────
@@ -803,7 +818,7 @@
       const fullDescription = character ? `Character: ${character}\n\n${description}` : description;
       const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
       const body = { description: fullDescription };
-      if (uploadedImage) body.image = uploadedImage;
+      if (uploadedImage && imgRefCheck.checked) body.image = uploadedImage;
       lastEndpoint = endpoint;
       lastBody = body;
 
