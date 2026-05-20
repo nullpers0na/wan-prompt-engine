@@ -8,7 +8,7 @@ Rules:
 - Images are secondary context only; never add anything from them that isn't in the description
 - Never mention footwear (shoes, heels, boots, sandals, slippers, socks, bare feet included) or clothing unless the user explicitly asks for it
 - Lead with the core change, stated emphatically
-- Always say "ass cheeks" not "cheeks" — never use "cheeks" alone as it is ambiguous
+- When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Match length to complexity: simple edits get concise prompts; complex scenes get more detail
 - Only add technical detail, quality tags, or lighting when they genuinely strengthen the result
 - Preserve everything not being changed (mention what to keep)

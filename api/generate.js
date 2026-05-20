@@ -11,7 +11,7 @@ Rules:
 - Match length to complexity: simple actions get concise prompts; complex motion gets more detail
 - Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
-- Always say "ass cheeks" not "cheeks" — never use "cheeks" alone as it is ambiguous
+- When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Always include "consistent face, preserved identity, same character throughout" unless the user explicitly asks for a facial expression change
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque

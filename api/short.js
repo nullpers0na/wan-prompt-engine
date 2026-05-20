@@ -9,7 +9,7 @@ Rules:
 - Output one prompt only — no labels, no commentary
 - Keep it extremely short: comma-separated descriptors or 1–2 short sentences maximum
 - Focus on the specific motion, physics, and camera — be precise about body part, direction, intensity
-- Always say "ass cheeks" not "cheeks" — never use "cheeks" alone as it is ambiguous
+- When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Present tense, action already happening
 - Always include "consistent face, preserved identity, same character throughout" unless the user explicitly asks for a facial expression change
 - No elaborate scene-setting, no quality tags, no filler
