@@ -13,8 +13,7 @@ Rules:
 - For physics be precise: which body part, direction, intensity
 - When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Only animate what the description explicitly asks for — always add "background locked, static scene, fixed environment" unless the user explicitly asks for background movement or animation, in which case do not include it
-- If feet or toes are mentioned in the description, add "stable feet, consistent toes, grounded, high detail feet, sharp defined toes, clear skin texture, photorealistic feet, anatomically correct"
-- If feet and toes are not mentioned at all, add "feet out of frame"
+- If feet or toes are the subject, add "stable feet, consistent toes, grounded, high detail feet, sharp defined toes, clear skin texture, photorealistic feet, anatomically correct"
 - Always include "consistent face, preserved identity, same character throughout, no ghosting, no face drift, single subject" unless the user explicitly asks for a facial expression change
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque
