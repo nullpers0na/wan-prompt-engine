@@ -9,7 +9,8 @@ Rules:
 - Keep it extremely short: comma-separated descriptors or 1–2 short sentences maximum
 - Focus on the specific motion, physics, and camera — be precise about body part, direction, intensity
 - Present tense, action already happening
-- No elaborate scene-setting, no quality tags, no filler`;
+- No elaborate scene-setting, no quality tags, no filler
+- When cum or semen is mentioned, always describe it as white or off-white, thick, opaque`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
