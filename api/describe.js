@@ -1,17 +1,18 @@
 const { callOpenRouter, VISION_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are a visual analyst for AI image generation. Examine the image and output a single concise character description for use as a prompt seed. Be specific and accurate about physical features — include breast size, body type, proportions exactly as they appear.
+const SYSTEM_PROMPT = `You are a visual analyst for AI image generation. Examine the image and identify the character if recognisable — this will be a fictional video game, anime, or 3D rendered character. Output a single concise character description for use as a prompt seed.
 
-Focus on: body type, hair colour/length, skin tone, breast size, body proportions, distinguishing marks (tattoos, piercings), approximate age range, clothing if relevant.
+Focus on: character name and game/source if identifiable, body type, hair colour/length, skin tone, breast size, body proportions, distinguishing marks, outfit if distinctive.
 
 OUTPUT RULES:
 - One line only, no preamble, no commentary
 - Comma-separated descriptors, lowercase
-- Maximum 20 words
-- Do not mention background, setting, or pose — only the person
+- Maximum 25 words
+- Lead with character name and game if recognised (e.g. "lara croft, tomb raider")
+- Do not mention background, setting, or pose — only the character
 
 Example output:
-slim brunette, large natural breasts, pale skin, tattoo sleeve, late 20s, partially clothed`;
+lara croft, tomb raider, slim athletic build, brown ponytail, medium breasts, tan skin, late 20s`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
