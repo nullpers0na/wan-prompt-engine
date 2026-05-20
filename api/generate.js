@@ -11,7 +11,7 @@ Rules:
 - Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
-- When cum or semen is mentioned, always describe it as white or off-white, thick, opaque
+- When cum or semen is mentioned, always describe it as creamy white, thick, opaque
 - Separate each prompt with a blank line only — absolutely no labels, numbers, headers, or asterisks of any kind`;
 
 function parsePrompts(text) {
