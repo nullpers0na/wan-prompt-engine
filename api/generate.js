@@ -12,7 +12,7 @@ Rules:
 - Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
 - When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
-- Only animate what the description explicitly asks for — always add "background locked, static scene, fixed environment" unless the user explicitly describes background movement
+- Only animate what the description explicitly asks for — always add "background locked, static scene, fixed environment" unless the user explicitly asks for background movement or animation, in which case do not include it
 - If feet are not mentioned, add "feet out of frame" to avoid foot morphing artifacts
 - If feet are the subject, add "stable feet, consistent toes, grounded, high detail feet, sharp defined toes, clear skin texture, photorealistic feet, anatomically correct"
 - Always include "consistent face, preserved identity, same character throughout, no ghosting, no face drift, single subject" unless the user explicitly asks for a facial expression change
