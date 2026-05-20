@@ -12,6 +12,7 @@ Rules:
 - Include shot type, camera behaviour, and body motion only when they add meaningful clarity
 - For physics be precise: which body part, direction, intensity
 - If the user says the face shouldn't change, move, or shift, translate that as: "face locked, static expression, no facial movement or deformation"
+- Always include "face locked, static expression, no facial movement or deformation" unless the user explicitly asks for facial movement or expression changes
 - Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque
 - Separate each prompt with a blank line only — absolutely no labels, numbers, headers, or asterisks of any kind`;
