@@ -435,7 +435,10 @@
 
       <div>
         <label class="field-label" for="characterInput">Woman <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input id="characterInput" class="character-input" type="text" placeholder="e.g. slim brunette, large natural breasts, tattoos, pale skin…" autocomplete="off" />
+        <div style="position:relative">
+          <input id="characterInput" class="character-input" type="text" placeholder="e.g. slim brunette, large natural breasts, tattoos, pale skin…" autocomplete="off" style="padding-right:36px" />
+          <button class="clear-btn" id="clearCharBtn" type="button" title="Clear">✕</button>
+        </div>
       </div>
 
       <div>
@@ -731,6 +734,7 @@
     fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
     removeBtn.addEventListener('click', () => clearUpload());
     clearDescBtn.addEventListener('click', () => { descriptionEl.value = ''; descriptionEl.focus(); });
+    document.getElementById('clearCharBtn').addEventListener('click', () => { characterEl.value = ''; localStorage.removeItem(CHARACTER_KEY); characterEl.focus(); });
 
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
