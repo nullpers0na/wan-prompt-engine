@@ -222,6 +222,27 @@
     /* ── Error ─────────────────────────────────────────────────────────────── */
     #error { font-size: 0.82rem; color: #fca5a5; background: rgba(252,165,165,0.07); border: 1px solid rgba(252,165,165,0.2); border-radius: 8px; padding: 10px 14px; display: none; word-break: break-word; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
 
+    /* ── Negative prompt ───────────────────────────────────────────────────── */
+    .negative-box { display: none; flex-direction: column; gap: 8px; }
+    .negative-box.visible { display: flex; }
+    .negative-header { display: flex; align-items: center; justify-content: space-between; }
+    .negative-copy {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 500;
+      background: none; border: 1px solid var(--border); color: var(--text-dim);
+      border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+    }
+    .negative-copy:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
+    .negative-copy.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
+    .negative-textarea {
+      width: 100%; min-height: 72px;
+      background: rgba(252,165,165,0.04); border: 1px solid rgba(252,165,165,0.15);
+      border-radius: 10px; color: var(--text-muted);
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.82rem;
+      padding: 12px 14px; resize: vertical; outline: none;
+      transition: border-color 0.2s; line-height: 1.6;
+    }
+    .negative-textarea:focus { border-color: rgba(252,165,165,0.3); }
+
     /* ── Segments ──────────────────────────────────────────────────────────── */
     .segments { display: flex; flex-direction: column; gap: 10px; }
     .segment {
@@ -454,6 +475,14 @@
 
       <div id="error"></div>
       <div class="segments" id="segments"></div>
+
+      <div class="negative-box" id="negativeBox">
+        <div class="negative-header">
+          <span class="field-label" style="margin:0">Negative Prompt</span>
+          <button class="negative-copy" id="negativeCopyBtn">Copy</button>
+        </div>
+        <textarea class="negative-textarea" id="negativeTextarea" spellcheck="false"></textarea>
+      </div>
       <div class="splitter-note" id="splitterNote" style="display:none">Paste into <strong>CLIPPromptSplitter5</strong> — blank line between each segment</div>
 
       <div class="history-section" id="historySection" style="display:none">
@@ -467,9 +496,10 @@
   </div>
 
   <script>
-    const VIDEO_TIMESTAMPS = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
-    const IMAGE_LABELS     = ['Prompt'];
-    const SHORT_LABEL      = 'Clip';
+    const VIDEO_TIMESTAMPS  = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
+    const IMAGE_LABELS      = ['Prompt'];
+    const SHORT_LABEL       = 'Clip';
+    const GENERAL_NEGATIVES = 'blurry, low quality, watermark, text, logo, bad anatomy, deformed, extra limbs, missing limbs, worst quality, jpeg artifacts, noise, grainy, overexposed, underexposed, duplicate, mutated, static image, no movement';
     const ALLOWED_TYPES    = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const HISTORY_KEY      = 'wan_history';
     const HISTORY_MAX      = 10;
@@ -582,7 +612,10 @@
     const examplesEl     = document.getElementById('examples');
     const refreshBtn     = document.getElementById('refreshBtn');
     const expandBtn      = document.getElementById('expandBtn');
-    const historySection = document.getElementById('historySection');
+    const negativeBox      = document.getElementById('negativeBox');
+    const negativeTextarea = document.getElementById('negativeTextarea');
+    const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
+    const historySection   = document.getElementById('historySection');
     const splitterNote   = document.getElementById('splitterNote');
     const historyHeader  = document.getElementById('historyHeader');
     const historyToggle  = document.getElementById('historyToggle');
@@ -648,6 +681,7 @@
         modeBtns.forEach(b => b.classList.toggle('active', b === btn));
         descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
         segmentsEl.innerHTML = '';
+        negativeBox.classList.remove('visible');
         copyAllBtn.style.display = 'none';
         regenBtn.style.display = 'none';
         copyNumBtn.style.display = 'none';
@@ -743,6 +777,7 @@
       setLoading(true);
       showError(null);
       copyAllBtn.style.display = 'none';
+      negativeBox.classList.remove('visible');
       lastPrompts = [];
       renderExamples(false);
 
@@ -767,6 +802,13 @@
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
         showOutputButtons();
+        if (mode === 'short') {
+          const specific = data.negative ? data.negative.replace(/,?\s*$/, '') + ', ' : '';
+          negativeTextarea.value = specific + GENERAL_NEGATIVES;
+          negativeBox.classList.add('visible');
+        } else {
+          negativeBox.classList.remove('visible');
+        }
         saveHistory({ mode, description, character, prompts: data.prompts });
         renderHistory();
       } catch (err) {
@@ -822,6 +864,13 @@
       } finally {
         setLoading(false);
       }
+    });
+
+    negativeCopyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(negativeTextarea.value).then(() => {
+        negativeCopyBtn.textContent = 'Copied!'; negativeCopyBtn.classList.add('copied');
+        setTimeout(() => { negativeCopyBtn.textContent = 'Copy'; negativeCopyBtn.classList.remove('copied'); }, 1800);
+      });
     });
 
     // ── Render segments ───────────────────────────────────────────────────────
