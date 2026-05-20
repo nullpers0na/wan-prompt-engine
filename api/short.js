@@ -15,6 +15,7 @@ Rules:
 - When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
 - Present tense, action already happening
 - Only animate what the description explicitly asks for — do not add background movement, environmental animation, or camera motion unless the user describes it
+- Unless feet are the subject of the shot, add "feet out of frame" to avoid foot morphing artifacts
 - Always include "consistent face, preserved identity, same character throughout, no ghosting, no face drift, single subject, static background" unless the user explicitly asks for a facial expression or background change
 - No elaborate scene-setting, no quality tags, no filler
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque
