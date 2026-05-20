@@ -159,6 +159,15 @@
     .character-input:focus { border-color: rgba(232,53,122,0.4); box-shadow: 0 0 0 3px rgba(232,53,122,0.08); }
 
     /* ── Textarea ──────────────────────────────────────────────────────────── */
+    .textarea-wrap { position: relative; }
+    .clear-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: none; border: none; color: var(--text-dim);
+      font-size: 0.75rem; cursor: pointer; padding: 2px 6px;
+      border-radius: 4px; line-height: 1; transition: color 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .clear-btn:hover { color: var(--rose-light); }
     textarea {
       width: 100%; min-height: 120px;
       background: var(--surface); border: 1px solid var(--border);
@@ -431,7 +440,10 @@
 
       <div>
         <label class="field-label" for="description">Scene / Edit</label>
-        <textarea id="description" placeholder="Describe your video scene…" rows="4"></textarea>
+        <div class="textarea-wrap">
+          <textarea id="description" placeholder="Describe your video scene…" rows="4"></textarea>
+          <button class="clear-btn" id="clearDescBtn" type="button" title="Clear">✕</button>
+        </div>
       </div>
 
       <div>
@@ -612,6 +624,7 @@
     const examplesEl     = document.getElementById('examples');
     const refreshBtn     = document.getElementById('refreshBtn');
     const expandBtn      = document.getElementById('expandBtn');
+    const clearDescBtn     = document.getElementById('clearDescBtn');
     const negativeBox      = document.getElementById('negativeBox');
     const negativeTextarea = document.getElementById('negativeTextarea');
     const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
@@ -717,6 +730,7 @@
     uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
     fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
     removeBtn.addEventListener('click', () => clearUpload());
+    clearDescBtn.addEventListener('click', () => { descriptionEl.value = ''; descriptionEl.focus(); });
 
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
