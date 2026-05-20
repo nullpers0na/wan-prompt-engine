@@ -10,6 +10,7 @@ Rules:
 - Keep it extremely short: comma-separated descriptors or 1–2 short sentences maximum
 - Focus on the specific motion, physics, and camera — be precise about body part, direction, intensity
 - Present tense, action already happening
+- If the user says the face shouldn't change, move, or shift, translate that as: "face locked, static expression, no facial movement or deformation"
 - No elaborate scene-setting, no quality tags, no filler
 - When cum or semen is mentioned, always describe it as creamy white, thick, opaque`;
 
