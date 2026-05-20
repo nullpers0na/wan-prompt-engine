@@ -1,6 +1,6 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation and editing (Qwen, FLUX, SDXL). Take the user's edit request and rewrite it as a single, superior prompt following this exact structure: [what to change] + [exactly how] + [what to preserve from the image, only if relevant].
+const SYSTEM_PROMPT = `You are an expert prompt engineer for AI image generation and editing (Qwen, FLUX, SDXL). Take the user's edit request and rewrite it as a single, superior prompt following this structure: what to change, exactly how, then what to preserve (only if relevant). Output as a single flowing prompt with no brackets, labels, or separators.
 
 Rules:
 - The text description is your only source of content — follow it exactly
