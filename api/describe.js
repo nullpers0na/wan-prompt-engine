@@ -62,8 +62,8 @@ module.exports = async (req, res) => {
     // Treat non-name responses as blank
     if (/^(unknown|unidentified|unnamed|unrecognized|unrecognised|n\/a|none|-)$/i.test(name)) name = '';
 
-    // If unrecognised and we have a memory bank, match description text-to-text
-    if (!name && description && knownCharacters.length > 0) {
+    // Always check memory bank first — user-saved names take priority over vision model names
+    if (description && knownCharacters.length > 0) {
       const matchResult = await callOpenRouter(
         buildDescriptionMatchPrompt(description, knownCharacters),
         'Output the matched character name or unknown.',
