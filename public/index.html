@@ -908,7 +908,7 @@
         const describeRes = await fetch('/api/describe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image, mode, knownCharacters, preferences: memoryData?.preferences || {} }),
+          body: JSON.stringify({ image, mode, knownCharacters, userProfile: memoryData?.profile || null }),
           signal,
         });
         if (!describeRes.ok) { const err = await describeRes.json().catch(() => ({})); throw new Error(err.error || `describe failed (${describeRes.status})`); }

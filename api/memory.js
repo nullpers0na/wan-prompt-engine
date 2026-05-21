@@ -1,159 +1,141 @@
-const { put, get } = require('@vercel/blob');
+const { db } = require('./lib/db');
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 
-const BLOB_KEY = 'wan-memory.json';
+const SYNTHESIZE_EVERY = 5;
 
-async function readMemory() {
-  try {
-    const blob = await get(BLOB_KEY, { access: 'private' });
-    if (!blob || !blob.stream) return createDefaultMemory();
-    const text = await new Response(blob.stream).text();
-    return JSON.parse(text);
-  } catch {
-    return createDefaultMemory();
-  }
+const BODY_PARTS = ['breasts', 'tits', 'nipples', 'areola', 'areolas', 'ass', 'butt', 'hips', 'thighs', 'legs', 'feet', 'face', 'lips', 'pussy'];
+const ACTIONS    = ['bigger', 'larger', 'smaller', 'saggy', 'perky', 'heavy', 'jiggle', 'bounce', 'nude', 'naked', 'cum', 'close-up', 'slow motion', 'spread', 'round', 'curvy'];
+
+function extractTags(prompt) {
+  const lower = prompt.toLowerCase();
+  return [...new Set([...BODY_PARTS, ...ACTIONS].filter(kw => lower.includes(kw)))];
 }
 
-async function writeMemory(data) {
-  data.updatedAt = Date.now();
-  await put(BLOB_KEY, JSON.stringify(data), {
-    access: 'private',
-    allowOverwrite: true,
-    addRandomSuffix: false,
-    contentType: 'application/json',
-  });
-}
+async function synthesizeProfile(sql, promptCount) {
+  if (promptCount % SYNTHESIZE_EVERY !== 0) return;
 
-function createDefaultMemory() {
-  return {
-    preferences: {},      // bodyPart/action frequency counts
-    sequences: {},        // what the user asks for after what
-    characterHistory: {}, // per-character usage
-    recentPrompts: [],    // last 50 prompts
-    rejectedPatterns: [], // rejected prompts (last 20)
-    accepted: 0,          // count of accepted prompts
-    updatedAt: null,
-  };
-}
+  const [recent, accepted, rejected] = await Promise.all([
+    sql`SELECT prompt_text, mode, character_name FROM prompts ORDER BY created_at DESC LIMIT 40`,
+    sql`SELECT prompt_text, character_name FROM prompts WHERE accepted = true ORDER BY created_at DESC LIMIT 20`,
+    sql`SELECT prompt_text FROM prompts WHERE accepted = false ORDER BY created_at DESC LIMIT 15`,
+  ]);
 
-async function extractAiTags(prompt) {
-  const tagText = await callOpenRouter(
-    'Extract 3-6 semantic tags from this AI generation prompt. Focus on body parts, actions, and style preferences. Output only comma-separated lowercase tags, nothing else.',
-    prompt,
-    { model: TEXT_MODEL, maxTokens: 40 },
-  ).catch(() => '');
-  return tagText.split(',').map(t => t.trim()).filter(Boolean);
+  if (recent.length < 3) return;
+
+  const chars = [...new Set(recent.map(r => r.character_name).filter(Boolean))];
+
+  const profile = await callOpenRouter(
+    'You are building a behavioral profile for an adult AI image/video generation user. Be specific, direct, and descriptive — this profile is injected into AI prompts to personalise suggestions.',
+    `Recent prompts (newest first):\n${recent.map(r => r.prompt_text).join('\n')}\n\nAccepted/copied prompts:\n${accepted.map(r => r.prompt_text).join('\n') || 'none yet'}\n\nRejected/regenerated prompts:\n${rejected.map(r => r.prompt_text).join('\n') || 'none yet'}\n\nCharacters used: ${chars.join(', ') || 'none identified'}\n\nWrite a 3-5 sentence profile. Cover: what content and body parts they obsess over, their typical workflow sequences (what follows what), what they consistently reject, and any character-specific patterns. Be blunt and specific.`,
+    { model: TEXT_MODEL, maxTokens: 300 },
+  ).catch(() => null);
+
+  if (!profile) return;
+
+  await sql`
+    INSERT INTO user_profile (id, profile, prompt_count, updated_at)
+    VALUES (1, ${profile}, ${promptCount}, NOW())
+    ON CONFLICT (id) DO UPDATE SET
+      profile = ${profile},
+      prompt_count = ${promptCount},
+      updated_at = NOW()
+  `;
 }
 
 module.exports = async (req, res) => {
   if (req.method === 'GET') {
-    const memory = await readMemory();
-    return res.json(memory);
+    try {
+      const sql = await db();
+      const [profileRows, recentRows, charRows] = await Promise.all([
+        sql`SELECT profile, prompt_count, updated_at FROM user_profile WHERE id = 1`,
+        sql`SELECT prompt_text, mode, character_name, accepted, created_at FROM prompts ORDER BY created_at DESC LIMIT 20`,
+        sql`SELECT name, description, prompt_count FROM characters ORDER BY prompt_count DESC LIMIT 20`,
+      ]);
+      return res.json({
+        profile: profileRows[0]?.profile || null,
+        promptCount: profileRows[0]?.prompt_count || 0,
+        updatedAt: profileRows[0]?.updated_at || null,
+        recentPrompts: recentRows,
+        characters: charRows,
+      });
+    } catch (err) {
+      console.error('memory GET error:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   if (req.method === 'POST') {
     try {
+      const sql = await db();
       const { event, data } = req.body || {};
-      const memory = await readMemory();
-
-      // Ensure rejectedPatterns exists on older memory objects
-      if (!memory.rejectedPatterns) memory.rejectedPatterns = [];
-      if (typeof memory.accepted !== 'number') memory.accepted = 0;
 
       if (event === 'prompt_generated') {
         const { prompt, mode, character } = data;
+        const tags = extractTags(prompt);
 
-        // Track recent prompts
-        memory.recentPrompts.unshift({ prompt, mode, character, ts: Date.now() });
-        memory.recentPrompts = memory.recentPrompts.slice(0, 50);
+        await sql`
+          INSERT INTO prompts (prompt_text, mode, character_name, tags)
+          VALUES (${prompt}, ${mode || null}, ${character || null}, ${tags})
+        `;
 
-        // Extract keywords (fast) and update frequency counts
-        const keywords = extractKeywords(prompt);
-        keywords.forEach(kw => {
-          memory.preferences[kw] = (memory.preferences[kw] || 0) + 1;
-        });
-
-        // AI semantic tag extraction (richer)
-        const aiTags = await extractAiTags(prompt);
-        aiTags.forEach(tag => {
-          memory.preferences[tag] = (memory.preferences[tag] || 0) + 1;
-        });
-
-        // Track sequences — what followed the previous prompt
-        if (memory.recentPrompts.length > 1) {
-          const prev = memory.recentPrompts[1];
-          const prevKeywords = extractKeywords(prev.prompt);
-          prevKeywords.forEach(pk => {
-            if (!memory.sequences[pk]) memory.sequences[pk] = {};
-            keywords.forEach(ck => {
-              memory.sequences[pk][ck] = (memory.sequences[pk][ck] || 0) + 1;
-            });
-          });
-        }
-
-        // Per-character tracking
         if (character) {
-          if (!memory.characterHistory[character]) memory.characterHistory[character] = { prompts: [], preferences: {} };
-          memory.characterHistory[character].prompts.unshift({ prompt, mode, ts: Date.now() });
-          memory.characterHistory[character].prompts = memory.characterHistory[character].prompts.slice(0, 20);
-          keywords.forEach(kw => {
-            memory.characterHistory[character].preferences[kw] = (memory.characterHistory[character].preferences[kw] || 0) + 1;
-          });
+          await sql`
+            INSERT INTO characters (name, prompt_count, updated_at)
+            VALUES (${character}, 1, NOW())
+            ON CONFLICT (name) DO UPDATE SET
+              prompt_count = characters.prompt_count + 1,
+              updated_at = NOW()
+          `;
         }
 
-        await writeMemory(memory);
+        const [{ count }] = await sql`SELECT COUNT(*)::int AS count FROM prompts`;
+        await synthesizeProfile(sql, count);
+
         return res.json({ ok: true });
       }
 
       if (event === 'prompt_accepted') {
         const { prompt } = data;
-        memory.accepted = (memory.accepted || 0) + 1;
-
-        // Increment tags by 0.5 for accepted prompts
-        const keywords = extractKeywords(prompt);
-        keywords.forEach(kw => {
-          memory.preferences[kw] = (memory.preferences[kw] || 0) + 0.5;
-        });
-
-        await writeMemory(memory);
+        await sql`
+          UPDATE prompts SET accepted = true
+          WHERE id = (
+            SELECT id FROM prompts WHERE prompt_text = ${prompt}
+            ORDER BY created_at DESC LIMIT 1
+          )
+        `;
         return res.json({ ok: true });
       }
 
       if (event === 'prompt_rejected') {
-        const { prompt, mode, character } = data;
-        memory.rejectedPatterns.unshift({ prompt, mode, character, ts: Date.now() });
-        memory.rejectedPatterns = memory.rejectedPatterns.slice(0, 20);
-
-        await writeMemory(memory);
+        const { prompt } = data;
+        await sql`
+          UPDATE prompts SET accepted = false
+          WHERE id = (
+            SELECT id FROM prompts WHERE prompt_text = ${prompt}
+            ORDER BY created_at DESC LIMIT 1
+          )
+        `;
         return res.json({ ok: true });
       }
 
       if (event === 'character_named') {
         const { name, description } = data;
-        if (!memory.characterHistory[name]) memory.characterHistory[name] = { prompts: [], preferences: {} };
-        memory.characterHistory[name].description = description;
-        await writeMemory(memory);
+        await sql`
+          INSERT INTO characters (name, description, updated_at)
+          VALUES (${name}, ${description || null}, NOW())
+          ON CONFLICT (name) DO UPDATE SET
+            description = ${description || null},
+            updated_at = NOW()
+        `;
         return res.json({ ok: true });
       }
 
       return res.status(400).json({ error: 'Unknown event' });
     } catch (err) {
-      console.error('memory error:', err.message);
+      console.error('memory POST error:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }
 
   res.status(405).json({ error: 'Method not allowed' });
 };
-
-const BODY_PARTS = ['breasts', 'breast', 'tits', 'nipples', 'areola', 'areolas', 'ass', 'butt', 'hips', 'waist', 'thighs', 'legs', 'feet', 'toes', 'face', 'lips', 'pussy', 'body'];
-const ACTIONS    = ['bigger', 'larger', 'smaller', 'saggy', 'perky', 'heavy', 'jiggle', 'bounce', 'nude', 'naked', 'cum', 'exposed', 'detailed', 'close-up', 'slow motion', 'spread', 'round', 'flat', 'slim', 'curvy'];
-
-function extractKeywords(prompt) {
-  const lower = prompt.toLowerCase();
-  const found = [];
-  [...BODY_PARTS, ...ACTIONS].forEach(kw => {
-    if (lower.includes(kw)) found.push(kw);
-  });
-  return [...new Set(found)];
-}

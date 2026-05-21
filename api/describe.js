@@ -27,7 +27,7 @@ function buildDescriptionMatchPrompt(newDescription, knownCharacters) {
   return `You are a character matching assistant. Compare this physical description against a list of known characters and find the best match.\n\nNew description: ${newDescription}\n\nKnown characters:\n${list}\n\nFocus on consistent attributes: body type, breast size, ass size, skin tone, hair colour/length. Ignore minor differences from lighting, angle, or rendering style.\nOutput ONLY the exact character name from the list above if it matches with reasonable confidence, or the single word: unknown`;
 }
 
-async function generateQuip(name, description, mode, topPreferences) {
+async function generateQuip(name, description, mode, userProfile) {
   const modeGuess = {
     video: 'guess what motion or scene they are going to prompt.',
     short: 'guess what punchy single-motion clip they will write.',
@@ -36,10 +36,8 @@ async function generateQuip(name, description, mode, topPreferences) {
 
   const first = firstName(name);
   const subject = first ? `The character is ${first}.` : 'The character is unknown.';
-  const prefHint = topPreferences.length
-    ? `This user's most requested content: ${topPreferences.join(', ')}.`
-    : '';
-  const prompt = `${subject} Physical description: ${description}. ${prefHint}\n\nWrite ONE filthy, explicit one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Reference their usual interests if relevant. Be raunchy, lewd, specific. One sentence, no quotes, no asterisks.`;
+  const profileHint = userProfile ? `\nKnown user style: ${userProfile}` : '';
+  const prompt = `${subject} Physical description: ${description}.${profileHint}\n\nWrite ONE filthy, explicit one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Reference their known style and interests. Be raunchy, lewd, specific. One sentence, no quotes, no asterisks.`;
 
   return callOpenRouter(prompt, 'Write the one-liner now.', { model: TEXT_MODEL, maxTokens: 80 });
 }
@@ -48,11 +46,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { image, mode = 'video', knownCharacters = [], preferences = {} } = req.body || {};
-    const topPreferences = Object.entries(preferences)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([k]) => k);
+    const { image, mode = 'video', knownCharacters = [], userProfile = null } = req.body || {};
     if (!image?.data || !image?.mediaType) return res.status(400).json({ error: 'Image is required' });
 
     const imgContent = [
@@ -82,7 +76,7 @@ module.exports = async (req, res) => {
 
     // Always generate quip separately — vision model drops it when overloaded
     const quip = description
-      ? await generateQuip(name, description, mode, topPreferences).catch(() => '')
+      ? await generateQuip(name, description, mode, userProfile).catch(() => '')
       : '';
 
     res.json({ name, description, quip });
