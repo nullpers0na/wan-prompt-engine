@@ -2,13 +2,12 @@ const { callOpenRouter, VISION_MODEL } = require('./lib/openrouter');
 
 const ID_MODEL = 'x-ai/grok-2-vision-1212';
 
-const ID_PROMPT = `You are a character identification expert. Look at this image and identify the character if they are from a video game, anime, or 3D rendered source.
+const ID_PROMPT = `You are an expert at identifying fictional characters from video games, anime, and 3D rendered art. Your job is to name the character in this image.
 
-Output ONE line only:
-- If you recognise the character with certainty: their name and game/source in lowercase (e.g. "tifa lockhart, final fantasy vii")
-- If you are not certain: leave the line completely blank
+Output ONE line only — the character's name and game/source in lowercase (e.g. "tifa lockhart, final fantasy vii").
+If you genuinely have no idea, leave the line blank. But if you have a strong feeling about who it is, say it — a confident best guess is better than silence.
 
-Do not guess. A wrong name is far worse than a blank. Look at outfit, body proportions, artstyle, and face — not just hair colour.`;
+To identify: look at the face, outfit, hair style and colour, body proportions, artstyle, and any distinctive accessories or weapons. Many popular characters are heavily modded or rendered in different styles — focus on facial features and silhouette.`;
 
 function buildDetailPrompt(mode) {
   const modeGuess = {
@@ -45,7 +44,7 @@ module.exports = async (req, res) => {
     ];
 
     const [idResult, detailResult] = await Promise.all([
-      callOpenRouter(ID_PROMPT, imgContent, { model: ID_MODEL, maxTokens: 40 }).catch(() => ''),
+      callOpenRouter(ID_PROMPT, imgContent, { model: ID_MODEL, maxTokens: 60 }).catch(() => ''),
       callOpenRouter(buildDetailPrompt(mode), imgContent, { model: VISION_MODEL, maxTokens: 160 }).catch(() => ''),
     ]);
 
