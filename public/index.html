@@ -1021,18 +1021,18 @@
 
     async function autoDescribeCharacter(image) {
       uploadArea.classList.add('analysing');
-      // Fetch memory bank upfront for auto-suggest "continue from last time"
-      let currentMemory = null;
-      try { const mr = await fetch('/api/memory'); if (mr.ok) currentMemory = await mr.json(); } catch (_) {}
       try {
         const knownCharacters = loadMemoryBank();
-        const res = await fetch('/api/describe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image, mode, knownCharacters }),
-        });
-        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || `describe failed (${res.status})`); }
-        const data = await res.json();
+        const [describeRes, memoryData] = await Promise.all([
+          fetch('/api/describe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image, mode, knownCharacters }),
+          }),
+          fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null),
+        ]);
+        if (!describeRes.ok) { const err = await describeRes.json().catch(() => ({})); throw new Error(err.error || `describe failed (${describeRes.status})`); }
+        const data = await describeRes.json();
         if (data.description) {
           describedCharacter = data.description;
           lastDescription = data.description;
@@ -1051,8 +1051,8 @@
           showSuggestions();
           const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
           // Prepend "continue from last time" chip if character is in memory history
-          if (data.name && currentMemory && currentMemory.characterHistory) {
-            const histEntry = currentMemory.characterHistory[data.name.toLowerCase()];
+          if (data.name && memoryData && memoryData.characterHistory) {
+            const histEntry = memoryData.characterHistory[data.name.toLowerCase()];
             const lastHistPrompt = histEntry?.prompts?.[0]?.prompt;
             if (lastHistPrompt) {
               suggestionsChips.innerHTML = '';
@@ -1373,7 +1373,7 @@
     }
 
     function showError(msg) { errorEl.textContent = msg || ''; errorEl.style.display = msg ? 'block' : 'none'; }
-    function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   </script>
 </body>
 </html>
