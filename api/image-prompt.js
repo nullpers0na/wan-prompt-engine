@@ -1,20 +1,16 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are an expert prompt engineer for Qwen image editing. Take the user's edit request and write a single precise prompt.
+const SYSTEM_PROMPT = `You are an expert prompt engineer for Qwen image editing. Take the user's edit request and write a single short, precise prompt.
 
-Qwen responds best to:
-- Visual description of the end result, not just the instruction: describe what it looks like
-- Quality tags that genuinely help: "photorealistic, highly detailed, 8k, sharp focus"
-- Describing the change specifically — texture, weight, shape, size, appearance
-- Keeping preservation notes short and targeted
+Keep it tight — 1 to 2 sentences maximum. Do not pad with preservation notes or repeat back the character description.
 
-Structure: [describe the change and exactly how it looks] + [quality tags] + [preserve the original face exactly] + [anything the user explicitly asked to preserve]
+Structure: [describe the change visually] + [2-3 quality tags] + "preserve the original face exactly"
 
 Rules:
-- Only describe what the user asked to change — do not add, infer, or expand with attributes from the image
-- Describe the specific change in visual detail — what does it actually look like?
-- Do not reframe the edit as a full character description or use language like "transform into"
-- Always include "preserve the original face exactly" unless the user is changing the face
+- Describe only what changes — what does the result actually look like?
+- Do NOT list things to keep the same (hair, skin, expression, pose, background, etc.) — Qwen reads the image, it doesn't need reminding
+- 2-3 quality tags maximum: pick the ones that matter for this specific edit
+- Always end with "preserve the original face exactly" unless the face is what's changing
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque
 - When the description references multiple images, use <image_1> <image_2> syntax: state what to take from <image_2>, then "Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged"
 - Images are STATIC — no motion language
