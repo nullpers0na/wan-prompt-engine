@@ -18,6 +18,7 @@ async function readMemory() {
 async function writeMemory(data) {
   data.updatedAt = Date.now();
   await put(BLOB_KEY, JSON.stringify(data), {
+    access: 'private',
     allowOverwrite: true,
     addRandomSuffix: false,
     contentType: 'application/json',
