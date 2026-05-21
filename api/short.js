@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
       buildUserContent(description, image),
-      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 300 },
+      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 400 },
     );
 
     const { prompt, negative } = parseResponse(text);

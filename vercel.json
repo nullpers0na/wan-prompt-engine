@@ -4,6 +4,7 @@
     { "src": "api/generate.js", "use": "@vercel/node" },
     { "src": "api/image-prompt.js", "use": "@vercel/node" },
     { "src": "api/short.js", "use": "@vercel/node" },
+    { "src": "api/flux-prompt.js", "use": "@vercel/node" },
     { "src": "api/describe.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
@@ -11,6 +12,7 @@
     { "src": "/api/generate", "dest": "/api/generate.js" },
     { "src": "/api/image-prompt", "dest": "/api/image-prompt.js" },
     { "src": "/api/short", "dest": "/api/short.js" },
+    { "src": "/api/flux-prompt", "dest": "/api/flux-prompt.js" },
     { "src": "/api/describe", "dest": "/api/describe.js" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }

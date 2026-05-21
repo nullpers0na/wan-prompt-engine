@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 1024 },
     );
 
-    const prompts = parsePrompts(text).map(p => `${p}, same face throughout, consistent identity`);
+    const prompts = parsePrompts(text);
     if (prompts.length !== 5) {
       return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
     }

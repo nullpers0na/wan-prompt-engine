@@ -436,7 +436,8 @@
       <div class="mode-toggle">
         <button class="mode-btn active" data-mode="video">Video Segments</button>
         <button class="mode-btn" data-mode="short">Short Clip</button>
-        <button class="mode-btn" data-mode="image">Image Edit</button>
+        <button class="mode-btn" data-mode="image">Qwen Edit</button>
+        <button class="mode-btn" data-mode="flux">Flux Edit</button>
       </div>
 
       <div>
@@ -576,6 +577,24 @@
         'belly and thighs wobble, slow body roll, wide angle, natural light',
         'side boob jiggle, arm raised slowly, soft backlight',
       ],
+      flux: [
+        'Make her topless, breasts fully exposed. Keep everything else identical.',
+        'Add creamy white cum dripping down her face and chest. Keep the face and background identical.',
+        'Change her hair to long platinum blonde. Keep everything else identical.',
+        'Make her breasts larger and fuller. Keep everything else identical.',
+        'Make her breasts saggy and heavy, hanging low with natural weight. Keep everything else identical.',
+        'Add a collar around her neck. Keep everything else identical.',
+        'Make her fully nude. Keep the face, pose, and background identical.',
+        'Add a large anal plug. Keep everything else identical.',
+        'Change her expression to submissive and desperate. Keep everything else identical.',
+        'Make her nipples more prominent and erect. Keep everything else identical.',
+        'Add cum dripping from her mouth and chin. Keep the face and everything else identical.',
+        'Make her ass larger and rounder. Keep everything else identical.',
+        'Add thigh-high stockings. Keep everything else identical.',
+        'Make her skin oiled and glistening. Keep everything else identical.',
+        'Change the background to a luxury hotel bedroom. Keep the subject identical.',
+        'Make her expression bratty and arrogant. Keep everything else identical.',
+      ],
       image: [
         'Pose her bent over presenting, ass toward camera, legs spread, keep existing lighting',
         'Add cum on face and breasts, glistening wet skin, dripping, photorealistic, 8k, sharp detail',
@@ -663,31 +682,37 @@
         video: 'close-up on lips, slow parting, tongue tip visible, jaw dropping, glossy wet lips',
         image: 'detailed lips, glossy, slightly parted, tongue just visible, soft focus on mouth',
         short: 'lips parting slowly, tongue tip, glossy wet, close-up',
+        flux: 'make the lips glossy and slightly parted with tongue just visible. Keep everything else identical.',
       },
       breasts: {
         video: 'close-up on breasts, heavy jiggle in slow motion, soft-body physics, exaggerated natural bounce',
         image: 'large natural breasts, detailed nipples, areola detail, smooth skin, full and heavy',
         short: 'breasts jiggle, heavy natural bounce, soft-body physics, slow motion',
+        flux: 'make the breasts larger, fuller and more exposed with detailed nipples. Keep everything else identical.',
       },
       body: {
         video: 'full body shot, slow weight shift side to side, curves accentuated, natural body sway, wide angle',
         image: 'full body visible, hourglass figure, smooth curves, detailed skin, photorealistic, 8k',
         short: 'body sway, natural weight shift, curves jiggling, wide shot',
+        flux: 'make the body fully nude with an hourglass figure, smooth detailed skin. Keep the face and background identical.',
       },
       ass: {
         video: 'close-up from behind on ass, heavy jiggle, rippling soft flesh, slow motion, soft-body physics',
         image: 'round ass, detailed, presenting, arched back, smooth skin, close-up rear angle',
         short: 'ass jiggle, heavy soft-body ripple, slow motion, rear close-up',
+        flux: 'make the ass larger, rounder and more prominent. Keep everything else identical.',
       },
       legs: {
         video: 'legs spreading slowly, thighs quivering, close-up on inner thighs, weight shifting between legs',
         image: 'legs spread wide, detailed inner thighs, smooth skin, heels on, close-up low angle',
         short: 'thigh jiggle, legs spreading slowly, inner thigh wobble',
+        flux: 'spread the legs wide apart showing detailed inner thighs and smooth skin. Keep everything else identical.',
       },
       feet: {
         video: 'close-up on feet, toes curling and spreading slowly, arched sole, slow toe wiggle, static camera',
         image: 'detailed feet, bare soles visible, toes spread, high arch, clean smooth skin, close-up',
         short: 'toes curling slowly, arched sole, close-up, static shot',
+        flux: 'make the feet bare and detailed, high arch, clean smooth skin, spread toes. Keep everything else identical.',
       },
     };
 
@@ -708,7 +733,7 @@
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode;
         modeBtns.forEach(b => b.classList.toggle('active', b === btn));
-        descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
+        descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : mode === 'flux' ? 'Describe the edit you want to make…' : 'Describe the image edit you want to make…';
         segmentsEl.innerHTML = '';
         negativeBox.classList.remove('visible');
         copyAllBtn.style.display = 'none';
@@ -816,7 +841,7 @@
 
       const character = characterEl.value.trim();
       const fullDescription = character ? `Character: ${character}\n\n${description}` : description;
-      const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
+      const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : mode === 'flux' ? '/api/flux-prompt' : '/api/image-prompt';
       const body = { description: fullDescription };
       if (uploadedImage && imgRefCheck.checked) body.image = uploadedImage;
       lastEndpoint = endpoint;
@@ -922,7 +947,7 @@
       prompts.forEach((text, i) => {
         const seg = document.createElement('div');
         seg.className = 'segment';
-        const label = mode === 'video' ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}` : mode === 'short' ? `<span>${SHORT_LABEL}</span>` : `<span>${IMAGE_LABELS[i]}</span>`;
+        const label = mode === 'video' ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}` : mode === 'short' ? `<span>${SHORT_LABEL}</span>` : `<span>Prompt</span>`;
         const reorderBtns = mode === 'video' ? `
           <div class="segment-reorder">
             <button data-move="-1" data-idx="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>▲</button>
@@ -994,7 +1019,7 @@
           modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
           descriptionEl.value = entry.description;
           characterEl.value = entry.character || '';
-          descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
+          descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : mode === 'flux' ? 'Describe the edit you want to make…' : 'Describe the image edit you want to make…';
           lastPrompts = entry.prompts;
           lastBody = null; lastEndpoint = null;
           renderSegments(entry.prompts, false);
