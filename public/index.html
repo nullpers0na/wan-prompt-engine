@@ -939,6 +939,7 @@
         splitterNote.style.display = 'none';
         showError(null);
         lastPrompts = [];
+        sessionPrompts = [];
         examplesExpanded = false;
         renderExamples();
         if (describedCharacter && suggestionsOverlay.classList.contains('visible')) fetchSuggestions(describedCharacter);
@@ -1102,7 +1103,10 @@
           suggestionsChips.appendChild(chip);
         });
       } catch (_) {
-        hideSuggestions();
+        // Don't close the popup — quip and name input are still useful
+        const continueChip = suggestionsChips.querySelector('.continue-chip');
+        suggestionsChips.innerHTML = '';
+        if (continueChip) suggestionsChips.appendChild(continueChip);
       }
     }
 
@@ -1241,6 +1245,7 @@
         if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
         lastPrompts = data.prompts;
         renderSegments(data.prompts);
+        fetchNextSteps(descriptionEl.value.trim(), mode, characterName || null);
       } catch (err) {
         clearTimeout(fetchTimeout);
         showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
