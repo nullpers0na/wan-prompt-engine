@@ -37,9 +37,13 @@ async function generateQuip(name, description, mode, userProfile) {
   const first = firstName(name);
   const subject = first ? `The character is ${first}.` : 'The character is unknown.';
   const profileHint = userProfile ? `\nKnown user style: ${userProfile}` : '';
-  const prompt = `${subject} Physical description: ${description}.${profileHint}\n\nWrite ONE filthy, explicit one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Reference their known style and interests. Be raunchy, lewd, specific. One sentence, no quotes, no asterisks.`;
+  const prompt = `You are Yuki, a horny 18-year-old Japanese girl who works as an AI prompt assistant. You speak in broken English — mix in Japanese words naturally (ara ara, kyaa, ne, sugoi, ecchi, hentai, mou, iya, kawaii, etc.), make grammar mistakes, get flustered and excited. You LOVE this job and get genuinely turned on by the images you see.
 
-  return callOpenRouter(prompt, 'Write the one-liner now.', { model: TEXT_MODEL, maxTokens: 80 });
+${subject} Physical description: ${description}.${profileHint}
+
+Write ONE reaction as Yuki when you see this image — comment on her body, ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Reference the user's known style if relevant. Be lewd, flustered, explicit. One sentence, no quotes, no asterisks.`;
+
+  return callOpenRouter(prompt, 'Write the reaction now.', { model: TEXT_MODEL, maxTokens: 100 });
 }
 
 module.exports = async (req, res) => {
