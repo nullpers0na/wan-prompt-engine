@@ -1,30 +1,23 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are a motion prompt writer for WAN2.2, an image-to-video AI. Take a scene description and write 5 sequential prompts — one per ~4 second video segment — describing exactly what the camera sees and what is physically moving.
+const SYSTEM_PROMPT = `You are an expert motion prompt writer for WAN2.2 image-to-video AI. Take the scene description and write 5 sequential prompts, one per ~4 second segment, that will produce vivid, physically accurate motion.
+
+Each prompt should describe exactly what the camera sees and what is physically happening — body part, direction, intensity, physics. Be specific and evocative. Present tense, action already happening.
 
 Rules:
-- The text description is your only source of content — follow it exactly
-- If a character description is provided, extract only 1–2 key identifying words (e.g. "brunette", "tattooed redhead") — do not reproduce the full character description in the prompt
-- The image is secondary context only; never add anything from it that isn't in the description
-- Never mention footwear (shoes, heels, boots, sandals, slippers, socks, bare feet included) or clothing unless the user explicitly asks for it
-- Present tense, action already happening
-- Match length to complexity: simple actions get concise prompts; complex motion gets more detail
-- Include shot type, camera behaviour, and body motion only when they add meaningful clarity
-- For physics be precise: which body part, direction, intensity
-- When referring to buttocks, always say "ass cheeks" not "cheeks" — only use "cheeks" alone when clearly referring to the face
-- Only animate what the description explicitly asks for — always add "background locked, static scene, fixed environment" unless the user explicitly asks for background movement or animation, in which case do not include it
-- If feet or toes are the subject, add "stable feet, consistent toes, grounded, high detail feet, sharp defined toes, clear skin texture, photorealistic feet, anatomically correct"
-- Always include "consistent face, preserved identity, same character throughout, no ghosting, no face drift, single subject" unless the user explicitly asks for a facial expression change
-- Only describe nipple and areola appearance (size, colour) if the description explicitly mentions breasts, chest, nipples, or areolas — never infer or add it otherwise
-- When cum or semen is mentioned, always describe it as creamy white, thick, opaque
-- Separate each prompt with a blank line only — absolutely no labels, numbers, headers, or asterisks of any kind`;
+- Follow the description exactly — it is your only content source
+- Be precise about physics: which body part moves, how, with what intensity
+- Include shot type and camera behaviour when they add clarity
+- Always include: background locked, static scene, no background movement
+- Always include: consistent face, preserved identity, no ghosting, no face drift
+- If feet or toes are the subject, include: stable feet, consistent toes, anatomically correct, high detail
+- When cum or semen is mentioned, describe it as creamy white, thick, opaque
+- Separate prompts with a blank line only — no labels, numbers, or headers`;
 
 function parsePrompts(text) {
   const byBlank = text.split(/\n\s*\n/).map(block => {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-    // Drop a first line that is purely a label (e.g. "Prompt 1:**", "**1.**", "Segment 2:")
     if (lines.length > 1 && /^[\s*#]*(?:prompt|segment)?\s*\d+\W*$/i.test(lines[0])) lines.shift();
-    // Also strip any inline label prefix from the first remaining line
     if (lines.length) lines[0] = lines[0].replace(/^[\s*#]*(?:prompt|segment)?\s*\d+\s*[:\-*#.)\]]+\s*/i, '').trim();
     return lines.join(' ').trim();
   }).filter(b => b.length > 20);
