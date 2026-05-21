@@ -904,15 +904,13 @@
       uploadArea.classList.add('analysing');
       try {
         const knownCharacters = loadMemoryBank();
-        const [describeRes, memoryData] = await Promise.all([
-          fetch('/api/describe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image, mode, knownCharacters }),
-            signal,
-          }),
-          fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null),
-        ]);
+        const memoryData = await fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null);
+        const describeRes = await fetch('/api/describe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image, mode, knownCharacters, preferences: memoryData?.preferences || {} }),
+          signal,
+        });
         if (!describeRes.ok) { const err = await describeRes.json().catch(() => ({})); throw new Error(err.error || `describe failed (${describeRes.status})`); }
         const data = await describeRes.json();
         if (data.description) {

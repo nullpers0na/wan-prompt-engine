@@ -27,7 +27,7 @@ function buildDescriptionMatchPrompt(newDescription, knownCharacters) {
   return `You are a character matching assistant. Compare this physical description against a list of known characters and find the best match.\n\nNew description: ${newDescription}\n\nKnown characters:\n${list}\n\nFocus on consistent attributes: body type, breast size, ass size, skin tone, hair colour/length. Ignore minor differences from lighting, angle, or rendering style.\nOutput ONLY the exact character name from the list above if it matches with reasonable confidence, or the single word: unknown`;
 }
 
-async function generateQuip(name, description, mode) {
+async function generateQuip(name, description, mode, topPreferences) {
   const modeGuess = {
     video: 'guess what motion or scene they are going to prompt.',
     short: 'guess what punchy single-motion clip they will write.',
@@ -36,7 +36,10 @@ async function generateQuip(name, description, mode) {
 
   const first = firstName(name);
   const subject = first ? `The character is ${first}.` : 'The character is unknown.';
-  const prompt = `${subject} Physical description: ${description}.\n\nWrite ONE filthy, explicit one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Be raunchy, lewd, and specific about her body. Reference a sexual act, body part, or what you'd do to her. One sentence, no quotes, no asterisks.`;
+  const prefHint = topPreferences.length
+    ? `This user's most requested content: ${topPreferences.join(', ')}.`
+    : '';
+  const prompt = `${subject} Physical description: ${description}. ${prefHint}\n\nWrite ONE filthy, explicit one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Reference their usual interests if relevant. Be raunchy, lewd, specific. One sentence, no quotes, no asterisks.`;
 
   return callOpenRouter(prompt, 'Write the one-liner now.', { model: TEXT_MODEL, maxTokens: 80 });
 }
@@ -45,7 +48,11 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { image, mode = 'video', knownCharacters = [] } = req.body || {};
+    const { image, mode = 'video', knownCharacters = [], preferences = {} } = req.body || {};
+    const topPreferences = Object.entries(preferences)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k]) => k);
     if (!image?.data || !image?.mediaType) return res.status(400).json({ error: 'Image is required' });
 
     const imgContent = [
@@ -75,7 +82,7 @@ module.exports = async (req, res) => {
 
     // Always generate quip separately — vision model drops it when overloaded
     const quip = description
-      ? await generateQuip(name, description, mode).catch(() => '')
+      ? await generateQuip(name, description, mode, topPreferences).catch(() => '')
       : '';
 
     res.json({ name, description, quip });
