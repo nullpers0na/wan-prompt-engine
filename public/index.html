@@ -742,6 +742,7 @@
     let uploadedImage = null;
     let historyOpen = false;
     let describedCharacter = '';
+    let characterName = '';   // AI-identified or user-entered name, used as memory key
     let lastDescription = ''; // physical description of last analysed image
     let sessionPrompts = []; // session continuity tracking
 
@@ -984,6 +985,7 @@
         .replace(/,\s*,/g, ',')         // double commas → single
         .trim().toLowerCase();
       saveToMemoryBank(name, lastDescription);
+      characterName = name;
       characterNameSaved.classList.add('visible');
       saveCharacterBtn.disabled = true;
       fetchSuggestions(`${name}, ${lastDescription}`);
@@ -1035,6 +1037,7 @@
         const data = await describeRes.json();
         if (data.description) {
           describedCharacter = data.description;
+          characterName = data.name || '';
           lastDescription = data.description;
           if (data.quip) {
             suggestionsQuip.textContent = data.quip;
@@ -1084,7 +1087,7 @@
         const res = await fetch('/api/suggest', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description: characterDescription, mode, character: describedCharacter || null, sessionPrompts: sessionPrompts.slice(-5) }),
+          body: JSON.stringify({ description: characterDescription, mode, character: characterName || null, sessionPrompts: sessionPrompts.slice(-5) }),
         });
         if (!res.ok) throw new Error('suggest failed');
         const data = await res.json();
@@ -1130,7 +1133,7 @@
     }
 
     function clearUpload() {
-      uploadedImage = null; describedCharacter = ''; try { fileInput.value = ''; } catch (_) {}
+      uploadedImage = null; describedCharacter = ''; characterName = ''; try { fileInput.value = ''; } catch (_) {}
       previewImg.src = ''; uploadPreview.classList.remove('visible'); uploadArea.classList.remove('has-preview'); uploadHint.style.display = '';
       hideSuggestions();
     }
@@ -1182,10 +1185,10 @@
         fetch('/api/memory', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: 'prompt_generated', data: { prompt: description, mode, character: describedCharacter || null } }),
+          body: JSON.stringify({ event: 'prompt_generated', data: { prompt: description, mode, character: characterName || null } }),
         }).catch(() => {});
         // Fetch "What next?" chips
-        fetchNextSteps(description, mode, describedCharacter || null);
+        fetchNextSteps(description, mode, characterName || null);
       } catch (err) {
         clearTimeout(fetchTimeout);
         showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
@@ -1209,7 +1212,7 @@
         copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
         setTimeout(() => { copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy'; copyAllBtn.classList.remove('copied'); }, 1800);
         if (lastPrompts.length > 0) {
-          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: describedCharacter || null } }) }).catch(() => {});
+          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: characterName || null } }) }).catch(() => {});
         }
       });
     });
@@ -1225,7 +1228,7 @@
     regenBtn.addEventListener('click', async () => {
       if (!lastBody || !lastEndpoint) return;
       // Fire rejected signal before regenerating
-      fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_rejected', data: { prompt: descriptionEl.value.trim(), mode, character: describedCharacter || null } }) }).catch(() => {});
+      fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_rejected', data: { prompt: descriptionEl.value.trim(), mode, character: characterName || null } }) }).catch(() => {});
       setLoading(true);
       showError(null);
       const controller = new AbortController();
@@ -1262,7 +1265,7 @@
         btn.classList.add('flash');
         setTimeout(() => btn.classList.remove('flash'), 1400);
         if (lastPrompts.length > 0) {
-          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: describedCharacter || null } }) }).catch(() => {});
+          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: characterName || null } }) }).catch(() => {});
         }
       });
     });
