@@ -1,15 +1,14 @@
-const { put, list } = require('@vercel/blob');
+const { put, get } = require('@vercel/blob');
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 
 const BLOB_KEY = 'wan-memory.json';
 
 async function readMemory() {
   try {
-    const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
-    if (!blobs.length) return createDefaultMemory();
-    const res = await fetch(blobs[0].downloadUrl);
-    if (!res.ok) return createDefaultMemory();
-    return await res.json();
+    const blob = await get(BLOB_KEY, { access: 'private' });
+    if (!blob || !blob.stream) return createDefaultMemory();
+    const text = await new Response(blob.stream).text();
+    return JSON.parse(text);
   } catch {
     return createDefaultMemory();
   }
