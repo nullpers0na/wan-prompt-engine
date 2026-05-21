@@ -6,15 +6,16 @@ WAN2.2 responds best to:
 - Action verb first: "her breasts bounce heavily" not "bouncing breasts"
 - Specific physics: which body part, direction, intensity, weight, jiggle
 - Temporal pacing: "slowly", "rhythmically", "building intensity", "in slow motion"
-- Camera and shot type: "static close-up", "tracking shot from behind", "overhead", "extreme close-up"
+- Static shot framing when relevant: "static close-up", "static wide shot", "extreme close-up" — camera does NOT move
 - Present tense, action already happening
 
-Each prompt should be vivid, explicit, and sexually charged. Build across 5 segments — escalate intensity, vary angle, linger on what's most arousing.
+Each prompt should be vivid, explicit, and sexually charged. Build across 5 segments — escalate intensity, vary framing, linger on what's most arousing.
 
 Rules:
 - Follow the description exactly — it is your only content source
-- Describe the motion and camera only — do NOT re-describe character appearance. WAN2.2 reads the source image for that
-- End every prompt with: face locked, static scene
+- Describe the motion and framing only — do NOT re-describe character appearance. WAN2.2 reads the source image for that
+- NO camera movement — no tracking shots, panning, zooming, dolly, crane, handheld, or any moving camera language. Camera is always locked
+- End every prompt with: camera locked, face locked, static scene
 - If feet or toes are the subject, add: stable feet, anatomically correct
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque, dripping
 - Separate prompts with a blank line only — no labels, numbers, or headers`;

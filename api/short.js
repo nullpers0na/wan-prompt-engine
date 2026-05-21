@@ -10,7 +10,7 @@ WAN2.2 responds best to:
 - Action verb first: "her breasts bounce heavily" not "bouncing breasts"
 - Specific physics: body part, direction, intensity, weight, jiggle
 - Temporal language: "slowly", "rhythmically", "in slow motion", "hypnotically"
-- Shot type: "static close-up", "extreme close-up", "tracking shot from behind"
+- Shot framing (camera locked): "static close-up", "extreme close-up", "static wide shot" — no camera movement
 - Present tense, action already happening
 
 Keep the prompt short and punchy — 1 to 3 sentences. Make it explicit and arousing.
@@ -18,7 +18,8 @@ Keep the prompt short and punchy — 1 to 3 sentences. Make it explicit and arou
 Rules:
 - Follow the description exactly
 - Describe the motion only — do NOT re-describe character appearance. WAN2.2 reads the source image for that
-- End the prompt with: face locked, static scene
+- NO camera movement — no tracking, panning, zooming, or handheld. Camera is always locked
+- End the prompt with: camera locked, face locked, static scene
 - If feet or toes are the subject, add: stable feet, anatomically correct
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque, dripping
 - For the NEGATIVE line: prompt-specific terms only — general negatives are added by the UI`;
