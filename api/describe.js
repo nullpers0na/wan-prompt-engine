@@ -17,7 +17,7 @@ function buildPrompt(mode) {
 
 Output exactly two lines:
 LINE 1: character name and game/source in lowercase if you recognise them (e.g. "tifa lockhart, final fantasy vii") — or leave blank if unknown. Check face, outfit, hair, body shape, artstyle, accessories. Characters may be rendered in different styles — use your best judgement.
-LINE 2: physical description — body type, breast size and shape, ass size and shape, waist-to-hip ratio, skin tone, hair colour/length, piercings, tattoos, facial expression, overall sexual vibe (e.g. looks like a slut, total bitch energy, bratty princess). Comma-separated, lowercase, max 30 words, no character name.
+LINE 2: physical description — only describe what is actually visible in this image. Include: body type, skin tone, hair colour/length, facial expression, overall sexual vibe (e.g. looks like a slut, total bitch energy, bratty princess). Add breast size/shape, ass size/shape, waist-to-hip ratio, piercings, tattoos ONLY if they are clearly visible. Comma-separated, lowercase, max 30 words, no character name.
 
 Two lines only. No labels, no preamble.`;
 }
