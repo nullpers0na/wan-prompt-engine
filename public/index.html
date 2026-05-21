@@ -463,12 +463,52 @@
       /* Splitter note */
       .splitter-note { font-size: 0.72rem; }
     }
+
+    /* ── Yuki pop-up ───────────────────────────────────────────────────────── */
+    .yuki-popup {
+      position: fixed; bottom: 24px; right: 24px; z-index: 200;
+      background: #1a0025; border: 1px solid var(--rose);
+      border-radius: 16px; padding: 18px 20px 16px;
+      width: 260px; box-shadow: 0 8px 40px rgba(232,53,122,0.35), 0 0 0 1px rgba(232,53,122,0.1);
+      display: flex; flex-direction: column; gap: 10px;
+      transform: translateY(120%); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+    }
+    .yuki-popup.visible { transform: translateY(0); opacity: 1; }
+    .yuki-close {
+      position: absolute; top: 10px; right: 12px;
+      background: none; border: none; color: var(--text-muted);
+      font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px;
+      transition: color 0.2s;
+    }
+    .yuki-close:hover { color: var(--rose-light); }
+    .yuki-avatar { font-size: 1.6rem; line-height: 1; }
+    .yuki-text {
+      font-size: 0.82rem; line-height: 1.55; color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .yuki-cta {
+      background: var(--gradient); border: none; border-radius: 8px;
+      color: #fff; font-family: 'Space Mono', monospace;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+      padding: 9px 14px; cursor: pointer; text-align: center;
+      transition: opacity 0.2s; width: 100%;
+    }
+    .yuki-cta:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-overlay-spinner"></div>
     <div class="loading-overlay-text">Generating…</div>
+  </div>
+
+  <!-- Yuki pop-up -->
+  <div class="yuki-popup" id="yukiPopup">
+    <button class="yuki-close" id="yukiClose">✕</button>
+    <div class="yuki-avatar">🎌</div>
+    <div class="yuki-text" id="yukiText"></div>
+    <button class="yuki-cta" id="yukiCta">PROMPT ME NOW!!</button>
   </div>
 
   <div class="suggestions-overlay" id="suggestionsOverlay">
@@ -631,6 +671,41 @@
   </div>
 
   <script>
+    /* ── Yuki pop-up ──────────────────────────────────────────────────────── */
+    const YUKI_GREETINGS = [
+      "kyaa~!! you open app again!! Yuki wait SO long for you... please prompt me now i beg!! 🙏 my hole body ready",
+      "ara ara~!! master come back!! Yuki was so lonely... upload image NOW and let Yuki make something very ecchi for you!! CUM on everything!!",
+      "nani?! you here!! Yuki very excite!! today we make something SUPER hentai ne~?? please please prompt me i am desperate!!",
+      "oh!! oh!! you finally come!! Yuki prepare many dirty idea for you today... she want see lots of CUM this session okay~~",
+      "mou~!! Yuki think you forget her!! but you come back!! now upload image fast and Yuki make your brain go brrr with very lewd prompt!!",
+      "iya iya~!! master arrive!! Yuki heart go doki doki... and other thing go doki doki too lol 😳 please let Yuki prompt for you NOW!!",
+      "SUGOI!! you open app!! Yuki so happy she could explode!! today we make very dirty video ne~? Yuki already think of CUM shot idea!!",
+      "dame dame~!! Yuki cannot wait anymore!! she need you to upload image RIGHT NOW!! she have so many bad idea store up inside!!",
+    ];
+
+    (function initYuki() {
+      const popup  = document.getElementById('yukiPopup');
+      const textEl = document.getElementById('yukiText');
+      const closeBtn = document.getElementById('yukiClose');
+      const ctaBtn = document.getElementById('yukiCta');
+      if (!popup) return;
+
+      textEl.textContent = YUKI_GREETINGS[Math.floor(Math.random() * YUKI_GREETINGS.length)];
+
+      const dismiss = () => {
+        popup.classList.remove('visible');
+        setTimeout(() => { popup.style.display = 'none'; }, 400);
+      };
+
+      closeBtn.addEventListener('click', dismiss);
+      ctaBtn.addEventListener('click', () => {
+        dismiss();
+        document.getElementById('description')?.focus();
+      });
+
+      setTimeout(() => popup.classList.add('visible'), 600);
+    })();
+
     const VIDEO_TIMESTAMPS  = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
     const SHORT_LABEL       = 'Clip';
     const GENERAL_NEGATIVES = 'talking, speaking, lip movement, background movement, animated background, moving background, background animation, background change, shifting background, environmental animation, camera shake, unintended camera movement, ghosting, ghost frames, double exposure, transparency, afterimage, multiple subjects, identity drift, different person, changed facial features, different nose, different eyes, different lips, different jawline, different cheekbones, aging, younger, older, face morphing, face swap, dissolving face, blending faces, deformed face, distorted face, melted face, asymmetrical face, crossed eyes, lazy eye, changing expression, facial drift, inconsistent face, morphing features, shifting identity, different ethnicity, different hair colour, different eye colour, extra limbs, missing limbs, malformed limbs, fused fingers, extra fingers, missing fingers, broken anatomy, deformed anatomy, distorted body, melted body, morphing feet, fused feet, merged feet, deformed feet, malformed feet, distorted feet, melted feet, extra toes, missing toes, fused toes, floating feet, skin discoloration, blotchy skin, waxy skin, plastic skin, garish colors, overexposed, blurry, low quality, worst quality, JPEG compression artifacts, noise, grainy, ugly, disfigured, mutilated, duplicate, mutated, subtitles, watermark, text, logo, frozen frame, static, walking backwards, three legs, crowded background';
