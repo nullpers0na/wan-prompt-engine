@@ -745,6 +745,7 @@
     let characterName = '';   // AI-identified or user-entered name, used as memory key
     let lastDescription = ''; // physical description of last analysed image
     let sessionPrompts = []; // session continuity tracking
+    let describeAbortController = null; // cancels in-flight describe when new image uploaded
 
     const CHARACTERS_KEY = 'wan_characters';
     function loadMemoryBank() { try { return JSON.parse(localStorage.getItem(CHARACTERS_KEY) || '[]'); } catch { return []; } }
@@ -988,7 +989,6 @@
       saveToMemoryBank(name, lastDescription);
       characterName = name;
       characterNameSaved.classList.add('visible');
-      saveCharacterBtn.disabled = true;
       fetchSuggestions(`${name}, ${lastDescription}`);
       fetch('/api/memory', {
         method: 'POST',
@@ -1023,6 +1023,11 @@
     }
 
     async function autoDescribeCharacter(image) {
+      // Abort any previous in-flight describe and clear stale popup
+      if (describeAbortController) describeAbortController.abort();
+      describeAbortController = new AbortController();
+      const signal = describeAbortController.signal;
+      hideSuggestions();
       uploadArea.classList.add('analysing');
       try {
         const knownCharacters = loadMemoryBank();
@@ -1031,6 +1036,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image, mode, knownCharacters }),
+            signal,
           }),
           fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
@@ -1046,7 +1052,6 @@
           }
           // Always show name prompt — pre-fill if AI got a name, allow correction
           characterNameInput.value = data.name || '';
-          saveCharacterBtn.disabled = false;
           characterNameSaved.classList.remove('visible');
           suggestionsNamePrompt.querySelector('.suggestions-name-label').textContent = data.name
             ? `Not right? Correct it:`
@@ -1070,7 +1075,7 @@
           fetchSuggestions(suggestContext);
         }
       } catch (err) {
-        console.error('describe error:', err.message);
+        if (err.name !== 'AbortError') console.error('describe error:', err.message);
       } finally {
         uploadArea.classList.remove('analysing');
       }
