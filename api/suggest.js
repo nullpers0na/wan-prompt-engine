@@ -6,7 +6,7 @@ async function fetchMemory() {
   try {
     const { blobs } = await list({ prefix: 'wan-memory.json', limit: 1 });
     if (!blobs.length) return null;
-    const res = await fetch(blobs[0].url);
+    const res = await fetch(blobs[0].downloadUrl);
     return res.ok ? await res.json() : null;
   } catch { return null; }
 }

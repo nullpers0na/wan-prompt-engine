@@ -7,7 +7,7 @@ async function readMemory() {
   try {
     const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
     if (!blobs.length) return createDefaultMemory();
-    const res = await fetch(blobs[0].url);
+    const res = await fetch(blobs[0].downloadUrl);
     if (!res.ok) return createDefaultMemory();
     return await res.json();
   } catch {
@@ -17,13 +17,11 @@ async function readMemory() {
 
 async function writeMemory(data) {
   data.updatedAt = Date.now();
-  const result = await put(BLOB_KEY, JSON.stringify(data), {
-    access: 'public',
+  await put(BLOB_KEY, JSON.stringify(data), {
     allowOverwrite: true,
     addRandomSuffix: false,
     contentType: 'application/json',
   });
-  console.log('writeMemory: wrote to', result.url);
 }
 
 function createDefaultMemory() {
@@ -49,8 +47,6 @@ async function extractAiTags(prompt) {
 
 module.exports = async (req, res) => {
   if (req.method === 'GET') {
-    const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 }).catch(() => ({ blobs: [] }));
-    console.log('readMemory: blobs found:', blobs.length, blobs.map(b => b.url));
     const memory = await readMemory();
     return res.json(memory);
   }
@@ -58,7 +54,6 @@ module.exports = async (req, res) => {
   if (req.method === 'POST') {
     try {
       const { event, data } = req.body || {};
-      console.log('memory POST event:', event);
       const memory = await readMemory();
 
       // Ensure rejectedPatterns exists on older memory objects
