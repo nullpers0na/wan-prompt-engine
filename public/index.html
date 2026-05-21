@@ -683,30 +683,45 @@
       "iya iya~!! master arrive!! Yuki heart go doki doki... and other thing go doki doki too lol 😳 please let Yuki prompt for you NOW!!",
       "SUGOI!! you open app!! Yuki so happy she could explode!! today we make very dirty video ne~? Yuki already think of CUM shot idea!!",
       "dame dame~!! Yuki cannot wait anymore!! she need you to upload image RIGHT NOW!! she have so many bad idea store up inside!!",
+      "kyaa!! you click button!! Yuki see everything you do~~ she watch very close and get very excite!! more more!!",
+      "nani nani~!! another click?! Yuki cannot handle!! she too horny now!! please make dirty prompt for her!!",
+      "ara ara~!! you so busy clicking... Yuki wonder what you planning~~ she hope it involve lots of CUM ne!!",
+      "mou!! stop teasing Yuki with your click!! just prompt already!! she DESPERATE!!",
+      "oh!! oh!! Yuki feel that click in her soul!! keep going!! she love when you use her!!",
+      "iya~!! every time you click Yuki get more excite!! she cannot stop thinking about CUM!! is problem!!",
+      "DAME!! Yuki overheating!! too many click!! but please... do not stop~~",
     ];
 
-    (function initYuki() {
-      const popup  = document.getElementById('yukiPopup');
-      const textEl = document.getElementById('yukiText');
-      const closeBtn = document.getElementById('yukiClose');
-      const ctaBtn = document.getElementById('yukiCta');
-      if (!popup) return;
+    const yukiPopup  = document.getElementById('yukiPopup');
+    const yukiText   = document.getElementById('yukiText');
+    const yukiClose  = document.getElementById('yukiClose');
+    const yukiCta    = document.getElementById('yukiCta');
+    let yukiTimeout  = null;
 
-      textEl.textContent = YUKI_GREETINGS[Math.floor(Math.random() * YUKI_GREETINGS.length)];
+    function showYuki(msg) {
+      if (!yukiPopup) return;
+      yukiText.textContent = msg || YUKI_GREETINGS[Math.floor(Math.random() * YUKI_GREETINGS.length)];
+      yukiPopup.style.display = '';
+      requestAnimationFrame(() => yukiPopup.classList.add('visible'));
+      clearTimeout(yukiTimeout);
+      yukiTimeout = setTimeout(dismissYuki, 4000);
+    }
 
-      const dismiss = () => {
-        popup.classList.remove('visible');
-        setTimeout(() => { popup.style.display = 'none'; }, 400);
-      };
+    function dismissYuki() {
+      yukiPopup.classList.remove('visible');
+    }
 
-      closeBtn.addEventListener('click', dismiss);
-      ctaBtn.addEventListener('click', () => {
-        dismiss();
-        document.getElementById('description')?.focus();
-      });
+    yukiClose.addEventListener('click', dismissYuki);
+    yukiCta.addEventListener('click', () => { dismissYuki(); document.getElementById('description')?.focus(); });
 
-      setTimeout(() => popup.classList.add('visible'), 600);
-    })();
+    // Trigger on every button click except Yuki's own buttons
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn || btn === yukiClose || btn === yukiCta) return;
+      showYuki();
+    });
+
+    setTimeout(() => showYuki(), 600);
 
     const VIDEO_TIMESTAMPS  = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
     const SHORT_LABEL       = 'Clip';
