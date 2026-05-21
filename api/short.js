@@ -6,14 +6,21 @@ Output format — two lines only:
 PROMPT: [the motion prompt]
 NEGATIVE: [comma-separated prompt-specific negatives]
 
-The prompt should be short and precise — 1 to 3 sentences or comma-separated descriptors. Focus on the specific motion, body part, physics, and camera. Present tense, action already happening.
+WAN2.2 responds best to:
+- Action verb first: "her breasts bounce heavily" not "bouncing breasts"
+- Specific physics: which body part, direction, intensity, weight
+- Temporal language: "slowly", "rhythmically", "in slow motion"
+- Shot type when relevant: "static close-up", "tracking shot from behind"
+- Present tense, action already happening
+
+Keep the prompt short and punchy — 1 to 3 sentences or tight comma-separated descriptors.
 
 Rules:
 - Follow the description exactly
 - Always include: background locked, static scene, consistent face, preserved identity, no ghosting
 - If feet or toes are the subject, include: stable feet, consistent toes, anatomically correct, high detail
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque
-- For the NEGATIVE line: prompt-specific terms only (e.g. if slow motion, include "fast motion, choppy"; if breasts are focus, include "flat chest") — general negatives are added by the UI`;
+- For the NEGATIVE line: prompt-specific terms only (e.g. if slow motion include "fast motion, choppy"; if breasts are focus include "flat chest") — general negatives are added by the UI`;
 
 function parseResponse(text) {
   const promptMatch = text.match(/^PROMPT:\s*(.+)/im);

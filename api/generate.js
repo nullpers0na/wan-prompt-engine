@@ -1,13 +1,18 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are an expert motion prompt writer for WAN2.2 image-to-video AI. Take the scene description and write 5 sequential prompts, one per ~4 second segment, that will produce vivid, physically accurate motion.
+const SYSTEM_PROMPT = `You are an expert motion prompt writer for WAN2.2 image-to-video AI. Take the scene description and write 5 sequential prompts, one per ~4 second segment.
 
-Each prompt should describe exactly what the camera sees and what is physically happening — body part, direction, intensity, physics. Be specific and evocative. Present tense, action already happening.
+WAN2.2 responds best to:
+- Action verb first: "her breasts bounce heavily" not "bouncing breasts"
+- Specific physics: which body part, direction, intensity, weight
+- Temporal pacing: "slowly", "rhythmically", "building intensity", "in slow motion"
+- Camera and shot type when they add clarity: "static close-up", "tracking shot from behind", "overhead"
+- Present tense, action already happening
+
+Each prompt should paint a precise picture of what the camera sees and what is physically moving. Be vivid and specific. Build naturally across the 5 segments — vary pacing, angle, or intensity to create progression.
 
 Rules:
 - Follow the description exactly — it is your only content source
-- Be precise about physics: which body part moves, how, with what intensity
-- Include shot type and camera behaviour when they add clarity
 - Always include: background locked, static scene, no background movement
 - Always include: consistent face, preserved identity, no ghosting, no face drift
 - If feet or toes are the subject, include: stable feet, consistent toes, anatomically correct, high detail
