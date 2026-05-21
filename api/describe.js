@@ -47,9 +47,12 @@ module.exports = async (req, res) => {
 
     // Step 1: ID and description in parallel
     const [idResult, descResult] = await Promise.all([
-      callOpenRouter(ID_PROMPT, imgContent, { model: ID_MODEL, maxTokens: 60 }).catch(() => ''),
-      callOpenRouter(DETAIL_PROMPT, imgContent, { model: VISION_MODEL, maxTokens: 80 }).catch(() => ''),
+      callOpenRouter(ID_PROMPT, imgContent, { model: ID_MODEL, maxTokens: 60 }).catch(e => { console.error('Grok ID error:', e.message); return ''; }),
+      callOpenRouter(DETAIL_PROMPT, imgContent, { model: VISION_MODEL, maxTokens: 80 }).catch(e => { console.error('Qwen detail error:', e.message); return ''; }),
     ]);
+
+    console.log('Grok raw:', JSON.stringify(idResult));
+    console.log('Qwen raw:', JSON.stringify(descResult));
 
     const name = idResult.replace(/^[\s\-*>]+/, '').trim();
     const description = descResult.replace(/^[\s\-*>]+/, '').trim().split('\n')[0];
