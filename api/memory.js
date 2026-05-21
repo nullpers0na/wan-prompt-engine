@@ -1,4 +1,4 @@
-const { put, head, del } = require('@vercel/blob');
+const { put, head } = require('@vercel/blob');
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 
 const BLOB_KEY = 'wan-memory.json';
@@ -107,7 +107,7 @@ module.exports = async (req, res) => {
       }
 
       if (event === 'prompt_accepted') {
-        const { prompt, mode, character } = data;
+        const { prompt } = data;
         memory.accepted = (memory.accepted || 0) + 1;
 
         // Increment tags by 0.5 for accepted prompts
