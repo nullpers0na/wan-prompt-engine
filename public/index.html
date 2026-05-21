@@ -210,6 +210,16 @@
     .upload-remove { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; font-weight: 500; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s; }
     .upload-remove:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
 
+    /* ── Suggestions ───────────────────────────────────────────────────────── */
+    .suggestions-box { display: none; flex-direction: column; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .suggestions-box.visible { display: flex; }
+    .suggestions-header { display: flex; align-items: center; justify-content: space-between; }
+    .suggestions-title { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    .suggestions-dismiss { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0; transition: color 0.2s; }
+    .suggestions-dismiss:hover { color: var(--rose-light); }
+    .suggestions-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .suggestions-loading { font-size: 0.78rem; color: var(--text-dim); }
+
     /* ── Actions ───────────────────────────────────────────────────────────── */
     .actions { display: flex; gap: 12px; align-items: center; }
     button { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; border-radius: 10px; padding: 12px 28px; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s; }
@@ -482,6 +492,16 @@
         </div>
       </div>
 
+      <div class="suggestions-box" id="suggestionsBox">
+        <div class="suggestions-header">
+          <span class="suggestions-title">Suggested prompts</span>
+          <button class="suggestions-dismiss" id="suggestionsDismiss">✕</button>
+        </div>
+        <div class="suggestions-chips" id="suggestionsChips">
+          <span class="suggestions-loading">Analysing image…</span>
+        </div>
+      </div>
+
       <div class="actions">
         <button id="generateBtn">Generate Prompts</button>
         <button id="regenBtn" title="Regenerate">↻</button>
@@ -647,6 +667,9 @@
     const refreshBtn     = document.getElementById('refreshBtn');
     const expandBtn      = document.getElementById('expandBtn');
     const clearDescBtn     = document.getElementById('clearDescBtn');
+    const suggestionsBox   = document.getElementById('suggestionsBox');
+    const suggestionsChips = document.getElementById('suggestionsChips');
+    const suggestionsDismiss = document.getElementById('suggestionsDismiss');
     const negativeBox      = document.getElementById('negativeBox');
     const negativeTextarea = document.getElementById('negativeTextarea');
     const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
@@ -731,6 +754,8 @@
         lastPrompts = [];
         examplesExpanded = false;
         renderExamples();
+        const char = characterEl.value.trim();
+        if (char && suggestionsBox.classList.contains('visible')) fetchSuggestions(char);
       });
     });
 
@@ -759,7 +784,8 @@
     fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
     removeBtn.addEventListener('click', () => clearUpload());
     clearDescBtn.addEventListener('click', () => { descriptionEl.value = ''; descriptionEl.focus(); });
-    document.getElementById('clearCharBtn').addEventListener('click', () => { characterEl.value = ''; localStorage.removeItem(CHARACTER_KEY); characterEl.focus(); });
+    suggestionsDismiss.addEventListener('click', () => suggestionsBox.classList.remove('visible'));
+    document.getElementById('clearCharBtn').addEventListener('click', () => { characterEl.value = ''; localStorage.removeItem(CHARACTER_KEY); characterEl.focus(); suggestionsBox.classList.remove('visible'); });
 
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
@@ -798,6 +824,7 @@
         const data = await res.json();
         if (data.description && !characterEl.value.trim()) {
           characterEl.value = data.description;
+          fetchSuggestions(data.description);
         }
       } catch (_) {
         characterEl.placeholder = 'Auto-describe failed — enter manually';
@@ -805,6 +832,29 @@
         return;
       }
       characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…';
+    }
+
+    async function fetchSuggestions(characterDescription) {
+      suggestionsBox.classList.add('visible');
+      suggestionsChips.innerHTML = '<span class="suggestions-loading">Generating suggestions…</span>';
+      try {
+        const res = await fetch('/api/suggest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: characterDescription, mode }),
+        });
+        if (!res.ok) throw new Error('suggest failed');
+        const data = await res.json();
+        suggestionsChips.innerHTML = '';
+        (data.suggestions || []).forEach(text => {
+          const chip = document.createElement('button');
+          chip.className = 'example-chip'; chip.type = 'button'; chip.textContent = text;
+          chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); suggestionsBox.classList.remove('visible'); });
+          suggestionsChips.appendChild(chip);
+        });
+      } catch (_) {
+        suggestionsBox.classList.remove('visible');
+      }
     }
 
     function clearUpload() {
