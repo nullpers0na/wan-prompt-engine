@@ -1,8 +1,5 @@
 const { callOpenRouter, VISION_MODEL } = require('./lib/openrouter');
 
-const ID_MODEL     = 'google/gemini-2.0-flash-exp'; // strong at character recognition
-const DETAIL_MODEL = VISION_MODEL;                   // strong at explicit physical description
-
 const ID_PROMPT = `You are a character identification expert. Look at this image and identify the character if they are from a video game, anime, or 3D rendered source.
 
 Output ONE line only:
@@ -46,8 +43,8 @@ module.exports = async (req, res) => {
     ];
 
     const [idResult, detailResult] = await Promise.all([
-      callOpenRouter(ID_PROMPT, imgContent, { model: ID_MODEL, maxTokens: 40 }).catch(() => ''),
-      callOpenRouter(buildDetailPrompt(mode), imgContent, { model: DETAIL_MODEL, maxTokens: 160 }).catch(() => ''),
+      callOpenRouter(ID_PROMPT, imgContent, { model: VISION_MODEL, maxTokens: 40 }).catch(() => ''),
+      callOpenRouter(buildDetailPrompt(mode), imgContent, { model: VISION_MODEL, maxTokens: 160 }).catch(() => ''),
     ]);
 
     const name = idResult.replace(/^[\s\-*>]+/, '').trim();
