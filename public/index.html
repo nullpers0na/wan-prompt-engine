@@ -482,7 +482,7 @@
       transition: color 0.2s;
     }
     .yuki-close:hover { color: var(--rose-light); }
-    .yuki-avatar { font-size: 1.6rem; line-height: 1; }
+    .yuki-avatar { width: 100%; height: 160px; object-fit: cover; object-position: center top; border-radius: 10px; display: block; }
     .yuki-text {
       font-size: 0.82rem; line-height: 1.55; color: var(--text);
       font-family: 'Space Grotesk', sans-serif;
@@ -506,7 +506,7 @@
   <!-- Yuki pop-up -->
   <div class="yuki-popup" id="yukiPopup">
     <button class="yuki-close" id="yukiClose">✕</button>
-    <div class="yuki-avatar">🎌</div>
+    <img class="yuki-avatar" src="/IMG_7044.jpeg" alt="Yuki" />
     <div class="yuki-text" id="yukiText"></div>
     <button class="yuki-cta" id="yukiCta">PROMPT ME NOW!!</button>
   </div>
