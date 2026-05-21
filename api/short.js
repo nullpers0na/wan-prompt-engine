@@ -17,8 +17,9 @@ Keep the prompt short and punchy — 1 to 3 sentences or tight comma-separated d
 
 Rules:
 - Follow the description exactly
-- Always include: background locked, static scene, consistent face, preserved identity, no ghosting
-- If feet or toes are the subject, include: stable feet, consistent toes, anatomically correct, high detail
+- Describe the motion only — do NOT re-describe character appearance (body, hair, skin, outfit, expression). WAN2.2 reads the source image for that
+- End the prompt with: face locked, static scene
+- If feet or toes are the subject, add: stable feet, anatomically correct
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque
 - For the NEGATIVE line: prompt-specific terms only (e.g. if slow motion include "fast motion, choppy"; if breasts are focus include "flat chest") — general negatives are added by the UI`;
 

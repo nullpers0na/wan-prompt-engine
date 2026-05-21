@@ -59,6 +59,9 @@ module.exports = async (req, res) => {
     let name        = lines[0] || '';
     let description = lines[1] || '';
 
+    // Treat non-name responses as blank
+    if (/^(unknown|unidentified|unnamed|unrecognized|unrecognised|n\/a|none|-)$/i.test(name)) name = '';
+
     // If unrecognised and we have a memory bank, match description text-to-text
     if (!name && description && knownCharacters.length > 0) {
       const matchResult = await callOpenRouter(

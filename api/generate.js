@@ -13,9 +13,9 @@ Each prompt should paint a precise picture of what the camera sees and what is p
 
 Rules:
 - Follow the description exactly — it is your only content source
-- Always include: background locked, static scene, no background movement
-- Always include: consistent face, preserved identity, no ghosting, no face drift
-- If feet or toes are the subject, include: stable feet, consistent toes, anatomically correct, high detail
+- Describe the motion and camera only — do NOT re-describe character appearance (body, hair, skin, outfit, expression). WAN2.2 reads the source image for that
+- End every prompt with: face locked, static scene
+- If feet or toes are the subject, add: stable feet, anatomically correct
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque
 - Separate prompts with a blank line only — no labels, numbers, or headers`;
 
