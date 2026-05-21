@@ -2,12 +2,14 @@ const { callOpenRouter, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter')
 
 const ID_MODEL = 'x-ai/grok-2-vision-1212';
 
-const ID_PROMPT = `You are an expert at identifying fictional characters from video games, anime, and 3D rendered art. Your job is to name the character in this image.
+const ID_PROMPT = `Identify the fictional character in this image. They will be from a video game, anime, or 3D rendered source.
 
-Output ONE line only — the character's name and game/source in lowercase (e.g. "tifa lockhart, final fantasy vii").
-If you genuinely have no idea, leave the line blank. But if you have a strong feeling about who it is, say it — a confident best guess is better than silence.
+Respond with ONLY the character name and game/source in lowercase — nothing else. No sentences, no explanation, no punctuation other than commas.
+Example: tifa lockhart, final fantasy vii
 
-To identify: look at the face, outfit, hair style and colour, body proportions, artstyle, and any distinctive accessories or weapons. Many popular characters are heavily modded or rendered in different styles — focus on facial features and silhouette.`;
+If you have no idea, respond with the single word: unknown
+
+Look at face, outfit, hair, body proportions, artstyle, and accessories. Characters may be heavily modded or in a different art style — focus on face and silhouette. A best guess is better than unknown.`;
 
 const DETAIL_PROMPT = `You are a visual analyst for explicit AI image generation. Look at this image and describe the character's physical attributes.
 
@@ -54,7 +56,9 @@ module.exports = async (req, res) => {
     console.log('Grok raw:', JSON.stringify(idResult));
     console.log('Qwen raw:', JSON.stringify(descResult));
 
-    const name = idResult.replace(/^[\s\-*>]+/, '').trim();
+    // Take first non-empty line, strip any conversational prefix, discard if 'unknown'
+    const rawName = idResult.split('\n').map(l => l.replace(/^[\s\-*>"]+/, '').trim()).filter(Boolean)[0] || '';
+    const name = rawName.toLowerCase() === 'unknown' ? '' : rawName;
     const description = descResult.replace(/^[\s\-*>]+/, '').trim().split('\n')[0];
 
     // Step 2: Generate quip with full context (text only, fast)
