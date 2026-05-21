@@ -815,7 +815,7 @@
         const res = await fetch('/api/describe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image }),
+          body: JSON.stringify({ image, mode }),
         });
         if (!res.ok) throw new Error('describe failed');
         const data = await res.json();
