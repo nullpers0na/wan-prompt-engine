@@ -1187,7 +1187,7 @@
         } else {
           negativeBox.classList.remove('visible');
         }
-        saveHistory({ mode, description, character: describedCharacter, prompts: data.prompts });
+        saveHistory({ mode, description, character: describedCharacter, characterName, prompts: data.prompts });
         renderHistory();
         // Track session continuity
         sessionPrompts.push({ prompt: description, mode });
@@ -1352,12 +1352,13 @@
         const el = document.createElement('div');
         el.className = 'history-item';
         const ago = timeAgo(entry.ts);
-        el.innerHTML = `<div class="history-item-meta"><span class="history-item-mode">${entry.mode}</span><span class="history-item-time">${ago}</span></div><div class="history-item-desc">${escapeHtml((entry.character ? `[${entry.character}] ` : '') + entry.description)}</div>`;
+        el.innerHTML = `<div class="history-item-meta"><span class="history-item-mode">${entry.mode}</span><span class="history-item-time">${ago}</span></div><div class="history-item-desc">${escapeHtml((entry.characterName ? `[${entry.characterName}] ` : '') + entry.description)}</div>`;
         el.addEventListener('click', () => {
           mode = entry.mode;
           modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
           descriptionEl.value = entry.description;
           describedCharacter = entry.character || '';
+          characterName = entry.characterName || '';
           descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
           lastPrompts = entry.prompts;
           lastBody = null; lastEndpoint = null;
