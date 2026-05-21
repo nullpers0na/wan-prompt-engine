@@ -484,7 +484,21 @@
       transition: color 0.2s;
     }
     .yuki-close:hover { color: var(--rose-light); }
-    .yuki-avatar { width: 100%; height: 160px; object-fit: cover; object-position: center top; border-radius: 10px; display: block; }
+    .yuki-img-wrap { position: relative; width: 100%; height: 160px; border-radius: 10px; overflow: hidden; }
+    .yuki-avatar { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+    .yuki-drip { position: absolute; top: -60px; width: 7px; border-radius: 0 0 50% 50%; background: rgba(255,254,220,0.92); animation: yukiDrip linear infinite; transform-origin: top center; }
+    .yuki-drip::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 11px; height: 11px; background: rgba(255,254,220,0.92); border-radius: 50%; }
+    .yuki-drip:nth-child(1) { left: 15%; height: 55px; animation-duration: 2.4s; animation-delay: 0s; }
+    .yuki-drip:nth-child(2) { left: 35%; height: 40px; animation-duration: 3.1s; animation-delay: 0.7s; }
+    .yuki-drip:nth-child(3) { left: 55%; height: 65px; animation-duration: 2.7s; animation-delay: 0.3s; }
+    .yuki-drip:nth-child(4) { left: 72%; height: 45px; animation-duration: 3.4s; animation-delay: 1.1s; }
+    .yuki-drip:nth-child(5) { left: 88%; height: 50px; animation-duration: 2.9s; animation-delay: 0.5s; }
+    @keyframes yukiDrip {
+      0%   { transform: translateY(0) scaleY(0); opacity: 0; }
+      10%  { opacity: 1; transform: translateY(0) scaleY(1); }
+      80%  { opacity: 1; }
+      100% { transform: translateY(230px) scaleY(1); opacity: 0; }
+    }
     .yuki-text {
       font-size: 0.82rem; line-height: 1.55; color: var(--text);
       font-family: 'Space Grotesk', sans-serif;
@@ -508,7 +522,14 @@
   <!-- Yuki pop-up -->
   <div class="yuki-popup" id="yukiPopup">
     <button class="yuki-close" id="yukiClose">✕</button>
-    <img class="yuki-avatar" src="/IMG_7044.jpeg" alt="Yuki" />
+    <div class="yuki-img-wrap">
+      <img class="yuki-avatar" src="/IMG_7044.jpeg" alt="Yuki" />
+      <div class="yuki-drip"></div>
+      <div class="yuki-drip"></div>
+      <div class="yuki-drip"></div>
+      <div class="yuki-drip"></div>
+      <div class="yuki-drip"></div>
+    </div>
     <div class="yuki-text" id="yukiText"></div>
     <button class="yuki-cta" id="yukiCta">PROMPT ME NOW!!</button>
   </div>
