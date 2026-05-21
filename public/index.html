@@ -232,6 +232,16 @@
     .suggestions-quip.visible { display: block; }
     .suggestions-chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .suggestions-loading { font-size: 0.78rem; color: var(--text-dim); }
+    .suggestions-name-prompt { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .suggestions-name-prompt.visible { display: flex; }
+    .suggestions-name-label { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.05em; }
+    .suggestions-name-row { display: flex; gap: 8px; }
+    .suggestions-name-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; }
+    .suggestions-name-input:focus { border-color: rgba(232,53,122,0.5); }
+    .suggestions-name-save { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 500; background: var(--gradient); border: none; border-radius: 8px; padding: 8px 16px; color: #fff; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+    .suggestions-name-save:hover { opacity: 0.85; }
+    .suggestions-name-saved { font-size: 0.78rem; color: var(--rose-light); display: none; }
+    .suggestions-name-saved.visible { display: block; }
 
     /* ── Actions ───────────────────────────────────────────────────────────── */
     .actions { display: flex; gap: 12px; align-items: center; }
@@ -418,6 +428,14 @@
       <div class="suggestions-quip" id="suggestionsQuip"></div>
       <div class="suggestions-chips" id="suggestionsChips">
         <span class="suggestions-loading">Analysing image…</span>
+      </div>
+      <div class="suggestions-name-prompt" id="suggestionsNamePrompt">
+        <span class="suggestions-name-label">Don't recognise her? Name her and she'll be remembered:</span>
+        <div class="suggestions-name-row">
+          <input class="suggestions-name-input" id="characterNameInput" type="text" placeholder="e.g. Tifa Lockhart" autocomplete="off" />
+          <button class="suggestions-name-save" id="saveCharacterBtn" type="button">Save</button>
+        </div>
+        <span class="suggestions-name-saved" id="characterNameSaved">Saved to memory ✓</span>
       </div>
     </div>
   </div>
@@ -655,6 +673,15 @@
     let uploadedImage = null;
     let historyOpen = false;
     let describedCharacter = '';
+    let lastDescription = ''; // physical description of last analysed image
+
+    const CHARACTERS_KEY = 'wan_characters';
+    function loadMemoryBank() { try { return JSON.parse(localStorage.getItem(CHARACTERS_KEY) || '[]'); } catch { return []; } }
+    function saveToMemoryBank(name, description) {
+      const bank = loadMemoryBank().filter(c => c.name.toLowerCase() !== name.toLowerCase());
+      bank.unshift({ name, description });
+      localStorage.setItem(CHARACTERS_KEY, JSON.stringify(bank.slice(0, 50)));
+    }
 
     const generateBtn    = document.getElementById('generateBtn');
     const copyAllBtn     = document.getElementById('copyAllBtn');
@@ -680,10 +707,19 @@
     const suggestionsOverlay = document.getElementById('suggestionsOverlay');
     const suggestionsBox     = document.getElementById('suggestionsBox');
     const suggestionsChips   = document.getElementById('suggestionsChips');
-    const suggestionsQuip    = document.getElementById('suggestionsQuip');
-    const suggestionsDismiss = document.getElementById('suggestionsDismiss');
+    const suggestionsQuip      = document.getElementById('suggestionsQuip');
+    const suggestionsDismiss   = document.getElementById('suggestionsDismiss');
+    const suggestionsNamePrompt = document.getElementById('suggestionsNamePrompt');
+    const characterNameInput   = document.getElementById('characterNameInput');
+    const saveCharacterBtn     = document.getElementById('saveCharacterBtn');
+    const characterNameSaved   = document.getElementById('characterNameSaved');
     function showSuggestions() { suggestionsOverlay.classList.add('visible'); }
-    function hideSuggestions() { suggestionsOverlay.classList.remove('visible'); suggestionsQuip.classList.remove('visible'); suggestionsQuip.textContent = ''; }
+    function hideSuggestions() {
+      suggestionsOverlay.classList.remove('visible');
+      suggestionsQuip.classList.remove('visible'); suggestionsQuip.textContent = '';
+      suggestionsNamePrompt.classList.remove('visible');
+      characterNameInput.value = ''; characterNameSaved.classList.remove('visible');
+    }
     const negativeBox      = document.getElementById('negativeBox');
     const negativeTextarea = document.getElementById('negativeTextarea');
     const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
@@ -800,6 +836,17 @@
     suggestionsDismiss.addEventListener('click', hideSuggestions);
     suggestionsOverlay.addEventListener('click', e => { if (e.target === suggestionsOverlay) hideSuggestions(); });
 
+    saveCharacterBtn.addEventListener('click', () => {
+      const name = characterNameInput.value.trim();
+      if (!name || !lastDescription) return;
+      saveToMemoryBank(name, lastDescription);
+      characterNameSaved.classList.add('visible');
+      saveCharacterBtn.disabled = true;
+      // Refetch suggestions with name context
+      fetchSuggestions(`${name}, ${lastDescription}`);
+    });
+    characterNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveCharacterBtn.click(); });
+
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
       showError(null);
@@ -827,18 +874,27 @@
     async function autoDescribeCharacter(image) {
       uploadArea.classList.add('analysing');
       try {
+        const knownCharacters = loadMemoryBank();
         const res = await fetch('/api/describe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image, mode }),
+          body: JSON.stringify({ image, mode, knownCharacters }),
         });
         if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || `describe failed (${res.status})`); }
         const data = await res.json();
         if (data.description) {
           describedCharacter = data.description;
+          lastDescription = data.description;
           if (data.quip) {
             suggestionsQuip.textContent = data.quip;
             suggestionsQuip.classList.add('visible');
+          }
+          // Show name prompt if unrecognised
+          if (!data.name) {
+            characterNameInput.value = '';
+            saveCharacterBtn.disabled = false;
+            characterNameSaved.classList.remove('visible');
+            suggestionsNamePrompt.classList.add('visible');
           }
           showSuggestions();
           const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
