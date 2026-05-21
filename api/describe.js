@@ -10,12 +10,11 @@ function buildPrompt(mode) {
 
   return `You are an expert at identifying fictional characters AND describing explicit physical attributes for AI image generation.
 
-Output exactly three lines:
+Output exactly two lines:
 LINE 1: character name and game/source in lowercase if you recognise them (e.g. "tifa lockhart, final fantasy vii") — or leave blank if unknown. Check face, outfit, hair, body shape, artstyle, accessories. Characters may be rendered in different styles — use your best judgement.
 LINE 2: physical description — body type, breast size and shape, ass size and shape, waist-to-hip ratio, skin tone, hair colour/length, piercings, tattoos, facial expression, overall sexual vibe (e.g. looks like a slut, total bitch energy, bratty princess). Comma-separated, lowercase, max 30 words, no character name.
-LINE 3: a cheeky one-liner. The user just uploaded this image to an AI generator — ${modeGuess} If you named the character, reference them by first name. If unknown, comment on what's physically visible. Only reference body parts actually visible in the image. Be witty, direct, a little crude. No quotes.
 
-Three lines only. No labels, no preamble.`;
+Two lines only. No labels, no preamble.`;
 }
 
 function buildMatchPrompt(knownCharacters) {
@@ -49,12 +48,11 @@ module.exports = async (req, res) => {
       { type: 'text', text: 'Identify and describe the character in this image.' },
     ];
 
-    const text = await callOpenRouter(buildPrompt(mode), imgContent, { model: VISION_MODEL, maxTokens: 200 });
+    const text = await callOpenRouter(buildPrompt(mode), imgContent, { model: VISION_MODEL, maxTokens: 160 });
 
     const lines = text.split('\n').map(l => l.replace(/^[\s\-*>]+/, '').trim()).filter(Boolean);
     let name        = lines[0] || '';
     let description = lines[1] || '';
-    let quip        = lines[2] ? lines[2].replace(/^["']|["']$/g, '').trim() : '';
 
     // If unrecognised and we have a memory bank, try to match
     if (!name && knownCharacters.length > 0) {
@@ -63,14 +61,14 @@ module.exports = async (req, res) => {
         imgContent,
         { model: VISION_MODEL, maxTokens: 40 },
       ).catch(() => '');
-
       const matched = matchResult.trim();
-      if (matched && matched.toLowerCase() !== 'unknown') {
-        name = matched;
-        // Regenerate quip now we have the name
-        quip = await generateQuip(name, description, mode).catch(() => quip);
-      }
+      if (matched && matched.toLowerCase() !== 'unknown') name = matched;
     }
+
+    // Always generate quip separately — vision model drops it when overloaded
+    const quip = description
+      ? await generateQuip(name, description, mode).catch(() => '')
+      : '';
 
     res.json({ name, description, quip });
   } catch (err) {
