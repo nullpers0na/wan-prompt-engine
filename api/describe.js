@@ -1,5 +1,11 @@
 const { callOpenRouter, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
+// "elena fisher, uncharted" → "Elena"
+function firstName(name) {
+  if (!name) return '';
+  return name.split(/[,\s]/)[0].replace(/^\w/, c => c.toUpperCase());
+}
+
 function buildPrompt(mode) {
   const modeGuess = {
     video: 'guess what motion or scene they are going to prompt — jiggle physics, walking, a body part moving, etc.',
@@ -30,8 +36,9 @@ async function generateQuip(name, description, mode) {
     flux:  'guess what direct Flux edit they will make.',
   }[mode] || 'guess what prompt the user is about to write.';
 
-  const subject = name ? `The character is ${name}.` : 'The character is unknown.';
-  const prompt = `${subject} Physical description: ${description}.\n\nWrite ONE cheeky one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${name ? 'Reference the character by first name.' : 'Comment on what physically stands out.'} Be witty, direct, a little crude. One sentence, no quotes.`;
+  const first = firstName(name);
+  const subject = first ? `The character is ${first}.` : 'The character is unknown.';
+  const prompt = `${subject} Physical description: ${description}.\n\nWrite ONE cheeky one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Be witty, direct, a little crude. One sentence, no quotes.`;
 
   return callOpenRouter(prompt, 'Write the one-liner now.', { model: TEXT_MODEL, maxTokens: 80 });
 }

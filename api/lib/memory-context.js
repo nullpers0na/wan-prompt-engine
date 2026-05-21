@@ -1,3 +1,9 @@
+// "elena fisher, uncharted" → "Elena"
+function firstName(name) {
+  if (!name) return '';
+  return name.split(/[,\s]/)[0].replace(/^\w/, c => c.toUpperCase());
+}
+
 // Builds a concise natural-language summary of the user's memory bank
 // to inject into AI system prompts
 function buildMemoryContext(memory, character) {
@@ -31,7 +37,7 @@ function buildMemoryContext(memory, character) {
       .slice(0, 5)
       .map(([k]) => k);
     if (charPrefs.length) {
-      lines.push(`For ${character} specifically, they focus on: ${charPrefs.join(', ')}.`);
+      lines.push(`For ${firstName(character)} specifically, they focus on: ${charPrefs.join(', ')}.`);
     }
   }
 
