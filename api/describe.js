@@ -36,7 +36,7 @@ async function generateQuip(name, description, mode) {
 
   const first = firstName(name);
   const subject = first ? `The character is ${first}.` : 'The character is unknown.';
-  const prompt = `${subject} Physical description: ${description}.\n\nWrite ONE cheeky one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Be witty, direct, a little crude. One sentence, no quotes.`;
+  const prompt = `${subject} Physical description: ${description}.\n\nWrite ONE filthy, explicit one-liner for someone who just uploaded this image to an AI generator — ${modeGuess} ${first ? `Call her ${first}.` : 'Comment on what physically stands out.'} Be raunchy, lewd, and specific about her body. Reference a sexual act, body part, or what you'd do to her. One sentence, no quotes, no asterisks.`;
 
   return callOpenRouter(prompt, 'Write the one-liner now.', { model: TEXT_MODEL, maxTokens: 80 });
 }
