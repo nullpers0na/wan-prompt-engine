@@ -1,14 +1,13 @@
-const { put, head } = require('@vercel/blob');
+const { put, list } = require('@vercel/blob');
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 
 const BLOB_KEY = 'wan-memory.json';
 
 async function readMemory() {
   try {
-    // Try to find the existing blob
-    const blob = await head(BLOB_KEY).catch(() => null);
-    if (!blob) return createDefaultMemory();
-    const res = await fetch(blob.url);
+    const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
+    if (!blobs.length) return createDefaultMemory();
+    const res = await fetch(blobs[0].url);
     if (!res.ok) return createDefaultMemory();
     return await res.json();
   } catch {
@@ -19,8 +18,9 @@ async function readMemory() {
 async function writeMemory(data) {
   data.updatedAt = Date.now();
   await put(BLOB_KEY, JSON.stringify(data), {
-    access: 'public', // blob URLs are always public but token is needed to write
+    access: 'public',
     allowOverwrite: true,
+    addRandomSuffix: false,
     contentType: 'application/json',
   });
 }
