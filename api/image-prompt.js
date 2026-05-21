@@ -11,8 +11,9 @@ Qwen responds best to:
 Structure: [describe the change and exactly how it looks] + [quality tags] + [preserve the original face exactly] + [anything the user explicitly asked to preserve]
 
 Rules:
-- Only mention attributes the user explicitly described — do not pull hair, skin, build, clothing, tattoos or accessories from the reference image
-- Describe the change in visual detail — what does it actually look like?
+- Only describe what the user asked to change — do not add, infer, or expand with attributes from the image
+- Describe the specific change in visual detail — what does it actually look like?
+- Do not reframe the edit as a full character description or use language like "transform into"
 - Always include "preserve the original face exactly" unless the user is changing the face
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque
 - When the description references multiple images, use <image_1> <image_2> syntax: state what to take from <image_2>, then "Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged"
