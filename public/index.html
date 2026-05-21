@@ -807,8 +807,9 @@
         if (!res.ok) throw new Error('describe failed');
         const data = await res.json();
         if (data.description) {
-          describedCharacter = data.description;
-          fetchSuggestions(data.description);
+          describedCharacter = data.description; // physical only — no name in prompts
+          const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
+          fetchSuggestions(suggestContext);
         }
       } catch (_) {}
     }
