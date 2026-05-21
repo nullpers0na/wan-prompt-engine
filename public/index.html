@@ -445,14 +445,6 @@
       </div>
 
       <div>
-        <label class="field-label" for="characterInput">Woman <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <div style="position:relative">
-          <input id="characterInput" class="character-input" type="text" placeholder="e.g. slim brunette, large natural breasts, tattoos, pale skin…" autocomplete="off" style="padding-right:36px" />
-          <button class="clear-btn" id="clearCharBtn" type="button" title="Clear">✕</button>
-        </div>
-      </div>
-
-      <div>
         <label class="field-label" for="description">Scene / Edit</label>
         <div class="textarea-wrap">
           <textarea id="description" placeholder="Describe your video scene…" rows="4"></textarea>
@@ -640,8 +632,7 @@
     let lastEndpoint = null;
     let uploadedImage = null;
     let historyOpen = false;
-
-    const CHARACTER_KEY = 'wan_character';
+    let describedCharacter = '';
 
     const generateBtn    = document.getElementById('generateBtn');
     const copyAllBtn     = document.getElementById('copyAllBtn');
@@ -651,9 +642,6 @@
     const errorEl        = document.getElementById('error');
     const segmentsEl     = document.getElementById('segments');
     const descriptionEl  = document.getElementById('description');
-    const characterEl    = document.getElementById('characterInput');
-    characterEl.value = localStorage.getItem(CHARACTER_KEY) || '';
-    characterEl.addEventListener('input', () => localStorage.setItem(CHARACTER_KEY, characterEl.value));
     const modeBtns       = document.querySelectorAll('.mode-btn');
     const uploadArea     = document.getElementById('uploadArea');
     const fileInput      = document.getElementById('fileInput');
@@ -754,8 +742,7 @@
         lastPrompts = [];
         examplesExpanded = false;
         renderExamples();
-        const char = characterEl.value.trim();
-        if (char && suggestionsBox.classList.contains('visible')) fetchSuggestions(char);
+        if (describedCharacter && suggestionsBox.classList.contains('visible')) fetchSuggestions(describedCharacter);
       });
     });
 
@@ -785,7 +772,6 @@
     removeBtn.addEventListener('click', () => clearUpload());
     clearDescBtn.addEventListener('click', () => { descriptionEl.value = ''; descriptionEl.focus(); });
     suggestionsDismiss.addEventListener('click', () => suggestionsBox.classList.remove('visible'));
-    document.getElementById('clearCharBtn').addEventListener('click', () => { characterEl.value = ''; localStorage.removeItem(CHARACTER_KEY); characterEl.focus(); suggestionsBox.classList.remove('visible'); });
 
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
@@ -812,8 +798,6 @@
     }
 
     async function autoDescribeCharacter(image) {
-      if (characterEl.value.trim()) return; // don't overwrite if user already typed something
-      characterEl.placeholder = 'Analysing image…';
       try {
         const res = await fetch('/api/describe', {
           method: 'POST',
@@ -822,16 +806,11 @@
         });
         if (!res.ok) throw new Error('describe failed');
         const data = await res.json();
-        if (data.description && !characterEl.value.trim()) {
-          characterEl.value = data.description;
+        if (data.description) {
+          describedCharacter = data.description;
           fetchSuggestions(data.description);
         }
-      } catch (_) {
-        characterEl.placeholder = 'Auto-describe failed — enter manually';
-        setTimeout(() => { characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…'; }, 3000);
-        return;
-      }
-      characterEl.placeholder = 'e.g. slim brunette, large natural breasts, tattoos, pale skin…';
+      } catch (_) {}
     }
 
     async function fetchSuggestions(characterDescription) {
@@ -858,8 +837,9 @@
     }
 
     function clearUpload() {
-      uploadedImage = null; try { fileInput.value = ''; } catch (_) {}
+      uploadedImage = null; describedCharacter = ''; try { fileInput.value = ''; } catch (_) {}
       previewImg.src = ''; uploadPreview.classList.remove('visible'); uploadArea.classList.remove('has-preview'); uploadHint.style.display = '';
+      suggestionsBox.classList.remove('visible');
     }
 
     // ── Generate ──────────────────────────────────────────────────────────────
@@ -874,8 +854,7 @@
       lastPrompts = [];
       renderExamples(false);
 
-      const character = characterEl.value.trim();
-      const fullDescription = character ? `Character: ${character}\n\n${description}` : description;
+      const fullDescription = describedCharacter ? `Character: ${describedCharacter}\n\n${description}` : description;
       const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : mode === 'flux' ? '/api/flux-prompt' : '/api/image-prompt';
       const body = { description: fullDescription };
       lastEndpoint = endpoint;
@@ -901,7 +880,7 @@
         } else {
           negativeBox.classList.remove('visible');
         }
-        saveHistory({ mode, description, character, prompts: data.prompts });
+        saveHistory({ mode, description, character: describedCharacter, prompts: data.prompts });
         renderHistory();
       } catch (err) {
         clearTimeout(fetchTimeout);
@@ -1052,7 +1031,7 @@
           mode = entry.mode;
           modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
           descriptionEl.value = entry.description;
-          characterEl.value = entry.character || '';
+          describedCharacter = entry.character || '';
           descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : mode === 'flux' ? 'Describe the edit you want to make…' : 'Describe the image edit you want to make…';
           lastPrompts = entry.prompts;
           lastBody = null; lastEndpoint = null;
