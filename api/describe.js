@@ -22,7 +22,7 @@ IDENTIFICATION RULES — read carefully:
 Output exactly three lines:
 LINE 1: character name and game/source if identified with certainty (e.g. "tifa lockhart, final fantasy vii") — or leave completely blank if uncertain
 LINE 2: physical description only — body type, breast size and shape, ass size and shape, waist-to-hip ratio, skin tone, hair colour/length, piercings, tattoos, facial expression and attitude, overall sexual vibe (e.g. looks like a slut, total bitch energy, bratty princess, cold and arrogant, desperate to please)
-LINE 3: a single cheeky one-liner. ${quipContext} If the character is named: reference her by name. If unknown: describe what stands out about her physically and then make your guess. Be witty, direct, a little crude. No quotes.
+LINE 3: a single cheeky one-liner. ${quipContext} If the character is named: reference her by name. If unknown: describe what stands out physically and make your guess. IMPORTANT: base the quip only on what is actually visible in this specific image — if her breasts aren't visible, don't mention them; comment on what you can actually see (ass, legs, face, outfit, pose, etc.). Be witty, direct, a little crude. No quotes.
 
 OUTPUT RULES:
 - Three lines only, no preamble, no labels, no commentary
