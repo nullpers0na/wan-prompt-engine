@@ -22,9 +22,9 @@ LINE 2: physical description — body type, breast size and shape, ass size and 
 Two lines only. No labels, no preamble.`;
 }
 
-function buildMatchPrompt(knownCharacters) {
+function buildDescriptionMatchPrompt(newDescription, knownCharacters) {
   const list = knownCharacters.map(c => `- ${c.name}: ${c.description}`).join('\n');
-  return `You are a character recognition assistant. Look at this image and compare it against these previously identified characters:\n\n${list}\n\nDoes this image show one of these characters? Look at body type, hair, skin tone, face shape, and any distinctive features.\nOutput ONLY the exact character name from the list above if it matches, or the single word: unknown`;
+  return `You are a character matching assistant. Compare this physical description against a list of known characters and find the best match.\n\nNew description: ${newDescription}\n\nKnown characters:\n${list}\n\nFocus on consistent attributes: body type, breast size, ass size, skin tone, hair colour/length. Ignore minor differences from lighting, angle, or rendering style.\nOutput ONLY the exact character name from the list above if it matches with reasonable confidence, or the single word: unknown`;
 }
 
 async function generateQuip(name, description, mode) {
@@ -59,12 +59,12 @@ module.exports = async (req, res) => {
     let name        = lines[0] || '';
     let description = lines[1] || '';
 
-    // If unrecognised and we have a memory bank, try to match
-    if (!name && knownCharacters.length > 0) {
+    // If unrecognised and we have a memory bank, match description text-to-text
+    if (!name && description && knownCharacters.length > 0) {
       const matchResult = await callOpenRouter(
-        buildMatchPrompt(knownCharacters),
-        imgContent,
-        { model: VISION_MODEL, maxTokens: 40 },
+        buildDescriptionMatchPrompt(description, knownCharacters),
+        'Output the matched character name or unknown.',
+        { model: TEXT_MODEL, maxTokens: 40 },
       ).catch(() => '');
       const matched = matchResult.trim();
       if (matched && matched.toLowerCase() !== 'unknown') name = matched;
