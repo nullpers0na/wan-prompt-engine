@@ -179,13 +179,6 @@
     textarea::placeholder { color: var(--text-dim); }
     textarea:focus { border-color: rgba(232,53,122,0.4); box-shadow: 0 0 0 3px rgba(232,53,122,0.08); }
 
-    /* ── Examples ──────────────────────────────────────────────────────────── */
-    .examples-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .examples-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); flex-shrink: 0; }
-    .examples-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .examples-btn { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 500; background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
-    .examples-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
-    .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .example-chip { font-family: 'Space Grotesk', sans-serif; font-size: 0.76rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 5px 14px; cursor: pointer; transition: border-color 0.2s, color 0.2s, background 0.2s; text-align: left; }
     .example-chip:hover { border-color: rgba(232,53,122,0.5); color: var(--rose-light); background: rgba(232,53,122,0.08); }
 
@@ -442,8 +435,6 @@
 
       /* Example chips — bigger touch area */
       .example-chip { padding: 8px 14px; font-size: 0.78rem; }
-      .examples-btn { padding: 7px 12px; font-size: 0.72rem; }
-
       /* Upload area — more compact */
       .upload-area { padding: 18px 14px; }
       .upload-hint-text { font-size: 0.8rem; }
@@ -579,17 +570,6 @@
         </div>
       </div>
 
-      <div>
-        <div class="examples-header">
-          <span class="examples-label">Try an example:</span>
-          <div class="examples-actions">
-            <button class="examples-btn" id="refreshBtn" type="button">&#8635; Shuffle</button>
-            <button class="examples-btn" id="expandBtn" type="button">Show all 24</button>
-          </div>
-        </div>
-        <div class="examples" id="examples"></div>
-      </div>
-
       <div class="upload-area" id="uploadArea">
         <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" />
         <div class="upload-hint" id="uploadHint">
@@ -657,83 +637,6 @@
     const ALLOWED_TYPES    = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const HISTORY_KEY      = 'wan_history';
     const HISTORY_MAX      = 10;
-    const CHIPS_DEFAULT    = 4;
-
-    const ALL_EXAMPLES = {
-      video: [
-        'Topless woman walking slowly toward camera, heavy breast jiggle, soft-body physics, slow motion 60fps',
-        'Close-up of ass in thong, slow rhythmic bounce and jiggle, tracking shot from behind, natural physics',
-        'Woman arching her back slowly, breasts bouncing, cum dripping down chest, fluid simulation, static camera',
-        'POV hips grinding slowly, ass jiggle, thigh wobble, gradual tempo increase, smooth motion loop',
-        'Slow pan up bare legs from ankles to thighs, skin detail, soft studio lighting, shallow depth of field',
-        'Woman in heels walking away from camera, ass sway, slow motion, tracking shot at waist height',
-        'Close-up of breasts bouncing in slow motion, topless, soft light, natural jiggle physics, loop-friendly',
-        'Woman arching back on bed, breasts falling to side with natural weight, slow motion, static overhead shot',
-        'Cum dripping slowly down inner thighs, fluid simulation, extreme close-up, warm studio light',
-        'Woman turning slowly in place, full body, ass jiggle on each step, hair movement, soft backlight',
-        'Close-up of feet in heels, slow step toward camera, leg muscles flexing, shallow focus',
-        'Woman bending forward slowly, ass presenting, thong, soft-body jiggle, slow zoom from behind',
-        'Side profile, woman bouncing on her knees, breasts jiggling heavily, soft-body dynamics, 60fps',
-        'Extreme close-up of nipples, slow zoom in, soft studio lighting, static camera',
-        'Woman lying on back, legs raised slowly, thighs spreading, static overhead camera, slow motion',
-        'Cum landing on ass in slow motion, fluid splatter simulation, extreme close-up, warm backlight',
-        'Tracking shot of legs in stockings and heels, slow motion, floor-level camera, shallow focus',
-        'Woman sitting and crossing legs slowly, thigh jiggle, skirt riding up, soft light, static camera',
-        'Close-up of ass clapping in slow motion, heavy soft-body jiggle, rhythmic, warm studio light',
-        'Woman pulling top down slowly, breasts spilling out, natural jiggle, slow motion, static front shot',
-        'POV standing over woman lying down, she arches back slowly, breasts rising, slow motion',
-        'Fluid dripping from fingers slowly onto chest, cum simulation, close-up, soft directional light',
-        'Woman in doggy position, ass jiggle, thigh wobble, camera slowly dollying in from behind',
-        'Close-up of inner thighs, slow squeeze and release, skin detail, soft warm light, static camera',
-      ],
-      short: [
-        'breasts jiggle as she walks toward camera, heavy natural bounce, fixed wide shot',
-        'ass clapping, heavy soft-body jiggle, rhythmic, close-up from behind',
-        'breast ripple, jiggle physics, slow motion, topless',
-        'hips swaying side to side, ass wobble, thigh jiggle, slow rhythm',
-        'breasts bouncing in slow motion, natural weight and sag, static front shot',
-        'ass presenting, slow deep arch, skin ripple, rear close-up',
-        'cum dripping slowly down chest, fluid sim, close-up, warm light',
-        'thighs jiggling as she sits and crosses legs, soft light, static shot',
-        'breasts swinging as she bends forward, heavy natural weight, side profile',
-        'ass jiggle with each slow step away from camera, tracking shot',
-        'nipple close-up, slow zoom, soft studio light',
-        'inner thigh squeeze and release, slow motion, warm backlight',
-        'breast bounce loop, 60fps, soft-body physics, topless, loopable',
-        'doggy position, ass ripple with each thrust, rear tracking shot',
-        'belly and thighs wobble, slow body roll, wide angle, natural light',
-        'side boob jiggle, arm raised slowly, soft backlight',
-      ],
-      image: [
-        'Pose her bent over presenting, ass toward camera, legs spread, keep existing lighting',
-        'Add cum on face and breasts, glistening wet skin, dripping, photorealistic, 8k, sharp detail',
-        'Make lingerie sheer and see-through, detailed skin underneath, soft studio lighting, high detail',
-        'Change pose to on all fours looking over shoulder, seductive eye contact, keep background and lighting',
-        'Add thigh-high stockings and heels, keep pose and body, warm rim lighting, photorealistic',
-        'Enhance breast size and shape, natural skin texture, keep all other details, 8k sharp focus',
-        'Add a creampie, dripping, photorealistic fluid, keep pose and lighting, high detail',
-        'Change background to luxury hotel bedroom, soft candlelight, keep subject pose and body',
-        'Make her expression more seductive, parted lips, bedroom eyes, keep body and lighting',
-        'Add wet glistening skin, water droplets, post-shower look, soft warm lighting, sharp detail',
-        'Remove clothing completely, natural skin, keep pose, lighting, and background identical',
-        'Add neon pink lighting from left, deep shadows right side, keep pose and subject unchanged',
-        'Change pose to legs spread lying back, keep face, body, and lighting, 8k photorealistic',
-        'Add cum dripping from mouth, chin, and neck, glistening, photorealistic fluid, keep everything else',
-        'Make nipples more prominent and detailed, keep body and lighting identical, sharp 8k detail',
-        'Add a collar and leash, keep pose and body, soft studio lighting, photorealistic accessories',
-        'Change outfit to crotchless fishnet bodysuit, keep pose and lighting, detailed skin through mesh',
-        'Add a second woman behind her, hands on hips, keep original subject unchanged, soft studio light',
-        'Make skin more oiled and shiny, glistening highlights, keep pose and background, 8k detail',
-        'Zoom into ass close-up, crop to waist down, keep lighting and skin detail, sharp focus',
-        'Add anal plug, keep pose and body unchanged, photorealistic, 8k, detailed',
-        'Change hair to long flowing blonde, keep face body and lighting identical',
-        'Add red lipstick and heavy eye makeup, keep body and lighting, photorealistic face detail',
-        'Make the setting an outdoor pool at night, keep subject pose and body, moonlight and pool glow',
-      ],
-    };
-
-    let examplesExpanded = false;
-    let shuffledExamples = [];
     let mode = 'video';
     let lastPrompts = [];
     let lastBody = null;
@@ -771,9 +674,6 @@
     const previewName    = document.getElementById('previewName');
     const previewSize    = document.getElementById('previewSize');
     const removeBtn      = document.getElementById('removeBtn');
-    const examplesEl     = document.getElementById('examples');
-    const refreshBtn     = document.getElementById('refreshBtn');
-    const expandBtn      = document.getElementById('expandBtn');
     const clearDescBtn     = document.getElementById('clearDescBtn');
     const suggestionsOverlay = document.getElementById('suggestionsOverlay');
     const suggestionsBox     = document.getElementById('suggestionsBox');
@@ -871,12 +771,6 @@
     const historyHeader  = document.getElementById('historyHeader');
     const historyToggle  = document.getElementById('historyToggle');
     const historyList    = document.getElementById('historyList');
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-      return a;
-    }
-
     // ── Mode ─────────────────────────────────────────────────────────────────
     // ── Body icon prompts ─────────────────────────────────────────────────────
     const ICON_PROMPTS = {
@@ -940,29 +834,9 @@
         showError(null);
         lastPrompts = [];
         sessionPrompts = [];
-        examplesExpanded = false;
-        renderExamples();
         if (describedCharacter && suggestionsOverlay.classList.contains('visible')) fetchSuggestions(describedCharacter);
       });
     });
-
-    // ── Examples ─────────────────────────────────────────────────────────────
-    function renderExamples(keepOrder = false) {
-      if (!keepOrder) shuffledExamples = shuffle(ALL_EXAMPLES[mode]);
-      const picks = examplesExpanded ? shuffledExamples : shuffledExamples.slice(0, CHIPS_DEFAULT);
-      examplesEl.innerHTML = '';
-      picks.forEach(text => {
-        const chip = document.createElement('button');
-        chip.className = 'example-chip'; chip.type = 'button'; chip.textContent = text;
-        chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); });
-        examplesEl.appendChild(chip);
-      });
-      expandBtn.textContent = examplesExpanded ? 'Show less' : `Show all ${(ALL_EXAMPLES[mode] || []).length}`;
-    }
-
-    refreshBtn.addEventListener('click', () => { examplesExpanded = false; renderExamples(false); });
-    expandBtn.addEventListener('click', () => { examplesExpanded = !examplesExpanded; renderExamples(true); });
-    renderExamples();
 
     // ── Upload ────────────────────────────────────────────────────────────────
     uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
@@ -1159,7 +1033,6 @@
       negativeBox.classList.remove('visible');
       nextStepsEl.style.display = 'none';
       lastPrompts = [];
-      renderExamples(false);
 
       const fullDescription = describedCharacter ? `Character: ${describedCharacter}\n\n${description}` : description;
       const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
@@ -1364,7 +1237,6 @@
           lastBody = null; lastEndpoint = null;
           renderSegments(entry.prompts, false);
           showOutputButtons();
-          renderExamples();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         historyList.appendChild(el);
