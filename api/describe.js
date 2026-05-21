@@ -11,7 +11,6 @@ function buildPrompt(mode) {
     video: 'guess what motion or scene they are going to prompt — jiggle physics, walking, a body part moving, etc.',
     short: 'guess what punchy single-motion clip they will write.',
     image: 'guess what image edit they are going to make — bigger breasts, saggy tits, nude, cum, outfit change, etc.',
-    flux:  'guess what direct Flux edit they will make — bigger breasts, nude, cum, outfit change, etc.',
   }[mode] || 'guess what prompt the user is about to write.';
 
   return `You are an expert at identifying fictional characters AND describing explicit physical attributes for AI image generation.
@@ -33,7 +32,6 @@ async function generateQuip(name, description, mode) {
     video: 'guess what motion or scene they are going to prompt.',
     short: 'guess what punchy single-motion clip they will write.',
     image: 'guess what image edit they are going to make.',
-    flux:  'guess what direct Flux edit they will make.',
   }[mode] || 'guess what prompt the user is about to write.';
 
   const first = firstName(name);

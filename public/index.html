@@ -344,6 +344,67 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Memory button ─────────────────────────────────────────────────────── */
+    .memory-btn {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 500;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 9px; padding: 8px 16px; cursor: pointer; letter-spacing: 0.04em;
+      transition: color 0.2s, border-color 0.2s, background 0.2s; white-space: nowrap;
+    }
+    .memory-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); background: rgba(232,53,122,0.06); }
+
+    /* ── Next steps ────────────────────────────────────────────────────────── */
+    .next-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .next-steps-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    .next-steps-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .next-step-chip {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.76rem;
+      background: rgba(232,53,122,0.06); border: 1px solid rgba(232,53,122,0.25); color: var(--rose-light);
+      border-radius: 20px; padding: 5px 14px; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s; text-align: left;
+    }
+    .next-step-chip:hover { border-color: rgba(232,53,122,0.6); background: rgba(232,53,122,0.14); color: var(--text); }
+
+    /* ── Memory overlay ────────────────────────────────────────────────────── */
+    .memory-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+    .memory-overlay.visible { display: flex; animation: fadeIn 0.18s ease; }
+    .memory-panel {
+      display: flex; flex-direction: column; gap: 16px;
+      background: #130719; border: 1px solid rgba(232,53,122,0.3);
+      border-radius: 16px; padding: 24px; width: 100%; max-width: 520px;
+      max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,53,122,0.08);
+      animation: popUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .memory-panel-header { display: flex; align-items: center; justify-content: space-between; }
+    .memory-panel-title { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    .memory-panel-dismiss { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; line-height: 1; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0; transition: color 0.2s; }
+    .memory-panel-dismiss:hover { color: var(--rose-light); }
+    .memory-section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rose-light); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 4px; }
+    .memory-pref-list { display: flex; flex-direction: column; gap: 4px; }
+    .memory-pref-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); padding: 4px 0; }
+    .memory-pref-count { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--rose-light); }
+    .memory-char-list { display: flex; flex-direction: column; gap: 6px; }
+    .memory-char-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .memory-char-info { flex: 1; min-width: 0; }
+    .memory-char-name { font-size: 0.82rem; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .memory-char-desc { font-size: 0.74rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .memory-char-del { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; padding: 4px 8px; cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s; }
+    .memory-char-del:hover { color: #fca5a5; border-color: rgba(252,165,165,0.4); }
+    .memory-recent-list { display: flex; flex-direction: column; gap: 4px; }
+    .memory-recent-item { font-size: 0.8rem; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+    .memory-recent-item:last-child { border-bottom: none; }
+    .memory-empty { font-size: 0.78rem; color: var(--text-dim); }
+
+    /* ── Continue chip ─────────────────────────────────────────────────────── */
+    .continue-chip {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600;
+      background: var(--gradient); border: none; color: #fff;
+      border-radius: 20px; padding: 7px 16px; cursor: pointer;
+      transition: opacity 0.2s; text-align: left; width: 100%;
+    }
+    .continue-chip:hover { opacity: 0.88; }
+
     /* ── Mobile ────────────────────────────────────────────────────────────── */
     @media (max-width: 640px) {
       body {
@@ -481,11 +542,33 @@
     </div>
 
     <div class="container">
-      <div class="mode-toggle">
-        <button class="mode-btn active" data-mode="video">Video Segments</button>
-        <button class="mode-btn" data-mode="short">Short Clip</button>
-        <button class="mode-btn" data-mode="image">Qwen Edit</button>
-        <button class="mode-btn" data-mode="flux">Flux Edit</button>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="video">Video Segments</button>
+          <button class="mode-btn" data-mode="short">Short Clip</button>
+          <button class="mode-btn" data-mode="image">Qwen Edit</button>
+        </div>
+        <div class="memory-overlay" id="memoryOverlay">
+          <div class="memory-panel" id="memoryPanel">
+            <div class="memory-panel-header">
+              <span class="memory-panel-title">Memory Bank</span>
+              <button class="memory-panel-dismiss" id="memoryDismiss">✕</button>
+            </div>
+            <div>
+              <div class="memory-section-title">Preferences</div>
+              <div class="memory-pref-list" id="memoryPrefList"><span class="memory-empty">No preferences yet.</span></div>
+            </div>
+            <div>
+              <div class="memory-section-title">Saved Characters</div>
+              <div class="memory-char-list" id="memoryCharList"><span class="memory-empty">No saved characters.</span></div>
+            </div>
+            <div>
+              <div class="memory-section-title">Recent Prompts</div>
+              <div class="memory-recent-list" id="memoryRecentList"><span class="memory-empty">No recent prompts.</span></div>
+            </div>
+          </div>
+        </div>
+        <button class="memory-btn" id="memoryBtn" type="button">Memory</button>
       </div>
 
       <div>
@@ -543,6 +626,10 @@
 
       <div id="error"></div>
       <div class="segments" id="segments"></div>
+      <div class="next-steps" id="nextSteps" style="display:none">
+        <span class="next-steps-label">What next?</span>
+        <div class="next-steps-chips" id="nextStepsChips"></div>
+      </div>
 
       <div class="negative-box" id="negativeBox">
         <div class="negative-header">
@@ -618,24 +705,6 @@
         'belly and thighs wobble, slow body roll, wide angle, natural light',
         'side boob jiggle, arm raised slowly, soft backlight',
       ],
-      flux: [
-        'Make her topless, breasts fully exposed. Keep everything else identical.',
-        'Add creamy white cum dripping down her face and chest. Keep the face and background identical.',
-        'Change her hair to long platinum blonde. Keep everything else identical.',
-        'Make her breasts larger and fuller. Keep everything else identical.',
-        'Make her breasts saggy and heavy, hanging low with natural weight. Keep everything else identical.',
-        'Add a collar around her neck. Keep everything else identical.',
-        'Make her fully nude. Keep the face, pose, and background identical.',
-        'Add a large anal plug. Keep everything else identical.',
-        'Change her expression to submissive and desperate. Keep everything else identical.',
-        'Make her nipples more prominent and erect. Keep everything else identical.',
-        'Add cum dripping from her mouth and chin. Keep the face and everything else identical.',
-        'Make her ass larger and rounder. Keep everything else identical.',
-        'Add thigh-high stockings. Keep everything else identical.',
-        'Make her skin oiled and glistening. Keep everything else identical.',
-        'Change the background to a luxury hotel bedroom. Keep the subject identical.',
-        'Make her expression bratty and arrogant. Keep everything else identical.',
-      ],
       image: [
         'Pose her bent over presenting, ass toward camera, legs spread, keep existing lighting',
         'Add cum on face and breasts, glistening wet skin, dripping, photorealistic, 8k, sharp detail',
@@ -674,6 +743,7 @@
     let historyOpen = false;
     let describedCharacter = '';
     let lastDescription = ''; // physical description of last analysed image
+    let sessionPrompts = []; // session continuity tracking
 
     const CHARACTERS_KEY = 'wan_characters';
     function loadMemoryBank() { try { return JSON.parse(localStorage.getItem(CHARACTERS_KEY) || '[]'); } catch { return []; } }
@@ -720,6 +790,78 @@
       suggestionsNamePrompt.classList.remove('visible');
       characterNameInput.value = ''; characterNameSaved.classList.remove('visible');
     }
+
+    const nextStepsEl    = document.getElementById('nextSteps');
+    const nextStepsChips = document.getElementById('nextStepsChips');
+    const memoryBtn      = document.getElementById('memoryBtn');
+    const memoryOverlay  = document.getElementById('memoryOverlay');
+    const memoryDismiss  = document.getElementById('memoryDismiss');
+    const memoryPrefList = document.getElementById('memoryPrefList');
+    const memoryCharList = document.getElementById('memoryCharList');
+    const memoryRecentList = document.getElementById('memoryRecentList');
+
+    // ── Memory viewer ─────────────────────────────────────────────────────────
+    function showMemory() { memoryOverlay.classList.add('visible'); }
+    function hideMemory() { memoryOverlay.classList.remove('visible'); }
+    memoryBtn.addEventListener('click', async () => {
+      showMemory();
+      try {
+        const res = await fetch('/api/memory');
+        if (!res.ok) throw new Error('Failed to load memory');
+        const data = await res.json();
+        // Preferences
+        const prefs = Object.entries(data.preferences || {})
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10);
+        memoryPrefList.innerHTML = '';
+        if (prefs.length === 0) {
+          memoryPrefList.innerHTML = '<span class="memory-empty">No preferences yet.</span>';
+        } else {
+          prefs.forEach(([tag, count]) => {
+            const el = document.createElement('div');
+            el.className = 'memory-pref-item';
+            el.innerHTML = `<span>${escapeHtml(tag)}</span><span class="memory-pref-count">${Math.round(count * 10) / 10}</span>`;
+            memoryPrefList.appendChild(el);
+          });
+        }
+        // Recent prompts (last 5)
+        const recents = (data.recentPrompts || []).slice(0, 5);
+        memoryRecentList.innerHTML = '';
+        if (recents.length === 0) {
+          memoryRecentList.innerHTML = '<span class="memory-empty">No recent prompts.</span>';
+        } else {
+          recents.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'memory-recent-item';
+            el.textContent = (p.mode ? `[${p.mode}] ` : '') + p.prompt;
+            memoryRecentList.appendChild(el);
+          });
+        }
+      } catch (err) {
+        memoryPrefList.innerHTML = '<span class="memory-empty">Could not load memory.</span>';
+      }
+      // Characters from localStorage
+      const chars = loadMemoryBank();
+      memoryCharList.innerHTML = '';
+      if (chars.length === 0) {
+        memoryCharList.innerHTML = '<span class="memory-empty">No saved characters.</span>';
+      } else {
+        chars.forEach(c => {
+          const el = document.createElement('div');
+          el.className = 'memory-char-item';
+          el.innerHTML = `<div class="memory-char-info"><div class="memory-char-name">${escapeHtml(c.name)}</div><div class="memory-char-desc">${escapeHtml(c.description || '')}</div></div><button class="memory-char-del" data-name="${escapeHtml(c.name)}">Delete</button>`;
+          el.querySelector('.memory-char-del').addEventListener('click', () => {
+            const bank = loadMemoryBank().filter(x => x.name !== c.name);
+            localStorage.setItem(CHARACTERS_KEY, JSON.stringify(bank));
+            el.remove();
+            if (memoryCharList.children.length === 0) memoryCharList.innerHTML = '<span class="memory-empty">No saved characters.</span>';
+          });
+          memoryCharList.appendChild(el);
+        });
+      }
+    });
+    memoryDismiss.addEventListener('click', hideMemory);
+    memoryOverlay.addEventListener('click', e => { if (e.target === memoryOverlay) hideMemory(); });
     const negativeBox      = document.getElementById('negativeBox');
     const negativeTextarea = document.getElementById('negativeTextarea');
     const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
@@ -728,7 +870,6 @@
     const historyHeader  = document.getElementById('historyHeader');
     const historyToggle  = document.getElementById('historyToggle');
     const historyList    = document.getElementById('historyList');
-
     function shuffle(arr) {
       const a = [...arr];
       for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -742,37 +883,31 @@
         video: 'close-up on lips, slow parting, tongue tip visible, jaw dropping, glossy wet lips',
         image: 'detailed lips, glossy, slightly parted, tongue just visible, soft focus on mouth',
         short: 'lips parting slowly, tongue tip, glossy wet, close-up',
-        flux: 'make the lips glossy and slightly parted with tongue just visible. Keep everything else identical.',
       },
       breasts: {
         video: 'close-up on breasts, heavy jiggle in slow motion, soft-body physics, exaggerated natural bounce',
         image: 'large natural breasts, detailed nipples, areola detail, smooth skin, full and heavy',
         short: 'breasts jiggle, heavy natural bounce, soft-body physics, slow motion',
-        flux: 'make the breasts larger, fuller and more exposed with detailed nipples. Keep everything else identical.',
       },
       body: {
         video: 'full body shot, slow weight shift side to side, curves accentuated, natural body sway, wide angle',
         image: 'full body visible, hourglass figure, smooth curves, detailed skin, photorealistic, 8k',
         short: 'body sway, natural weight shift, curves jiggling, wide shot',
-        flux: 'make the body fully nude with an hourglass figure, smooth detailed skin. Keep the face and background identical.',
       },
       ass: {
         video: 'close-up from behind on ass, heavy jiggle, rippling soft flesh, slow motion, soft-body physics',
         image: 'round ass, detailed, presenting, arched back, smooth skin, close-up rear angle',
         short: 'ass jiggle, heavy soft-body ripple, slow motion, rear close-up',
-        flux: 'make the ass larger, rounder and more prominent. Keep everything else identical.',
       },
       legs: {
         video: 'legs spreading slowly, thighs quivering, close-up on inner thighs, weight shifting between legs',
         image: 'legs spread wide, detailed inner thighs, smooth skin, heels on, close-up low angle',
         short: 'thigh jiggle, legs spreading slowly, inner thigh wobble',
-        flux: 'spread the legs wide apart showing detailed inner thighs and smooth skin. Keep everything else identical.',
       },
       feet: {
         video: 'close-up on feet, toes curling and spreading slowly, arched sole, slow toe wiggle, static camera',
         image: 'detailed feet, bare soles visible, toes spread, high arch, clean smooth skin, close-up',
         short: 'toes curling slowly, arched sole, close-up, static shot',
-        flux: 'make the feet bare and detailed, high arch, clean smooth skin, spread toes. Keep everything else identical.',
       },
     };
 
@@ -793,8 +928,9 @@
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode;
         modeBtns.forEach(b => b.classList.toggle('active', b === btn));
-        descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : mode === 'flux' ? 'Describe the edit you want to make…' : 'Describe the image edit you want to make…';
+        descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
         segmentsEl.innerHTML = '';
+        nextStepsEl.style.display = 'none';
         negativeBox.classList.remove('visible');
         copyAllBtn.style.display = 'none';
         regenBtn.style.display = 'none';
@@ -926,7 +1062,7 @@
         const res = await fetch('/api/suggest', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description: characterDescription, mode, character: describedCharacter || null }),
+          body: JSON.stringify({ description: characterDescription, mode, character: describedCharacter || null, sessionPrompts: sessionPrompts.slice(-5) }),
         });
         if (!res.ok) throw new Error('suggest failed');
         const data = await res.json();
@@ -939,6 +1075,32 @@
         });
       } catch (_) {
         hideSuggestions();
+      }
+    }
+
+    async function fetchNextSteps(description, currentMode, character) {
+      nextStepsEl.style.display = 'none';
+      nextStepsChips.innerHTML = '';
+      try {
+        const res = await fetch('/api/suggest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description, mode: currentMode, character: character || null, lastPrompt: description, isNextStep: true, sessionPrompts: sessionPrompts.slice(-5) }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const chips = data.suggestions || [];
+        if (chips.length === 0) return;
+        nextStepsChips.innerHTML = '';
+        chips.forEach(text => {
+          const chip = document.createElement('button');
+          chip.className = 'next-step-chip'; chip.type = 'button'; chip.textContent = text;
+          chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); nextStepsEl.style.display = 'none'; });
+          nextStepsChips.appendChild(chip);
+        });
+        nextStepsEl.style.display = 'flex';
+      } catch (_) {
+        // silently fail
       }
     }
 
@@ -957,11 +1119,12 @@
       showError(null);
       copyAllBtn.style.display = 'none';
       negativeBox.classList.remove('visible');
+      nextStepsEl.style.display = 'none';
       lastPrompts = [];
       renderExamples(false);
 
       const fullDescription = describedCharacter ? `Character: ${describedCharacter}\n\n${description}` : description;
-      const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : mode === 'flux' ? '/api/flux-prompt' : '/api/image-prompt';
+      const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
       const body = { description: fullDescription };
       lastEndpoint = endpoint;
       lastBody = body;
@@ -988,12 +1151,16 @@
         }
         saveHistory({ mode, description, character: describedCharacter, prompts: data.prompts });
         renderHistory();
+        // Track session continuity
+        sessionPrompts.push({ prompt: description, mode });
         // Fire and forget — write to memory bank
         fetch('/api/memory', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event: 'prompt_generated', data: { prompt: description, mode, character: describedCharacter || null } }),
         }).catch(() => {});
+        // Fetch "What next?" chips
+        fetchNextSteps(description, mode, describedCharacter || null);
       } catch (err) {
         clearTimeout(fetchTimeout);
         showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
@@ -1016,6 +1183,9 @@
       navigator.clipboard.writeText(lastPrompts.join('\n\n')).then(() => {
         copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
         setTimeout(() => { copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy'; copyAllBtn.classList.remove('copied'); }, 1800);
+        if (lastPrompts.length > 0) {
+          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: describedCharacter || null } }) }).catch(() => {});
+        }
       });
     });
 
@@ -1029,6 +1199,8 @@
 
     regenBtn.addEventListener('click', async () => {
       if (!lastBody || !lastEndpoint) return;
+      // Fire rejected signal before regenerating
+      fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_rejected', data: { prompt: descriptionEl.value.trim(), mode, character: describedCharacter || null } }) }).catch(() => {});
       setLoading(true);
       showError(null);
       const controller = new AbortController();
@@ -1064,6 +1236,9 @@
       navigator.clipboard.writeText(lastPrompts[idx]).then(() => {
         btn.classList.add('flash');
         setTimeout(() => btn.classList.remove('flash'), 1400);
+        if (lastPrompts.length > 0) {
+          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: describedCharacter || null } }) }).catch(() => {});
+        }
       });
     });
 
@@ -1144,7 +1319,7 @@
           modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
           descriptionEl.value = entry.description;
           describedCharacter = entry.character || '';
-          descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : mode === 'flux' ? 'Describe the edit you want to make…' : 'Describe the image edit you want to make…';
+          descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
           lastPrompts = entry.prompts;
           lastBody = null; lastEndpoint = null;
           renderSegments(entry.prompts, false);

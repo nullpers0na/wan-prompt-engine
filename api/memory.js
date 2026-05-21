@@ -1,4 +1,5 @@
 const { put, head, del } = require('@vercel/blob');
+const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 
 const BLOB_KEY = 'wan-memory.json';
 
@@ -30,8 +31,19 @@ function createDefaultMemory() {
     sequences: {},        // what the user asks for after what
     characterHistory: {}, // per-character usage
     recentPrompts: [],    // last 50 prompts
+    rejectedPatterns: [], // rejected prompts (last 20)
+    accepted: 0,          // count of accepted prompts
     updatedAt: null,
   };
+}
+
+async function extractAiTags(prompt) {
+  const tagText = await callOpenRouter(
+    'Extract 3-6 semantic tags from this AI generation prompt. Focus on body parts, actions, and style preferences. Output only comma-separated lowercase tags, nothing else.',
+    prompt,
+    { model: TEXT_MODEL, maxTokens: 40 },
+  ).catch(() => '');
+  return tagText.split(',').map(t => t.trim()).filter(Boolean);
 }
 
 module.exports = async (req, res) => {
@@ -45,6 +57,10 @@ module.exports = async (req, res) => {
       const { event, data } = req.body || {};
       const memory = await readMemory();
 
+      // Ensure rejectedPatterns exists on older memory objects
+      if (!memory.rejectedPatterns) memory.rejectedPatterns = [];
+      if (typeof memory.accepted !== 'number') memory.accepted = 0;
+
       if (event === 'prompt_generated') {
         const { prompt, mode, character } = data;
 
@@ -52,10 +68,16 @@ module.exports = async (req, res) => {
         memory.recentPrompts.unshift({ prompt, mode, character, ts: Date.now() });
         memory.recentPrompts = memory.recentPrompts.slice(0, 50);
 
-        // Extract keywords and update frequency counts
+        // Extract keywords (fast) and update frequency counts
         const keywords = extractKeywords(prompt);
         keywords.forEach(kw => {
           memory.preferences[kw] = (memory.preferences[kw] || 0) + 1;
+        });
+
+        // AI semantic tag extraction (richer)
+        const aiTags = await extractAiTags(prompt);
+        aiTags.forEach(tag => {
+          memory.preferences[tag] = (memory.preferences[tag] || 0) + 1;
         });
 
         // Track sequences — what followed the previous prompt
@@ -79,6 +101,29 @@ module.exports = async (req, res) => {
             memory.characterHistory[character].preferences[kw] = (memory.characterHistory[character].preferences[kw] || 0) + 1;
           });
         }
+
+        await writeMemory(memory);
+        return res.json({ ok: true });
+      }
+
+      if (event === 'prompt_accepted') {
+        const { prompt, mode, character } = data;
+        memory.accepted = (memory.accepted || 0) + 1;
+
+        // Increment tags by 0.5 for accepted prompts
+        const keywords = extractKeywords(prompt);
+        keywords.forEach(kw => {
+          memory.preferences[kw] = (memory.preferences[kw] || 0) + 0.5;
+        });
+
+        await writeMemory(memory);
+        return res.json({ ok: true });
+      }
+
+      if (event === 'prompt_rejected') {
+        const { prompt, mode, character } = data;
+        memory.rejectedPatterns.unshift({ prompt, mode, character, ts: Date.now() });
+        memory.rejectedPatterns = memory.rejectedPatterns.slice(0, 20);
 
         await writeMemory(memory);
         return res.json({ ok: true });
