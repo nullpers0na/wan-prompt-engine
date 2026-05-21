@@ -1,12 +1,12 @@
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 const { buildMemoryContext } = require('./lib/memory-context');
-const { head } = require('@vercel/blob');
+const { list } = require('@vercel/blob');
 
 async function fetchMemory() {
   try {
-    const blob = await head('wan-memory.json').catch(() => null);
-    if (!blob) return null;
-    const res = await fetch(blob.url);
+    const { blobs } = await list({ prefix: 'wan-memory.json', limit: 1 });
+    if (!blobs.length) return null;
+    const res = await fetch(blobs[0].url);
     return res.ok ? await res.json() : null;
   } catch { return null; }
 }
