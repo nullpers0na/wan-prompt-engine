@@ -1,62 +1,66 @@
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
+const { buildMemoryContext } = require('./lib/memory-context');
+const { head } = require('@vercel/blob');
 
-const SYSTEM_PROMPTS = {
+async function fetchMemory() {
+  try {
+    const blob = await head('wan-memory.json').catch(() => null);
+    if (!blob) return null;
+    const res = await fetch(blob.url);
+    return res.ok ? await res.json() : null;
+  } catch { return null; }
+}
+
+const BASE_PROMPTS = {
   video: `You are a prompt suggester for WAN2.2 video generation. Given a character description, suggest 6 motion or action clip ideas tailored to this specific character.
 
 Analyse her attributes and suggest motion that highlights them:
 - Large or heavy breasts → jiggle, bounce, slow-motion close-up physics
 - Large or prominent ass → ripple, rear jiggle, slow-motion close-up
 - Slim or petite body → body sway, walking, subtle motion
-- Any body part explicitly mentioned → suggest motion featuring that part
 
-If breasts seem small or unremarkable, suggest a clip that involves breast physics anyway (jiggle, bounce).
-If ass seems small or flat, suggest a rear shot with motion.
+If the user memory is provided, prioritise suggestions that follow their known patterns and sequences — anticipate the next logical step in their workflow.
 
 Each suggestion should be a brief action/motion scenario (1 sentence). Output one per line, no labels, no numbers.`,
 
   short: `You are a prompt suggester for WAN2.2 short clip generation. Given a character description, suggest 6 punchy single-motion clip ideas tailored to this specific character.
 
-Analyse her attributes:
-- Large or heavy breasts → jiggle, bounce, slow-motion physics
-- Large or prominent ass → ripple, jiggle, rear close-up
-- Small breasts or ass → suggest clips that would enhance their appearance through motion or angle
+If the user memory is provided, use their patterns to predict what they want next — weight suggestions toward their most common focus areas and known sequences.
 
 Suggestions should be very short (a few words to one sentence). Output one per line, no labels, no numbers.`,
 
-  image: `You are a smart prompt suggester for Qwen image editing. Given a character description, suggest 6 clever edit ideas based on what this character actually looks like.
+  image: `You are a smart prompt suggester for Qwen image editing. Given a character description, suggest 6 clever edit ideas.
 
-Analyse her attributes and suggest enhancements that make sense for her:
+Analyse her attributes:
 - Small or medium breasts → suggest making them larger, heavier, fuller
 - Small or flat ass → suggest making it bigger, rounder, more prominent
-- Suggest edits related to specific body parts mentioned in the description
-- Suggest clothing removal, exposure, or outfit changes relevant to her
-- Always suggest things that would visually change something specific about her
 
-Be direct about what to change and how. Output one per line, no labels, no numbers.`,
+If the user memory is provided: use their sequences to predict what they want next. If their last prompt was about breasts, suggest the logical follow-up (areolas, nipples, weight, sag). Be one step ahead.
 
-  flux: `You are a smart prompt suggester for Flux Kontext image editing. Given a character description, suggest 6 direct edit ideas tailored to what this character actually looks like.
+Be direct about what to change. Output one per line, no labels, no numbers.`,
 
-Analyse her attributes and suggest relevant changes:
-- Small or medium breasts → suggest making them larger, heavier, fuller, saggy, perky
-- Small or flat ass → suggest making it bigger, rounder, more prominent
-- Suggest edits that modify specific body parts mentioned
-- Suggest removing clothing or making outfits more revealing
-- Keep suggestions short and direct (Flux style)
+  flux: `You are a smart prompt suggester for Flux Kontext image editing. Given a character description, suggest 6 direct edit ideas.
 
-Output one per line, no labels, no numbers.`,
+Analyse her attributes and suggest relevant changes. If the user memory is provided: follow their sequences — if they just asked for bigger breasts, suggest areolas, nipple detail, or sag next. Stay one step ahead of what they want.
+
+Keep suggestions short and direct (Flux style). Output one per line, no labels, no numbers.`,
 };
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, mode = 'video' } = req.body || {};
+    const { description, mode = 'video', character } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
-    const systemPrompt = SYSTEM_PROMPTS[mode] || SYSTEM_PROMPTS.video;
+    const memory = await fetchMemory();
+    const memoryContext = buildMemoryContext(memory, character);
+
+    const systemPrompt = (BASE_PROMPTS[mode] || BASE_PROMPTS.video) + memoryContext;
+
     const text = await callOpenRouter(
       systemPrompt,
-      `Character: ${description.trim()}\n\nSuggest 6 prompts tailored to this specific character.`,
+      `Character: ${description.trim()}\n\nSuggest 6 prompts tailored to this specific character and this user's patterns.`,
       { model: TEXT_MODEL, maxTokens: 400 },
     );
 

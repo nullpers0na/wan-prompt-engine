@@ -7,6 +7,7 @@
     { "src": "api/flux-prompt.js", "use": "@vercel/node" },
     { "src": "api/suggest.js", "use": "@vercel/node" },
     { "src": "api/describe.js", "use": "@vercel/node" },
+    { "src": "api/memory.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
@@ -16,6 +17,7 @@
     { "src": "/api/flux-prompt", "dest": "/api/flux-prompt.js" },
     { "src": "/api/suggest", "dest": "/api/suggest.js" },
     { "src": "/api/describe", "dest": "/api/describe.js" },
+    { "src": "/api/memory", "dest": "/api/memory.js" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]

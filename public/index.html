@@ -842,8 +842,12 @@
       saveToMemoryBank(name, lastDescription);
       characterNameSaved.classList.add('visible');
       saveCharacterBtn.disabled = true;
-      // Refetch suggestions with name context
       fetchSuggestions(`${name}, ${lastDescription}`);
+      fetch('/api/memory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'character_named', data: { name, description: lastDescription } }),
+      }).catch(() => {});
     });
     characterNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveCharacterBtn.click(); });
 
@@ -913,7 +917,7 @@
         const res = await fetch('/api/suggest', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description: characterDescription, mode }),
+          body: JSON.stringify({ description: characterDescription, mode, character: describedCharacter || null }),
         });
         if (!res.ok) throw new Error('suggest failed');
         const data = await res.json();
@@ -975,6 +979,12 @@
         }
         saveHistory({ mode, description, character: describedCharacter, prompts: data.prompts });
         renderHistory();
+        // Fire and forget — write to memory bank
+        fetch('/api/memory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'prompt_generated', data: { prompt: description, mode, character: describedCharacter || null } }),
+        }).catch(() => {});
       } catch (err) {
         clearTimeout(fetchTimeout);
         showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
