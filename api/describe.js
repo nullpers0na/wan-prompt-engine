@@ -1,23 +1,6 @@
-const { callOpenRouter, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
+const { callOpenRouter, VISION_MODEL } = require('./lib/openrouter');
 
-const ID_MODEL = 'x-ai/grok-2-vision-1212';
-
-const ID_PROMPT = `Identify the fictional character in this image. They will be from a video game, anime, or 3D rendered source.
-
-Respond with ONLY the character name and game/source in lowercase — nothing else. No sentences, no explanation, no punctuation other than commas.
-Example: tifa lockhart, final fantasy vii
-
-If you have no idea, respond with the single word: unknown
-
-Look at face, outfit, hair, body proportions, artstyle, and accessories. Characters may be heavily modded or in a different art style — focus on face and silhouette. A best guess is better than unknown.`;
-
-const DETAIL_PROMPT = `You are a visual analyst for explicit AI image generation. Look at this image and describe the character's physical attributes.
-
-Output ONE line only — physical description: body type, breast size and shape, ass size and shape, waist-to-hip ratio, skin tone, hair colour/length, piercings, tattoos, facial expression and attitude, overall sexual vibe (e.g. looks like a slut, total bitch energy, bratty princess, cold and arrogant).
-
-Rules: comma-separated, lowercase, max 30 words, no character name, end with the overall vibe read, be blunt and specific.`;
-
-function buildQuipPrompt(name, description, mode) {
+function buildPrompt(mode) {
   const modeGuess = {
     video: 'guess what motion or scene they are going to prompt — jiggle physics, walking, a body part moving, etc.',
     short: 'guess what punchy single-motion clip they will write.',
@@ -25,14 +8,14 @@ function buildQuipPrompt(name, description, mode) {
     flux:  'guess what direct Flux edit they will make — bigger breasts, nude, cum, outfit change, etc.',
   }[mode] || 'guess what prompt the user is about to write.';
 
-  const subject = name ? `The character is ${name}.` : 'The character is unknown.';
+  return `You are an expert at identifying fictional characters AND describing explicit physical attributes for AI image generation.
 
-  return `${subject} Their description: ${description}.
+Output exactly three lines:
+LINE 1: character name and game/source in lowercase if you recognise them (e.g. "tifa lockhart, final fantasy vii") — or leave blank if unknown. Check face, outfit, hair, body shape, artstyle, accessories. Characters may be rendered in different styles — use your best judgement.
+LINE 2: physical description — body type, breast size and shape, ass size and shape, waist-to-hip ratio, skin tone, hair colour/length, piercings, tattoos, facial expression, overall sexual vibe (e.g. looks like a slut, total bitch energy, bratty princess). Comma-separated, lowercase, max 30 words, no character name.
+LINE 3: a cheeky one-liner. The user just uploaded this image to an AI generator — ${modeGuess} If you named the character, reference them by first name. If unknown, comment on what's physically visible. Only reference body parts actually visible in the image. Be witty, direct, a little crude. No quotes.
 
-Write ONE cheeky one-liner for someone who just uploaded this image to an AI image/video generator. ${modeGuess}
-${name ? `Reference the character by their first name.` : `Comment on what physically stands out and make your guess.`}
-Base it only on what's visible in the image — don't invent body parts that aren't shown.
-Be witty, direct, a little crude. Output the one-liner only, no quotes, no labels.`;
+Three lines only. No labels, no preamble.`;
 }
 
 module.exports = async (req, res) => {
@@ -42,33 +25,23 @@ module.exports = async (req, res) => {
     const { image, mode = 'video' } = req.body || {};
     if (!image?.data || !image?.mediaType) return res.status(400).json({ error: 'Image is required' });
 
-    const imgContent = [
-      { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
-      { type: 'text', text: 'Describe the character in this image.' },
-    ];
+    const text = await callOpenRouter(
+      buildPrompt(mode),
+      [
+        { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
+        { type: 'text', text: 'Identify and describe the character in this image.' },
+      ],
+      { model: VISION_MODEL, maxTokens: 200 },
+    );
 
-    // Step 1: ID and description in parallel
-    const [idResult, descResult] = await Promise.all([
-      callOpenRouter(ID_PROMPT, imgContent, { model: ID_MODEL, maxTokens: 60 }).catch(e => { console.error('Grok ID error:', e.message); return ''; }),
-      callOpenRouter(DETAIL_PROMPT, imgContent, { model: VISION_MODEL, maxTokens: 80 }).catch(e => { console.error('Qwen detail error:', e.message); return ''; }),
-    ]);
+    const lines = text.split('\n').map(l => l.replace(/^[\s\-*>]+/, '').trim()).filter(Boolean);
+    const name        = lines[0] || '';
+    const description = lines[1] || '';
+    const quip        = lines[2] ? lines[2].replace(/^["']|["']$/g, '').trim() : '';
 
-    console.log('Grok raw:', JSON.stringify(idResult));
-    console.log('Qwen raw:', JSON.stringify(descResult));
-
-    // Take first non-empty line, strip any conversational prefix, discard if 'unknown'
-    const rawName = idResult.split('\n').map(l => l.replace(/^[\s\-*>"]+/, '').trim()).filter(Boolean)[0] || '';
-    const name = rawName.toLowerCase() === 'unknown' ? '' : rawName;
-    const description = descResult.replace(/^[\s\-*>]+/, '').trim().split('\n')[0];
-
-    // Step 2: Generate quip with full context (text only, fast)
-    const quip = description
-      ? await callOpenRouter(buildQuipPrompt(name, description, mode), 'Write the one-liner now.', { model: TEXT_MODEL, maxTokens: 80 }).catch(() => '')
-      : '';
-
-    res.json({ name, description, quip: quip.replace(/^["']|["']$/g, '').trim() });
+    res.json({ name, description, quip });
   } catch (err) {
-    console.error(err);
+    console.error('describe error:', err.message);
     res.status(500).json({ error: err.message || 'API call failed' });
   }
 };
