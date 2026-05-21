@@ -1,6 +1,6 @@
 const { callOpenRouter } = require('./lib/openrouter');
 
-const DESCRIBE_MODEL = 'google/gemini-2.0-flash-001';
+const DESCRIBE_MODEL = 'google/gemini-2.0-flash-exp';
 
 const MODE_QUIP_CONTEXT = {
   video:  'The user is about to generate a long video clip. Guess what motion or scene they are going to prompt — jiggle physics, walking, a specific body part moving, etc.',

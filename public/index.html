@@ -817,7 +817,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ image, mode }),
         });
-        if (!res.ok) throw new Error('describe failed');
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || `describe failed (${res.status})`); }
         const data = await res.json();
         if (data.description) {
           describedCharacter = data.description; // physical only — no name in prompts
@@ -829,7 +829,7 @@
           const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
           fetchSuggestions(suggestContext);
         }
-      } catch (_) {}
+      } catch (err) { console.error('describe error:', err.message); }
     }
 
     async function fetchSuggestions(characterDescription) {
