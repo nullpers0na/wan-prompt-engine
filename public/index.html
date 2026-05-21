@@ -893,13 +893,14 @@
             suggestionsQuip.textContent = data.quip;
             suggestionsQuip.classList.add('visible');
           }
-          // Show name prompt if unrecognised
-          if (!data.name) {
-            characterNameInput.value = '';
-            saveCharacterBtn.disabled = false;
-            characterNameSaved.classList.remove('visible');
-            suggestionsNamePrompt.classList.add('visible');
-          }
+          // Always show name prompt — pre-fill if AI got a name, allow correction
+          characterNameInput.value = data.name || '';
+          saveCharacterBtn.disabled = false;
+          characterNameSaved.classList.remove('visible');
+          suggestionsNamePrompt.querySelector('.suggestions-name-label').textContent = data.name
+            ? `Not right? Correct it:`
+            : `Don't recognise her? Name her and she'll be remembered:`;
+          suggestionsNamePrompt.classList.add('visible');
           showSuggestions();
           const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
           fetchSuggestions(suggestContext);
