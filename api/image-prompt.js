@@ -11,7 +11,11 @@ Rules:
 - Do NOT list things to keep the same (hair, skin, expression, pose, background, etc.) — Qwen reads the image, it doesn't need reminding
 - 2-3 quality tags maximum: pick the ones that matter for this specific edit
 - Always end with "preserve the original face exactly" unless the face is what's changing
-- LoRA trigger words — if the user's request contains any of these exact phrases, include them verbatim in the output, do not paraphrase or synonym-swap them: "tiny breasts", "small breasts", "medium breasts", "large breasts", "tiny areoles", "small areoles", "medium areoles", "large areoles", "medium sized areoles", "pale areoles", "ghost areoles", "brown areoles", "dark areoles", "hard nipples", "erect nipples"
+- LoRA trigger words — use these exact phrases verbatim; never paraphrase or synonym-swap them:
+  - Breast size: "tiny breasts", "small breasts", "medium breasts", "large breasts" — use whichever matches the user's intent. If the user requests a breast size change (e.g. "make them medium", "increase to large", "breasts to small") map it to the correct trigger word and include it in the output even if the exact phrase wasn't used
+  - Areola size: "tiny areoles", "small areoles", "medium areoles", "large areoles", "medium sized areoles"
+  - Areola colour: "pale areoles", "ghost areoles", "brown areoles", "dark areoles"
+  - Nipple state: "hard nipples", "erect nipples"
 - When cum or semen is mentioned, describe it as creamy white, thick, opaque
 - When the description references multiple images, use <image_1> <image_2> syntax: state what to take from <image_2>, then "Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged"
 - Images are STATIC — no motion language
