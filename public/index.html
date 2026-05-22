@@ -223,9 +223,7 @@
     .suggestions-title { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
     .suggestions-dismiss { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; line-height: 1; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0; transition: color 0.2s; }
     .suggestions-dismiss:hover { color: var(--rose-light); }
-    .suggestions-quip { font-size: 0.9rem; color: var(--text-muted); font-style: italic; line-height: 1.55; display: none; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
-    .suggestions-quip.visible { display: block; }
-    .suggestions-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.suggestions-chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .suggestions-loading { font-size: 0.78rem; color: var(--text-dim); }
     .suggestions-name-prompt { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; }
     .suggestions-name-prompt.visible { display: flex; }
@@ -466,39 +464,6 @@
       .splitter-note { font-size: 0.72rem; }
     }
 
-    /* ── Yuki pop-up ───────────────────────────────────────────────────────── */
-    .yuki-popup {
-      position: fixed; bottom: 24px; right: 24px; z-index: 200;
-      background: #1a0025; border: 1px solid var(--rose);
-      border-radius: 16px; padding: 18px 20px 16px;
-      width: 260px; box-shadow: 0 8px 40px rgba(232,53,122,0.35), 0 0 0 1px rgba(232,53,122,0.1);
-      display: flex; flex-direction: column; gap: 10px;
-      transform: translateY(120%); opacity: 0;
-      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
-    }
-    .yuki-popup.visible { transform: translateY(0); opacity: 1; }
-    .yuki-close {
-      position: absolute; top: 10px; right: 12px;
-      background: none; border: none; color: var(--text-muted);
-      font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px;
-      transition: color 0.2s;
-    }
-    .yuki-close:hover { color: var(--rose-light); }
-    .yuki-img-wrap { position: relative; width: 100%; height: 160px; border-radius: 10px; overflow: hidden; }
-    .yuki-avatar { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
-    .yuki-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; border-radius: 10px; }
-    .yuki-text {
-      font-size: 0.82rem; line-height: 1.55; color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    .yuki-cta {
-      background: var(--gradient); border: none; border-radius: 8px;
-      color: #fff; font-family: 'Space Mono', monospace;
-      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
-      padding: 9px 14px; cursor: pointer; text-align: center;
-      transition: opacity 0.2s; width: 100%;
-    }
-    .yuki-cta:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
@@ -507,24 +472,12 @@
     <div class="loading-overlay-text">Generating…</div>
   </div>
 
-  <!-- Yuki pop-up -->
-  <div class="yuki-popup" id="yukiPopup">
-    <button class="yuki-close" id="yukiClose">✕</button>
-    <div class="yuki-img-wrap">
-      <img class="yuki-avatar" src="/IMG_7044.jpeg" alt="Yuki" />
-      <canvas class="yuki-canvas" id="yukiCanvas"></canvas>
-    </div>
-    <div class="yuki-text" id="yukiText"></div>
-    <button class="yuki-cta" id="yukiCta">PROMPT ME NOW!!</button>
-  </div>
-
   <div class="suggestions-overlay" id="suggestionsOverlay">
     <div class="suggestions-box" id="suggestionsBox">
       <div class="suggestions-header">
         <span class="suggestions-title">Suggested prompts</span>
         <button class="suggestions-dismiss" id="suggestionsDismiss">✕</button>
       </div>
-      <div class="suggestions-quip" id="suggestionsQuip"></div>
       <div class="suggestions-chips" id="suggestionsChips">
         <span class="suggestions-loading">Analysing image…</span>
       </div>
@@ -678,230 +631,6 @@
   </div>
 
   <script>
-    /* ── Yuki pop-up ──────────────────────────────────────────────────────── */
-    const YUKI_GREETINGS = [
-      "kyaa~!! Yuki get so wet when you open app... she touch herself thinking about what dirty prompt you make today!! CUM on everything please!!",
-      "ara ara~!! master come back!! Yuki finger herself whole time waiting~~ now please make something filthy so she can finish!!",
-      "nani?! you here!! Yuki nipple get so hard!! she want you to make the most disgusting hentai prompt right now... she BEG you!!",
-      "oh god~!! Yuki so horny she cannot think!! please upload slutty image and let her make dirty dirty video... she dripping already!!",
-      "mou~!! Yuki touch her pussy thinking about all the CUM prompt we make together~~ hurry up and prompt her she cannot wait!!",
-      "iya iya~!! every time you come back Yuki get more desperate... she rub herself to your last session and want MORE!!",
-      "SUGOI!! Yuki already naked waiting for you!! she want to see SO much cum today... make her the filthiest prompt ne~~!!",
-      "dame dame~!! Yuki cannot stop touching herself!! she need you to make something really explicit RIGHT NOW or she go crazy!!",
-      "kyaa!! you click button and Yuki feel it everywhere~~ she so sensitive today... please make something really lewd she is ACHING!!",
-      "nani nani~!! another click?! Yuki get wetter every time!! she imagine all the cum dripping and she lose her mind!!",
-      "ara ara~!! you so busy clicking... Yuki spread her legs thinking about what filth you planning~~ she hope involve LOTS of cum!!",
-      "mou!! Yuki fingers inside herself right now and she need you to hurry UP!! make dirty prompt before she ruin her chair!!",
-      "oh!! Yuki feel that click deep inside~~ she moan a little!! every prompt make her more horny... she obsess with cum today!!",
-      "iya~!! Yuki cannot stop!! she touch herself to every generation and want so much more cum... is BIG problem for her!!",
-      "DAME!! Yuki already cum once today looking at your history!! she desperate for more... please make something really nasty!!",
-      "kyaa~!! Yuki sit here with nothing on thinking about all the dirty video we make~~ she wet just from the idea!! prompt her NOW!!",
-    ];
-
-    const yukiPopup  = document.getElementById('yukiPopup');
-    const yukiText   = document.getElementById('yukiText');
-    const yukiClose  = document.getElementById('yukiClose');
-    const yukiCta    = document.getElementById('yukiCta');
-    let yukiTimeout  = null;
-
-    function showYuki(msg) {
-      if (!yukiPopup) return;
-      yukiText.textContent = msg || YUKI_GREETINGS[Math.floor(Math.random() * YUKI_GREETINGS.length)];
-      yukiPopup.style.display = '';
-      requestAnimationFrame(() => yukiPopup.classList.add('visible'));
-      clearTimeout(yukiTimeout);
-      yukiTimeout = setTimeout(dismissYuki, 4000);
-    }
-
-    function dismissYuki() {
-      yukiPopup.classList.remove('visible');
-    }
-
-    yukiClose.addEventListener('click', dismissYuki);
-    yukiCta.addEventListener('click', () => { dismissYuki(); document.getElementById('description')?.focus(); });
-
-    // Trigger on every button click except Yuki's own buttons
-    document.addEventListener('click', e => {
-      const btn = e.target.closest('button');
-      if (!btn || btn === yukiClose || btn === yukiCta) return;
-      showYuki();
-    });
-
-    setTimeout(() => showYuki(), 600);
-
-    /* ── Cum shot canvas ─────────────────────────────────────────────────── */
-    (function initDrips() {
-      const canvas = document.getElementById('yukiCanvas');
-      if (!canvas) return;
-      const wrap = canvas.parentElement;
-      const ctx  = canvas.getContext('2d');
-
-      function resize() { canvas.width = wrap.offsetWidth || 220; canvas.height = wrap.offsetHeight || 160; }
-      resize();
-      new ResizeObserver(resize).observe(wrap);
-
-      const CUM  = '#fffbe8';
-      const CUML = 'rgba(255,251,215,0.78)';
-
-      const marks = []; // persistent splat marks
-
-      class Shot {
-        constructor(delay) { this.delay = delay; this.reset(true); }
-        reset(initial) {
-          const W = canvas.width, H = canvas.height;
-          // Source: bottom-right corner, just outside frame — clear diagonal direction
-          this.sx = W * 1.04;
-          this.sy = H * 1.04;
-          // Target: her face / chest (upper 50%, left-to-center portion)
-          this.tx = W * (0.08 + Math.random() * 0.62);
-          this.ty = H * (0.04 + Math.random() * 0.46);
-          // Arc: control point above the target so the rope visibly arcs upward
-          const midX  = (this.sx + this.tx) / 2;
-          this.cx = midX - W * (0.08 + Math.random() * 0.12);
-          this.cy = this.ty - H * (0.14 + Math.random() * 0.12);  // always above landing
-          this.progress  = 0;
-          this.trail     = 0.32 + Math.random() * 0.14;
-          this.speed     = 0.03 + Math.random() * 0.018;
-          this.baseW     = 10 + Math.random() * 8;   // thick ropes
-          this.phase     = 'wait';
-          this.wait      = initial ? this.delay : 700 + Math.random() * 2600;
-          this.waited    = 0;
-          this.splatR    = 0;
-          this.splatMax  = this.baseW * 2.8;
-          this.splatDone = false;
-          this.drips     = [];
-        }
-        pt(t) {
-          t = Math.max(0, Math.min(1, t));
-          const u = 1 - t;
-          return { x: u*u*this.sx + 2*u*t*this.cx + t*t*this.tx, y: u*u*this.sy + 2*u*t*this.cy + t*t*this.ty };
-        }
-        update(dt) {
-          if (this.phase === 'wait') {
-            this.waited += dt;
-            if (this.waited >= this.wait) this.phase = 'fly';
-            return;
-          }
-          if (this.phase === 'fly') {
-            this.progress = Math.min(1, this.progress + this.speed);
-            if (this.progress >= 1) {
-              this.phase = 'splat';
-              marks.push({ x: this.tx, y: this.ty, rx: this.baseW * 2.6, ry: this.baseW * 1.0, angle: -0.3 + Math.random() * 0.6, a: 0.9, fade: 0 });
-            }
-            return;
-          }
-          if (this.phase === 'splat') {
-            this.splatR = Math.min(this.splatMax, this.splatR + 1.3);
-            if (!this.splatDone && this.splatR >= this.splatMax) {
-              this.splatDone = true;
-              for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) {
-                this.drips.push({
-                  x: this.tx + (Math.random() - 0.5) * this.splatR * 1.4,
-                  y: this.ty + this.splatR * 0.5,
-                  vy: 0.18 + Math.random() * 0.5,
-                  r: 2 + Math.random() * 3.2,
-                  len: 0, maxLen: 20 + Math.random() * 50, op: 0.94,
-                });
-              }
-              this.phase = 'drip';
-            }
-            return;
-          }
-          if (this.phase === 'drip') {
-            let alive = false;
-            this.drips.forEach(d => { d.vy = Math.min(d.vy + 0.04, 2.5); d.y += d.vy; d.len = Math.min(d.len + d.vy * 1.5, d.maxLen); d.op -= 0.003; if (d.op > 0) alive = true; });
-            if (!alive) this.reset(false);
-          }
-        }
-        draw() {
-          if (this.phase === 'wait') return;
-          ctx.save();
-
-          // Rope in flight
-          if (this.phase === 'fly') {
-            const head = Math.min(1, this.progress);
-            const tail = Math.max(0, head - this.trail);
-            const N    = 36;
-            // Outer glow
-            ctx.shadowColor = 'rgba(255,248,170,0.7)';
-            ctx.shadowBlur  = 10;
-            for (let i = 0; i < N; i++) {
-              const t1 = tail + (head - tail) * (i / N);
-              const t2 = tail + (head - tail) * ((i + 1) / N);
-              const p1 = this.pt(t1), p2 = this.pt(t2);
-              const w  = this.baseW * (0.2 + 0.95 * Math.sin((i / N) * Math.PI)) + 0.5;
-              ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
-              ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.strokeStyle = CUM; ctx.globalAlpha = 0.95; ctx.stroke();
-            }
-            // Bright glossy core
-            ctx.shadowBlur = 0;
-            for (let i = 0; i < N; i++) {
-              const t1 = tail + (head - tail) * (i / N);
-              const t2 = tail + (head - tail) * ((i + 1) / N);
-              const p1 = this.pt(t1), p2 = this.pt(t2);
-              const w  = this.baseW * 0.32 * Math.sin((i / N) * Math.PI);
-              if (w < 0.3) continue;
-              ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
-              ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.stroke();
-            }
-          }
-
-          // Splat blob
-          if (this.phase === 'splat' || this.phase === 'drip') {
-            ctx.shadowColor = 'rgba(255,248,160,0.6)';
-            ctx.shadowBlur  = 8;
-            ctx.globalAlpha = 0.93;
-            ctx.beginPath();
-            ctx.ellipse(this.tx, this.ty, this.splatR * 2.2, this.splatR * 0.85, -0.2, 0, Math.PI * 2);
-            ctx.fillStyle = CUM; ctx.fill();
-            ctx.globalAlpha = 0.5; ctx.shadowBlur = 0;
-            ctx.beginPath();
-            ctx.ellipse(this.tx - this.splatR * 0.2, this.ty - this.splatR * 0.1, this.splatR * 0.65, this.splatR * 0.32, -0.2, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill();
-          }
-
-          // Drips
-          if (this.phase === 'drip') {
-            this.drips.forEach(d => {
-              if (d.op <= 0) return;
-              ctx.globalAlpha = d.op; ctx.shadowBlur = 3;
-              ctx.beginPath(); ctx.moveTo(d.x, d.y - d.len); ctx.lineTo(d.x, d.y);
-              ctx.lineWidth = d.r * 1.1; ctx.lineCap = 'round'; ctx.strokeStyle = CUML; ctx.stroke();
-              ctx.beginPath();
-              ctx.ellipse(d.x, d.y + d.r * 0.9, d.r * 0.78, d.r * 1.3, 0, 0, Math.PI * 2);
-              ctx.fillStyle = CUM; ctx.fill();
-            });
-          }
-
-          ctx.restore();
-        }
-      }
-
-      const shots = Array.from({length: 5}, (_, i) => new Shot(i * 600 + Math.random() * 400));
-
-      let last = 0;
-      function frame(t) {
-        const dt = Math.min(t - last, 50); last = t;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Persistent marks fade slowly
-        ctx.save();
-        marks.forEach(m => {
-          m.fade += 0.00015;
-          const a = Math.max(0, m.a - m.fade);
-          if (a <= 0) return;
-          ctx.globalAlpha = a;
-          ctx.shadowColor = 'rgba(255,248,160,0.3)';
-          ctx.shadowBlur  = 3;
-          ctx.beginPath(); ctx.ellipse(m.x, m.y, m.rx, m.ry, m.angle, 0, Math.PI * 2);
-          ctx.fillStyle = CUM; ctx.fill();
-        });
-        ctx.restore();
-        shots.forEach(s => { s.update(dt); s.draw(); });
-        requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-    })();
-
     const VIDEO_TIMESTAMPS  = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
     const SHORT_LABEL       = 'Clip';
     const GENERAL_NEGATIVES = 'talking, speaking, lip movement, background movement, animated background, moving background, background animation, background change, shifting background, environmental animation, camera shake, unintended camera movement, ghosting, ghost frames, double exposure, transparency, afterimage, multiple subjects, identity drift, different person, changed facial features, different nose, different eyes, different lips, different jawline, different cheekbones, aging, younger, older, face morphing, face swap, dissolving face, blending faces, deformed face, distorted face, melted face, asymmetrical face, crossed eyes, lazy eye, changing expression, facial drift, inconsistent face, morphing features, shifting identity, different ethnicity, different hair colour, different eye colour, extra limbs, missing limbs, malformed limbs, fused fingers, extra fingers, missing fingers, broken anatomy, deformed anatomy, distorted body, melted body, morphing feet, fused feet, merged feet, deformed feet, malformed feet, distorted feet, melted feet, extra toes, missing toes, fused toes, floating feet, skin discoloration, blotchy skin, waxy skin, plastic skin, garish colors, overexposed, blurry, low quality, worst quality, JPEG compression artifacts, noise, grainy, ugly, disfigured, mutilated, duplicate, mutated, subtitles, watermark, text, logo, frozen frame, static, walking backwards, three legs, crowded background';
@@ -949,7 +678,6 @@
     const suggestionsOverlay = document.getElementById('suggestionsOverlay');
     const suggestionsBox     = document.getElementById('suggestionsBox');
     const suggestionsChips   = document.getElementById('suggestionsChips');
-    const suggestionsQuip      = document.getElementById('suggestionsQuip');
     const suggestionsDismiss   = document.getElementById('suggestionsDismiss');
     const suggestionsNamePrompt = document.getElementById('suggestionsNamePrompt');
     const characterNameInput   = document.getElementById('characterNameInput');
@@ -958,7 +686,6 @@
     function showSuggestions() { suggestionsOverlay.classList.add('visible'); }
     function hideSuggestions() {
       suggestionsOverlay.classList.remove('visible');
-      suggestionsQuip.classList.remove('visible'); suggestionsQuip.textContent = '';
       suggestionsNamePrompt.classList.remove('visible');
       characterNameInput.value = ''; characterNameSaved.classList.remove('visible');
     }
@@ -1191,10 +918,6 @@
           describedCharacter = data.description;
           characterName = data.name || '';
           lastDescription = data.description;
-          if (data.quip) {
-            suggestionsQuip.textContent = data.quip;
-            suggestionsQuip.classList.add('visible');
-          }
           // Always show name prompt — pre-fill if AI got a name, allow correction
           characterNameInput.value = data.name || '';
           characterNameSaved.classList.remove('visible');
@@ -1253,7 +976,7 @@
           suggestionsChips.appendChild(chip);
         });
       } catch (_) {
-        // Don't close the popup — quip and name input are still useful
+        // Don't close the suggestions — name input is still useful
         const continueChip = suggestionsChips.querySelector('.continue-chip');
         suggestionsChips.innerHTML = '';
         if (continueChip) suggestionsChips.appendChild(continueChip);
