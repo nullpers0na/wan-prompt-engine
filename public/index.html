@@ -885,7 +885,6 @@
     }
 
     async function autoDescribeCharacter(image) {
-      // Abort any previous in-flight describe and clear stale popup
       if (describeAbortController) describeAbortController.abort();
       describeAbortController = new AbortController();
       const signal = describeAbortController.signal;
@@ -893,23 +892,18 @@
       uploadArea.classList.add('analysing');
       try {
         const knownCharacters = loadMemoryBank();
-        // Kick off memory fetch and describe in parallel — describe doesn't need to wait for memory
-        const [memoryData, describeRes] = await Promise.all([
-          fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null),
-          fetch('/api/describe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image, mode, knownCharacters, userProfile: null }),
-            signal,
-          }),
-        ]);
+        const describeRes = await fetch('/api/describe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image, mode, knownCharacters }),
+          signal,
+        });
         if (!describeRes.ok) { const err = await describeRes.json().catch(() => ({})); throw new Error(err.error || `describe failed (${describeRes.status})`); }
         const data = await describeRes.json();
         if (data.description) {
           describedCharacter = data.description;
           characterName = data.name || '';
           lastDescription = data.description;
-          // Always show name prompt — pre-fill if AI got a name, allow correction
           characterNameInput.value = data.name || '';
           characterNameSaved.classList.remove('visible');
           suggestionsNamePrompt.querySelector('.suggestions-name-label').textContent = data.name
@@ -918,23 +912,28 @@
           suggestionsNamePrompt.classList.add('visible');
           showSuggestions();
           const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
-          // Prepend "continue from last time" chip if character is in memory history
-          if (data.name && memoryData && memoryData.characterHistory) {
-            const histEntry = memoryData.characterHistory[data.name.toLowerCase()];
-            const lastHistPrompt = histEntry?.prompts?.[0]?.prompt;
-            if (lastHistPrompt) {
-              suggestionsChips.innerHTML = '';
-              const continueChip = document.createElement('button');
-              continueChip.className = 'continue-chip'; continueChip.type = 'button';
-              continueChip.textContent = `▶ Continue from last time: ${lastHistPrompt}`;
-              continueChip.addEventListener('click', () => { descriptionEl.value = lastHistPrompt; descriptionEl.focus(); hideSuggestions(); });
-              suggestionsChips.appendChild(continueChip);
-            }
-          }
           fetchSuggestions(suggestContext);
+          // Load "continue from last time" chip in the background — don't block on memory
+          if (data.name) {
+            fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(memoryData => {
+              if (!memoryData?.characterHistory) return;
+              const histEntry = memoryData.characterHistory[data.name.toLowerCase()];
+              const lastHistPrompt = histEntry?.prompts?.[0]?.prompt;
+              if (lastHistPrompt) {
+                const continueChip = document.createElement('button');
+                continueChip.className = 'continue-chip'; continueChip.type = 'button';
+                continueChip.textContent = `▶ Continue from last time: ${lastHistPrompt}`;
+                continueChip.addEventListener('click', () => { descriptionEl.value = lastHistPrompt; descriptionEl.focus(); hideSuggestions(); });
+                suggestionsChips.prepend(continueChip);
+              }
+            });
+          }
         }
       } catch (err) {
-        if (err.name !== 'AbortError') console.error('describe error:', err.message);
+        if (err.name !== 'AbortError') {
+          console.error('describe error:', err.message);
+          showError(`Analyse failed: ${err.message}`);
+        }
       } finally {
         uploadArea.classList.remove('analysing');
       }
