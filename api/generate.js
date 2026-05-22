@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
     let systemPrompt = SYSTEM_PROMPT;
     if (clauses.length) {
       const constraints = clauses.join(', ');
-      systemPrompt += `\n- PERSISTENT CONSTRAINT (append to every prompt, after all other tags): ${constraints}`;
+      systemPrompt += `\n- PERSISTENT CONSTRAINT (append to every prompt, after all other tags): , ${constraints}`;
     }
 
     const text = await callOpenRouter(
