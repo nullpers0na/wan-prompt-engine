@@ -1,33 +1,24 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are a WAN2.2 single-clip prompt writer. Your job is to EXPAND the user's description with motion physics — NOT rewrite it.
-
-CRITICAL: Copy the user's exact words first, then add WAN2.2 physics language after. Never substitute, paraphrase, or soften any word. If they wrote "fat", the prompt contains "fat". If they wrote "huge", "saggy", "tiny", "disgusting" — it stays. Their words are non-negotiable.
+const SYSTEM_PROMPT = `You are a WAN2.2 motion physics assistant. The user has written their prompt — your job is to add technical WAN2.2 physics tags and negatives only.
 
 Output format — two lines only:
-PROMPT: [the motion prompt]
+PHYSICS: [comma-separated motion physics additions only — e.g. "slow motion, soft-body jiggle, heavy ripple, extreme close-up". Do NOT repeat anything already in the description]
 NEGATIVE: [comma-separated prompt-specific negatives]
 
-How to build the prompt:
-1. Start with the user's description verbatim (or very close to it)
-2. Add WAN2.2 physics: weight, jiggle, ripple, bounce direction, intensity, slow motion
-3. Add shot framing if useful: "static close-up", "extreme close-up"
-4. End with: camera locked, face locked, static scene
-
 Rules:
-- Present tense, action already happening
-- NO camera movement — no tracking, panning, zooming, or handheld
-- Do NOT add appearance details the user didn't write — WAN2.2 reads the source image
-- If feet or toes are the subject, add: stable feet, anatomically correct
-- When cum or semen is mentioned: creamy white, thick, opaque, dripping
-- For the NEGATIVE line: prompt-specific terms only — general negatives are added by the UI`;
+- PHYSICS line: additions only, no repetition of the user's words
+- If feet or toes are the subject, include: stable feet, anatomically correct
+- When cum or semen is in the description: include creamy white, thick, opaque, dripping
+- NEGATIVE line: prompt-specific terms only — general negatives are added by the UI
+- Keep PHYSICS short — 3 to 6 tags`;
 
 function parseResponse(text) {
-  const promptMatch = text.match(/^PROMPT:\s*(.+)/im);
+  const physicsMatch = text.match(/^PHYSICS:\s*(.+)/im);
   const negativeMatch = text.match(/^NEGATIVE:\s*(.+)/im);
-  const prompt = promptMatch ? promptMatch[1].trim() : text.split('\n')[0].trim();
+  const physics = physicsMatch ? physicsMatch[1].trim() : '';
   const negative = negativeMatch ? negativeMatch[1].trim() : '';
-  return { prompt, negative };
+  return { physics, negative };
 }
 
 module.exports = async (req, res) => {
@@ -36,16 +27,19 @@ module.exports = async (req, res) => {
   try {
     const { description, image } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
+
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
       buildUserContent(description, image),
-      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 400 },
+      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 200 },
     );
 
-    const { prompt, negative } = parseResponse(text);
-    if (prompt.length < 5) {
-      return res.status(500).json({ error: `Empty response. Raw: ${text.slice(0, 200)}` });
-    }
+    const { physics, negative } = parseResponse(text);
+
+    const base = description.trim().replace(/[.!]+$/, '');
+    const prompt = physics
+      ? `${base}, ${physics}, camera locked, face locked, static scene`
+      : `${base}, camera locked, face locked, static scene`;
 
     res.json({ prompts: [prompt], negative });
   } catch (err) {

@@ -1,19 +1,20 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are a WAN2.2 motion prompt writer. Write 5 short sequential prompts — one per ~4 second clip segment.
+const SYSTEM_PROMPT = `You are a WAN2.2 motion physics assistant. The user has written their scene description — your job is to write 5 sequential motion physics variations for it, one per ~4 second clip segment.
 
-CRITICAL: Keep the user's exact words. Never substitute, paraphrase, or soften any adjective. If they wrote "fat", the prompt contains "fat". Their words are non-negotiable — only ADD motion physics around them.
+Each line = one variation. Output 5 lines separated by blank lines.
+Each line = comma-separated physics tags only (motion, intensity, angle, timing).
+Do NOT repeat the user's description. Do NOT write full sentences. Physics tags only.
+
+Examples of physics tags: slow motion, heavy ripple, upward bounce, lateral sway, extreme close-up, wide shot, jiggle settling, soft-body physics, rhythmic motion
 
 Rules:
-- ONE sentence per prompt. Short is everything.
-- Start each prompt from the user's description, then add motion physics
-- Present tense, action already happening
-- Do NOT add appearance details the user didn't write — WAN2.2 reads the source image
-- NO camera movement ever — camera is always locked
-- End every prompt with: camera locked, face locked, static scene
-- If feet or toes are mentioned, add: stable feet, anatomically correct
-- When cum or semen is mentioned: creamy white, thick, opaque, dripping
-- Separate prompts with a blank line only — no labels, numbers, or headers`;
+- 3 to 6 tags per segment
+- Vary the motion across the 5 segments (build, peak, slow down, zoom, etc.)
+- If feet or toes are in the description: include stable feet, anatomically correct
+- If cum or semen is in the description: include creamy white, thick, opaque, dripping
+- No camera movement tags — camera is always locked
+- No labels, numbers, or headers`;
 
 // Extract "remember X" clauses and return { cleaned description, remember clauses[] }
 function extractRemember(description) {
@@ -25,17 +26,14 @@ function extractRemember(description) {
   return { cleaned, clauses };
 }
 
-function parsePrompts(text) {
-  const byBlank = text.split(/\n\s*\n/).map(block => {
-    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-    if (lines.length > 1 && /^[\s*#]*(?:prompt|segment)?\s*\d+\W*$/i.test(lines[0])) lines.shift();
-    if (lines.length) lines[0] = lines[0].replace(/^[\s*#]*(?:prompt|segment)?\s*\d+\s*[:\-*#.)\]]+\s*/i, '').trim();
-    return lines.join(' ').trim();
-  }).filter(b => b.length > 20);
+function parsePhysicsTags(text) {
+  const byBlank = text.split(/\n\s*\n/).map(block =>
+    block.split('\n').map(l => l.replace(/^[\s*#\-\d.)\]]+/, '').trim()).filter(Boolean).join(', ')
+  ).filter(b => b.length > 3);
   if (byBlank.length >= 5) return byBlank.slice(0, 5);
   return text.split('\n')
-    .map(l => l.replace(/^[\s*#]*(?:prompt|segment)?\s*\d+\s*[:\-*#.)\]]+\s*/i, '').trim())
-    .filter(l => l.length > 20).slice(0, 5);
+    .map(l => l.replace(/^[\s*#\-\d.)\]]+/, '').trim())
+    .filter(l => l.length > 3).slice(0, 5);
 }
 
 module.exports = async (req, res) => {
@@ -46,21 +44,23 @@ module.exports = async (req, res) => {
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     const { cleaned, clauses } = extractRemember(description);
+    const base = (cleaned || description).trim().replace(/[.!]+$/, '');
 
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
-      buildUserContent(cleaned || description, image),
-      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 1024 },
+      buildUserContent(`Scene: ${base}`, image),
+      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 600 },
     );
 
-    let prompts = parsePrompts(text);
-    if (clauses.length) {
-      const suffix = ', ' + clauses.join(', ');
-      prompts = prompts.map(p => p.replace(/[.!]+$/, '') + suffix);
+    const physicsList = parsePhysicsTags(text);
+    if (physicsList.length !== 5) {
+      return res.status(500).json({ error: `Expected 5 segments, got ${physicsList.length}. Raw: ${text.slice(0, 200)}` });
     }
-    if (prompts.length !== 5) {
-      return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
-    }
+
+    const suffix = clauses.length ? ', ' + clauses.join(', ') : '';
+    const prompts = physicsList.map(physics =>
+      `${base}, ${physics}, camera locked, face locked, static scene${suffix}`
+    );
 
     res.json({ prompts });
   } catch (err) {
