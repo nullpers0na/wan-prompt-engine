@@ -965,11 +965,16 @@
           chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); hideSuggestions(); });
           suggestionsChips.appendChild(chip);
         });
-      } catch (_) {
-        // Don't close the suggestions — name input is still useful
+      } catch (err) {
+        console.error('fetchSuggestions error:', err);
         const continueChip = suggestionsChips.querySelector('.continue-chip');
         suggestionsChips.innerHTML = '';
         if (continueChip) suggestionsChips.appendChild(continueChip);
+        const errSpan = document.createElement('span');
+        errSpan.className = 'suggestions-loading';
+        errSpan.style.color = 'var(--rose-light)';
+        errSpan.textContent = `Suggestions failed: ${err.message}`;
+        suggestionsChips.appendChild(errSpan);
       }
     }
 
