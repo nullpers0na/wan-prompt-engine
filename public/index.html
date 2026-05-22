@@ -395,6 +395,57 @@
     .memory-recent-item:last-child { border-bottom: none; }
     .memory-empty { font-size: 0.78rem; color: var(--text-dim); }
 
+    /* ── WhatsApp button ──────────────────────────────────────────────────── */
+    .wa-btn {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 500;
+      background: var(--surface); border: 1px solid rgba(37,211,102,0.25); color: var(--text-muted);
+      border-radius: 9px; padding: 8px 16px; cursor: pointer; letter-spacing: 0.04em;
+      transition: color 0.2s, border-color 0.2s, background 0.2s; white-space: nowrap;
+      position: relative;
+    }
+    .wa-btn:hover { color: #25d366; border-color: rgba(37,211,102,0.5); background: rgba(37,211,102,0.06); }
+    .wa-btn.connected { border-color: rgba(37,211,102,0.5); color: #25d366; }
+    .wa-badge {
+      position: absolute; top: -5px; right: -5px;
+      background: #25d366; color: #000; font-size: 0.62rem; font-weight: 700;
+      border-radius: 10px; min-width: 16px; height: 16px; display: none;
+      align-items: center; justify-content: center; padding: 0 4px;
+    }
+    .wa-badge.visible { display: flex; }
+
+    /* ── WhatsApp panel ────────────────────────────────────────────────────── */
+    .wa-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+    .wa-overlay.visible { display: flex; animation: fadeIn 0.18s ease; }
+    .wa-panel {
+      display: flex; flex-direction: column; gap: 16px;
+      background: #030d08; border: 1px solid rgba(37,211,102,0.3);
+      border-radius: 16px; padding: 24px; width: 100%; max-width: 560px;
+      max-height: 82vh; overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(37,211,102,0.08);
+      animation: popUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .wa-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; flex-shrink: 0; }
+    .wa-status-dot.ready { background: #25d366; box-shadow: 0 0 6px rgba(37,211,102,0.6); }
+    .wa-status-text { font-size: 0.72rem; color: var(--text-muted); }
+    .wa-section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #25d366; border-bottom: 1px solid rgba(37,211,102,0.2); padding-bottom: 6px; margin-bottom: 8px; }
+    .wa-msg-card { background: rgba(37,211,102,0.04); border: 1px solid rgba(37,211,102,0.15); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .wa-msg-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .wa-msg-sender { font-size: 0.82rem; font-weight: 500; color: #25d366; }
+    .wa-msg-time { font-size: 0.68rem; color: var(--text-dim); }
+    .wa-msg-body { font-size: 0.86rem; color: var(--text); line-height: 1.55; background: var(--surface); border-radius: 8px; padding: 10px 12px; }
+    .wa-draft-label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
+    .wa-draft-textarea { width: 100%; min-height: 72px; background: rgba(255,255,255,0.04); border: 1px solid rgba(37,211,102,0.25); color: var(--text); border-radius: 8px; padding: 10px 12px; font-family: 'Space Grotesk', sans-serif; font-size: 0.84rem; line-height: 1.5; resize: vertical; }
+    .wa-draft-textarea:focus { outline: none; border-color: rgba(37,211,102,0.55); }
+    .wa-card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .wa-btn-generate { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; font-weight: 500; background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.3); color: #25d366; border-radius: 8px; padding: 7px 14px; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+    .wa-btn-generate:hover { background: rgba(37,211,102,0.18); border-color: rgba(37,211,102,0.5); }
+    .wa-btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+    .wa-btn-send { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; font-weight: 600; background: #25d366; border: none; color: #000; border-radius: 8px; padding: 7px 16px; cursor: pointer; transition: opacity 0.2s; }
+    .wa-btn-send:hover { opacity: 0.85; }
+    .wa-btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+    .wa-btn-dismiss { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 8px; padding: 7px 12px; cursor: pointer; transition: color 0.2s, border-color 0.2s; margin-left: auto; }
+    .wa-btn-dismiss:hover { color: #fca5a5; border-color: rgba(252,165,165,0.4); }
+
     /* ── Continue chip ─────────────────────────────────────────────────────── */
     .continue-chip {
       font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600;
@@ -566,6 +617,28 @@
           </div>
         </div>
         <button class="memory-btn" id="memoryBtn" type="button">Memory</button>
+        <div class="wa-overlay" id="waOverlay">
+          <div class="wa-panel">
+            <div class="memory-panel-header">
+              <span class="memory-panel-title">WhatsApp Inbox</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="wa-status-dot" id="waStatusDot"></span>
+                <span class="wa-status-text" id="waStatusText">Connecting…</span>
+                <button class="memory-panel-dismiss" id="waDismiss">✕</button>
+              </div>
+            </div>
+            <div id="waQrSection" style="display:none;text-align:center;padding:8px 0 4px;">
+              <div class="wa-section-title" style="margin-bottom:14px;">Scan to Connect</div>
+              <img id="waQrImg" src="" alt="WhatsApp QR Code" style="width:200px;height:200px;border-radius:10px;background:#fff;padding:8px;" />
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">Open WhatsApp &rarr; Linked Devices &rarr; Link a Device</div>
+            </div>
+            <div id="waInboxSection">
+              <div class="wa-section-title">Pending Messages</div>
+              <div id="waInboxList"><span class="memory-empty">No pending messages.</span></div>
+            </div>
+          </div>
+        </div>
+        <button class="wa-btn" id="waBtn" type="button">WhatsApp<span class="wa-badge" id="waBadge">0</span></button>
       </div>
 
       <div>
@@ -1256,6 +1329,161 @@
     }
 
     renderHistory();
+
+    // ── WhatsApp ───────────────────────────────────────────────────────────────
+    const waBtn       = document.getElementById('waBtn');
+    const waOverlay   = document.getElementById('waOverlay');
+    const waDismiss   = document.getElementById('waDismiss');
+    const waStatusDot = document.getElementById('waStatusDot');
+    const waStatusText= document.getElementById('waStatusText');
+    const waQrSection = document.getElementById('waQrSection');
+    const waQrImg     = document.getElementById('waQrImg');
+    const waInboxList = document.getElementById('waInboxList');
+    const waBadge     = document.getElementById('waBadge');
+
+    let waOpen = false;
+    let waReady = false;
+    let waStatusTimer = null;
+    let waInboxTimer = null;
+
+    function openWaPanel() {
+      waOpen = true;
+      waOverlay.classList.add('visible');
+      pollWaStatus();
+      loadWaInbox();
+      waStatusTimer = setInterval(pollWaStatus, 4000);
+      waInboxTimer  = setInterval(loadWaInbox, 12000);
+    }
+
+    function closeWaPanel() {
+      waOpen = false;
+      waOverlay.classList.remove('visible');
+      clearInterval(waStatusTimer);
+      clearInterval(waInboxTimer);
+    }
+
+    async function pollWaStatus() {
+      try {
+        const r = await fetch('/api/whatsapp/status');
+        if (!r.ok) return;
+        const { ready, qr } = await r.json();
+        waReady = ready;
+        waStatusDot.className = 'wa-status-dot' + (ready ? ' ready' : '');
+        waStatusText.textContent = ready ? 'Connected' : (qr ? 'Scan QR to connect' : 'Connecting…');
+        waBtn.className = 'wa-btn' + (ready ? ' connected' : '');
+        waQrSection.style.display = qr ? 'block' : 'none';
+        if (qr) waQrImg.src = qr;
+      } catch {}
+    }
+
+    async function loadWaInbox() {
+      try {
+        const r = await fetch('/api/whatsapp/inbox');
+        if (!r.ok) return;
+        const msgs = await r.json();
+        const count = Array.isArray(msgs) ? msgs.length : 0;
+        waBadge.textContent = count;
+        waBadge.className = 'wa-badge' + (count > 0 ? ' visible' : '');
+        if (waOpen) renderWaInbox(Array.isArray(msgs) ? msgs : []);
+      } catch {}
+    }
+
+    function renderWaInbox(msgs) {
+      if (msgs.length === 0) {
+        waInboxList.innerHTML = '<span class="memory-empty">No pending messages.</span>';
+        return;
+      }
+      waInboxList.innerHTML = '';
+      msgs.forEach(msg => {
+        const card = document.createElement('div');
+        card.className = 'wa-msg-card';
+        card.dataset.id = msg.id;
+        const ts = new Date(msg.timestamp * 1000);
+        const timeStr = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        card.innerHTML = `
+          <div class="wa-msg-meta">
+            <span class="wa-msg-sender">${escapeHtml(msg.contact_name || msg.from_number)}</span>
+            <span class="wa-msg-time">${escapeHtml(timeStr)}</span>
+          </div>
+          <div class="wa-msg-body">${escapeHtml(msg.body)}</div>
+          <div class="wa-draft-label">Reply</div>
+          <textarea class="wa-draft-textarea" id="waDraft-${msg.id}" placeholder="Type a reply or click Generate…">${escapeHtml(msg.draft_response || '')}</textarea>
+          <div class="wa-card-actions">
+            <button class="wa-btn-generate" id="waGen-${msg.id}" onclick="generateDraft(${msg.id})">Generate reply</button>
+            <button class="wa-btn-send" onclick="sendWaReply(${msg.id})"${!waReady ? ' disabled title="WhatsApp not connected"' : ''}>Send</button>
+            <button class="wa-btn-dismiss" onclick="dismissWaMsg(${msg.id})">Dismiss</button>
+          </div>
+        `;
+        waInboxList.appendChild(card);
+      });
+    }
+
+    async function generateDraft(id) {
+      const btn = document.getElementById(`waGen-${id}`);
+      const textarea = document.getElementById(`waDraft-${id}`);
+      if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+      try {
+        const r = await fetch('/api/whatsapp/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageId: id }),
+        });
+        const data = await r.json();
+        if (data.error) throw new Error(data.error);
+        if (textarea) textarea.value = data.draft;
+      } catch (err) {
+        alert('Failed to generate: ' + err.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Generate reply'; }
+      }
+    }
+
+    async function sendWaReply(id) {
+      const textarea = document.getElementById(`waDraft-${id}`);
+      const response = textarea ? textarea.value.trim() : '';
+      if (!response) { alert('Please write or generate a reply first.'); return; }
+      try {
+        const r = await fetch('/api/whatsapp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageId: id, response }),
+        });
+        const data = await r.json();
+        if (data.error) throw new Error(data.error);
+        document.querySelector(`.wa-msg-card[data-id="${id}"]`)?.remove();
+        if (!waInboxList.querySelector('.wa-msg-card')) {
+          waInboxList.innerHTML = '<span class="memory-empty">No pending messages.</span>';
+        }
+        waBadge.textContent = waInboxList.querySelectorAll('.wa-msg-card').length || 0;
+      } catch (err) {
+        alert('Failed to send: ' + err.message);
+      }
+    }
+
+    async function dismissWaMsg(id) {
+      try {
+        await fetch('/api/whatsapp/dismiss', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageId: id }),
+        });
+        document.querySelector(`.wa-msg-card[data-id="${id}"]`)?.remove();
+        if (!waInboxList.querySelector('.wa-msg-card')) {
+          waInboxList.innerHTML = '<span class="memory-empty">No pending messages.</span>';
+        }
+        waBadge.textContent = waInboxList.querySelectorAll('.wa-msg-card').length || 0;
+      } catch (err) {
+        alert('Failed to dismiss: ' + err.message);
+      }
+    }
+
+    waBtn.addEventListener('click', openWaPanel);
+    waDismiss.addEventListener('click', closeWaPanel);
+    waOverlay.addEventListener('click', (e) => { if (e.target === waOverlay) closeWaPanel(); });
+
+    // Background polling for badge count (silently fails if server doesn't have WA running)
+    setInterval(loadWaInbox, 30000);
+    loadWaInbox();
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     function setLoading(on) {

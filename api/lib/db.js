@@ -45,6 +45,20 @@ async function db() {
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS whatsapp_messages (
+        id SERIAL PRIMARY KEY,
+        wa_id TEXT UNIQUE NOT NULL,
+        from_number TEXT NOT NULL,
+        contact_name TEXT,
+        body TEXT NOT NULL,
+        timestamp BIGINT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        draft_response TEXT,
+        sent_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `;
     _ready = true;
   }
   return sql;
