@@ -7,7 +7,8 @@ Keep every prompt to ONE sentence. Short is everything. WAN2.2 generates better 
 Rules:
 - ONE sentence per prompt. No more.
 - Action verb first, present tense: "her breasts bounce slowly" not "bouncing breasts"
-- Describe motion only — NOT appearance. WAN2.2 reads the source image for looks
+- Preserve the user's exact words and adjectives (e.g. "fat", "huge", "saggy", "tiny") — do not paraphrase or soften them
+- Describe motion only — do NOT add extra appearance details not in the description. WAN2.2 reads the source image for looks
 - NO camera movement ever — no panning, zooming, tracking, dolly, handheld. Camera is always locked
 - End every prompt with: camera locked, face locked, static scene
 - If feet or toes are mentioned, add: stable feet, anatomically correct

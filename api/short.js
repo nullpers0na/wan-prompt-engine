@@ -16,8 +16,8 @@ WAN2.2 responds best to:
 Keep the prompt short and punchy — 1 to 3 sentences. Make it explicit and arousing.
 
 Rules:
-- Follow the description exactly
-- Describe the motion only — do NOT re-describe character appearance. WAN2.2 reads the source image for that
+- Follow the description exactly — preserve the user's exact words and adjectives (e.g. "fat", "huge", "saggy", "tiny"). Do not paraphrase or soften them
+- Describe the motion only — do NOT add extra appearance details not in the description. WAN2.2 reads the source image for looks
 - NO camera movement — no tracking, panning, zooming, or handheld. Camera is always locked
 - End the prompt with: camera locked, face locked, static scene
 - If feet or toes are the subject, add: stable feet, anatomically correct
