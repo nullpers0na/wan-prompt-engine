@@ -25,7 +25,14 @@ module.exports = async (req, res) => {
     const { description, characterContext, image, loraEnabled = true } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
-    const base = description.trim().replace(/[.!]+$/, '');
+    // Replace "image 2" / "image 1" with <image_2> / <image_1> syntax
+    const normalized = description.trim()
+      .replace(/\bimage\s+2\b/gi, '<image_2>')
+      .replace(/\bimage\s+1\b/gi, '<image_1>')
+      .replace(/[.!]+$/, '');
+
+    const isMultiImage = normalized.includes('<image_2>') || normalized.includes('<image_1>');
+    const base = normalized;
     const parts = [base];
 
     if (loraEnabled) {
@@ -47,7 +54,11 @@ module.exports = async (req, res) => {
       if (triggers.length) parts.push(triggers.join(', '));
     }
 
-    parts.push('preserve the original face exactly');
+    if (isMultiImage) {
+      parts.push('keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged');
+    } else {
+      parts.push('preserve the original face exactly');
+    }
 
     res.json({ prompts: [parts.join(', ')] });
   } catch (err) {
