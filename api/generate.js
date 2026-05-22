@@ -14,6 +14,16 @@ Rules:
 - When cum or semen is mentioned: creamy white, thick, opaque, dripping
 - Separate prompts with a blank line only — no labels, numbers, or headers`;
 
+// Extract "remember X" clauses and return { cleaned description, remember clauses[] }
+function extractRemember(description) {
+  const clauses = [];
+  const cleaned = description.replace(/\bremember\s+(?:to\s+)?([^,.!?\n]+)/gi, (_, clause) => {
+    clauses.push(clause.trim());
+    return '';
+  }).replace(/,\s*,/g, ',').replace(/,\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+  return { cleaned, clauses };
+}
+
 function parsePrompts(text) {
   const byBlank = text.split(/\n\s*\n/).map(block => {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
@@ -33,9 +43,18 @@ module.exports = async (req, res) => {
   try {
     const { description, image } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
+
+    const { cleaned, clauses } = extractRemember(description);
+
+    let systemPrompt = SYSTEM_PROMPT;
+    if (clauses.length) {
+      const constraints = clauses.join(', ');
+      systemPrompt += `\n- PERSISTENT CONSTRAINT (append to every prompt, after all other tags): ${constraints}`;
+    }
+
     const text = await callOpenRouter(
-      SYSTEM_PROMPT,
-      buildUserContent(description, image),
+      systemPrompt,
+      buildUserContent(cleaned || description, image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 1024 },
     );
 
