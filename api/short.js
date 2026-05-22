@@ -25,18 +25,24 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, image } = req.body || {};
+    const { description, characterContext, image } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
+
+    const base = description.trim().replace(/[.!]+$/, '');
+
+    // Give LLM character context so physics tags are appropriate, but only the user's text becomes the base
+    const llmInput = characterContext
+      ? `Character: ${characterContext}\n\nUser prompt: ${description}`
+      : description;
 
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
-      buildUserContent(description, image),
+      buildUserContent(llmInput, image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 200 },
     );
 
     const { physics, negative } = parseResponse(text);
 
-    const base = description.trim().replace(/[.!]+$/, '');
     const prompt = physics
       ? `${base}, ${physics}, camera locked, face locked, static scene`
       : `${base}, camera locked, face locked, static scene`;

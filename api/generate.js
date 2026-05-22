@@ -1,20 +1,19 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are a WAN2.2 motion physics assistant. The user has written their scene description — your job is to write 5 sequential motion physics variations for it, one per ~4 second clip segment.
+const SYSTEM_PROMPT = `You are a WAN2.2 motion physics assistant. The user has written their scene — your job is to write 5 sequential motion physics variations, one per ~4 second clip segment.
 
-Each line = one variation. Output 5 lines separated by blank lines.
-Each line = comma-separated physics tags only (motion, intensity, angle, timing).
-Do NOT repeat the user's description. Do NOT write full sentences. Physics tags only.
+Each segment = one line of comma-separated physics tags only (motion, intensity, angle, timing).
+Separate segments with a blank line.
+Do NOT repeat the user's description words. Physics tags only.
 
-Examples of physics tags: slow motion, heavy ripple, upward bounce, lateral sway, extreme close-up, wide shot, jiggle settling, soft-body physics, rhythmic motion
+Examples: slow motion, heavy ripple, upward bounce, lateral sway, extreme close-up, wide shot, jiggle settling, soft-body physics, rhythmic motion, building intensity
 
 Rules:
-- 3 to 6 tags per segment
-- Vary the motion across the 5 segments (build, peak, slow down, zoom, etc.)
+- 3 to 6 tags per segment, vary across the 5 (build, peak, slow, zoom, settle)
 - If feet or toes are in the description: include stable feet, anatomically correct
 - If cum or semen is in the description: include creamy white, thick, opaque, dripping
 - No camera movement tags — camera is always locked
-- No labels, numbers, or headers`;
+- No labels, numbers, or headers — blank line between segments only`;
 
 // Extract "remember X" clauses and return { cleaned description, remember clauses[] }
 function extractRemember(description) {
@@ -40,15 +39,20 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, image } = req.body || {};
+    const { description, characterContext, image } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     const { cleaned, clauses } = extractRemember(description);
     const base = (cleaned || description).trim().replace(/[.!]+$/, '');
 
+    // Give LLM character context so physics tags are appropriate, but only user's text becomes the base
+    const llmInput = characterContext
+      ? `Character: ${characterContext}\n\nScene: ${cleaned || description}`
+      : `Scene: ${cleaned || description}`;
+
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
-      buildUserContent(`Scene: ${base}`, image),
+      buildUserContent(llmInput, image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 600 },
     );
 
