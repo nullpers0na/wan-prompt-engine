@@ -729,123 +729,186 @@
 
     setTimeout(() => showYuki(), 600);
 
-    /* ── Cum drip canvas ─────────────────────────────────────────────────── */
+    /* ── Cum shot canvas ─────────────────────────────────────────────────── */
     (function initDrips() {
       const canvas = document.getElementById('yukiCanvas');
       if (!canvas) return;
       const wrap = canvas.parentElement;
-      const ctx = canvas.getContext('2d');
+      const ctx  = canvas.getContext('2d');
 
-      function resize() {
-        canvas.width  = wrap.offsetWidth;
-        canvas.height = wrap.offsetHeight;
-      }
+      function resize() { canvas.width = wrap.offsetWidth; canvas.height = wrap.offsetHeight; }
       resize();
       new ResizeObserver(resize).observe(wrap);
 
-      const COLOR = 'rgba(255, 252, 210, 0.93)';
-      const SHADOW = 'rgba(220, 210, 140, 0.4)';
+      const CUM  = '#fffbe8';
+      const CUML = 'rgba(255,251,210,0.82)';
 
-      class Drip {
-        constructor(delay) {
-          this.delay = delay;
-          this.reset(true);
-        }
+      const marks = []; // persistent splat marks
+
+      class Shot {
+        constructor(delay) { this.delay = delay; this.reset(true); }
         reset(initial) {
-          const W = canvas.width;
-          this.x        = W * (0.08 + Math.random() * 0.84);
-          this.stemLen  = 0;
-          this.maxStem  = 30 + Math.random() * 70;
-          this.stemSpd  = 0.4 + Math.random() * 0.5;
-          this.stemW    = 3 + Math.random() * 3.5;
-          this.bulge    = 0;
-          this.maxBulge = 7 + Math.random() * 7;
-          this.bulgeSpd = 0.06 + Math.random() * 0.06;
-          this.phase    = initial ? 'waiting' : 'growing';
-          this.waitMs   = initial ? this.delay : 600 + Math.random() * 2400;
-          this.waited   = 0;
-          this.dropY    = 0;
-          this.dropVY   = 0;
-          this.dropR    = 0;
-          this.opacity  = 0;
+          const W = canvas.width, H = canvas.height;
+          // Source: bottom-centre, shot upward like a real ejaculation
+          this.sx = W * (0.25 + Math.random() * 0.5);
+          this.sy = H + 6;
+          // Target: face / chest area (top 55%)
+          this.tx = W * (0.15 + Math.random() * 0.7);
+          this.ty = H * (0.05 + Math.random() * 0.5);
+          // High parabolic arc above both points
+          const midX   = (this.sx + this.tx) / 2;
+          const peakY  = Math.min(this.sy, this.ty) - H * (0.38 + Math.random() * 0.22);
+          this.cx = midX + (Math.random() - 0.5) * W * 0.18;
+          this.cy = peakY;
+          this.progress  = 0;
+          this.trail     = 0.28 + Math.random() * 0.14;
+          this.speed     = 0.024 + Math.random() * 0.014;
+          this.baseW     = 5 + Math.random() * 5.5;
+          this.phase     = 'wait';
+          this.wait      = initial ? this.delay : 900 + Math.random() * 2800;
+          this.waited    = 0;
+          this.splatR    = 0;
+          this.splatMax  = this.baseW * 3.4;
+          this.splatDone = false;
+          this.splatter  = [];
+          this.drips     = [];
+        }
+        pt(t) {
+          t = Math.max(0, Math.min(1, t));
+          const u = 1 - t;
+          return { x: u*u*this.sx + 2*u*t*this.cx + t*t*this.tx, y: u*u*this.sy + 2*u*t*this.cy + t*t*this.ty };
         }
         update(dt) {
-          if (this.phase === 'waiting') {
+          if (this.phase === 'wait') {
             this.waited += dt;
-            if (this.waited >= this.waitMs) this.phase = 'growing';
+            if (this.waited >= this.wait) this.phase = 'fly';
             return;
           }
-          if (this.phase === 'growing') {
-            this.opacity = Math.min(1, this.opacity + dt * 0.003);
-            this.stemLen = Math.min(this.maxStem, this.stemLen + this.stemSpd);
-            this.bulge   = Math.min(this.maxBulge, this.bulge + this.bulgeSpd);
-            if (this.stemLen >= this.maxStem && this.bulge >= this.maxBulge) {
-              this.phase  = 'falling';
-              this.dropY  = this.stemLen + this.bulge;
-              this.dropR  = this.bulge;
-              this.dropVY = 0.5;
+          if (this.phase === 'fly') {
+            this.progress = Math.min(1, this.progress + this.speed);
+            if (this.progress >= 1) {
+              this.phase = 'splat';
+              marks.push({ x: this.tx, y: this.ty, rx: this.baseW * 3, ry: this.baseW * 1.1, angle: (Math.random() - 0.5) * 0.5, a: 0.87 });
+              for (let i = 0; i < 6 + Math.floor(Math.random() * 5); i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = 1.2 + Math.random() * 3.5;
+                this.splatter.push({ x: this.tx, y: this.ty, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd - 0.8, r: 0.9 + Math.random() * 2.4, op: 0.88 });
+              }
             }
             return;
           }
-          if (this.phase === 'falling') {
-            this.dropVY += 0.18;
-            this.dropY  += this.dropVY;
-            this.opacity = Math.max(0, this.opacity - dt * 0.0008);
-            if (this.dropY > canvas.height + 20 || this.opacity <= 0) this.reset(false);
+          if (this.phase === 'splat') {
+            this.splatR = Math.min(this.splatMax, this.splatR + 1.4);
+            this.splatter.forEach(s => { s.x += s.vx; s.y += s.vy; s.vy += 0.14; s.vx *= 0.9; s.op -= 0.028; });
+            if (!this.splatDone && this.splatR >= this.splatMax) {
+              this.splatDone = true;
+              for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) {
+                this.drips.push({
+                  x: this.tx + (Math.random() - 0.5) * this.splatR * 1.6,
+                  y: this.ty + this.splatR * 0.45,
+                  vy: 0.2 + Math.random() * 0.55,
+                  r: 1.6 + Math.random() * 2.8,
+                  len: 0, maxLen: 18 + Math.random() * 45, op: 0.92,
+                });
+              }
+              this.phase = 'drip';
+            }
+            return;
+          }
+          if (this.phase === 'drip') {
+            let alive = false;
+            this.drips.forEach(d => { d.vy = Math.min(d.vy + 0.045, 2.8); d.y += d.vy; d.len = Math.min(d.len + d.vy * 1.5, d.maxLen); d.op -= 0.003; if (d.op > 0) alive = true; });
+            if (!alive) this.reset(false);
           }
         }
         draw() {
-          if (this.phase === 'waiting') return;
-          const W  = canvas.width;
-          const x  = this.x;
-          const sw = this.stemW;
+          if (this.phase === 'wait') return;
           ctx.save();
-          ctx.globalAlpha = this.opacity;
-          ctx.shadowColor = SHADOW;
-          ctx.shadowBlur  = 4;
 
-          // stem — tapered bezier streak
-          if (this.stemLen > 0) {
-            ctx.beginPath();
-            ctx.moveTo(x - sw / 2, 0);
-            ctx.lineTo(x + sw / 2, 0);
-            ctx.quadraticCurveTo(x + sw * 0.3, this.stemLen * 0.6, x + sw * 0.15, this.stemLen);
-            ctx.quadraticCurveTo(x, this.stemLen + 1, x - sw * 0.15, this.stemLen);
-            ctx.quadraticCurveTo(x - sw * 0.3, this.stemLen * 0.6, x - sw / 2, 0);
-            ctx.fillStyle = COLOR;
-            ctx.fill();
+          if (this.phase === 'fly') {
+            const head = Math.min(1, this.progress);
+            const tail = Math.max(0, head - this.trail);
+            const N    = 34;
+            // Outer body
+            ctx.shadowColor = 'rgba(255,248,160,0.65)';
+            ctx.shadowBlur  = 9;
+            for (let i = 0; i < N; i++) {
+              const t1 = tail + (head - tail) * (i / N);
+              const t2 = tail + (head - tail) * ((i + 1) / N);
+              const p1 = this.pt(t1), p2 = this.pt(t2);
+              const w  = this.baseW * (0.25 + 0.9 * Math.sin((i / N) * Math.PI)) + 0.4;
+              ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+              ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.strokeStyle = CUM; ctx.globalAlpha = 0.95; ctx.stroke();
+            }
+            // Bright glossy core
+            ctx.shadowBlur = 0;
+            for (let i = 0; i < N; i++) {
+              const t1 = tail + (head - tail) * (i / N);
+              const t2 = tail + (head - tail) * ((i + 1) / N);
+              const p1 = this.pt(t1), p2 = this.pt(t2);
+              const w  = this.baseW * 0.35 * Math.sin((i / N) * Math.PI) + 0.2;
+              ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+              ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,0.88)'; ctx.stroke();
+            }
           }
 
-          // bulge at stem tip
-          if (this.bulge > 0 && this.phase === 'growing') {
+          if (this.phase === 'splat' || this.phase === 'drip') {
+            ctx.shadowColor = 'rgba(255,248,160,0.55)';
+            ctx.shadowBlur  = 7;
+            ctx.globalAlpha = 0.93;
             ctx.beginPath();
-            ctx.ellipse(x, this.stemLen + this.bulge * 0.7, this.bulge * 0.85, this.bulge, 0, 0, Math.PI * 2);
-            ctx.fillStyle = COLOR;
-            ctx.fill();
+            ctx.ellipse(this.tx, this.ty, this.splatR * 2.3, this.splatR * 0.88, -0.18, 0, Math.PI * 2);
+            ctx.fillStyle = CUM; ctx.fill();
+            // Glossy highlight
+            ctx.globalAlpha = 0.55;
+            ctx.shadowBlur  = 0;
+            ctx.beginPath();
+            ctx.ellipse(this.tx - this.splatR * 0.15, this.ty - this.splatR * 0.15, this.splatR * 0.75, this.splatR * 0.38, -0.18, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill();
+            // Splatter drops
+            this.splatter.forEach(s => {
+              if (s.op <= 0) return;
+              ctx.globalAlpha = s.op; ctx.shadowBlur = 2;
+              ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+              ctx.fillStyle = CUM; ctx.fill();
+            });
           }
 
-          // falling drop
-          if (this.phase === 'falling') {
-            ctx.beginPath();
-            // teardrop: circle bottom, pointed top
-            ctx.arc(x, this.dropY, this.dropR, 0.35, Math.PI - 0.35);
-            ctx.quadraticCurveTo(x, this.dropY - this.dropR * 2.4, x, this.dropY - this.dropR * 2.4);
-            ctx.closePath();
-            ctx.fillStyle = COLOR;
-            ctx.fill();
+          if (this.phase === 'drip') {
+            this.drips.forEach(d => {
+              if (d.op <= 0) return;
+              ctx.globalAlpha = d.op; ctx.shadowBlur = 3;
+              // Drip streak
+              ctx.beginPath(); ctx.moveTo(d.x, d.y - d.len); ctx.lineTo(d.x, d.y);
+              ctx.lineWidth = d.r * 1.15; ctx.lineCap = 'round'; ctx.strokeStyle = CUML; ctx.stroke();
+              // Teardrop bulb
+              ctx.beginPath();
+              ctx.ellipse(d.x, d.y + d.r, d.r * 0.82, d.r * 1.35, 0, 0, Math.PI * 2);
+              ctx.fillStyle = CUM; ctx.fill();
+            });
           }
 
           ctx.restore();
         }
       }
 
-      const drips = Array.from({length: 7}, (_, i) => new Drip(i * 350 + Math.random() * 500));
+      const shots = Array.from({length: 5}, (_, i) => new Shot(i * 550 + Math.random() * 500));
 
       let last = 0;
       function frame(t) {
-        const dt = t - last; last = t;
+        const dt = Math.min(t - last, 50); last = t;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drips.forEach(d => { d.update(dt); d.draw(); });
+        ctx.save();
+        marks.forEach(m => {
+          ctx.globalAlpha = m.a;
+          ctx.shadowColor = 'rgba(255,248,160,0.35)';
+          ctx.shadowBlur  = 4;
+          ctx.beginPath();
+          ctx.ellipse(m.x, m.y, m.rx, m.ry, m.angle, 0, Math.PI * 2);
+          ctx.fillStyle = CUM; ctx.fill();
+        });
+        ctx.restore();
+        shots.forEach(s => { s.update(dt); s.draw(); });
         requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
