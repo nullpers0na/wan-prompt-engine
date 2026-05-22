@@ -2,33 +2,37 @@ const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 const { db } = require('./lib/db');
 
 async function fetchContext(character) {
+  const empty = { profile: null, accepted: [], rejected: [], charAccepted: [] };
   try {
-    const sql = await db();
-
-    const [profileRows, acceptedRows, rejectedRows] = await Promise.all([
-      sql`SELECT profile FROM user_profile WHERE id = 1`,
-      sql`SELECT prompt_text FROM prompts WHERE accepted = true ORDER BY created_at DESC LIMIT 15`,
-      sql`SELECT prompt_text FROM prompts WHERE accepted = false ORDER BY created_at DESC LIMIT 10`,
+    const result = await Promise.race([
+      (async () => {
+        const sql = await db();
+        const [profileRows, acceptedRows, rejectedRows] = await Promise.all([
+          sql`SELECT profile FROM user_profile WHERE id = 1`,
+          sql`SELECT prompt_text FROM prompts WHERE accepted = true ORDER BY created_at DESC LIMIT 15`,
+          sql`SELECT prompt_text FROM prompts WHERE accepted = false ORDER BY created_at DESC LIMIT 10`,
+        ]);
+        let charAccepted = [];
+        if (character) {
+          const rows = await sql`
+            SELECT prompt_text FROM prompts
+            WHERE character_name = ${character} AND accepted = true
+            ORDER BY created_at DESC LIMIT 8
+          `;
+          charAccepted = rows.map(r => r.prompt_text);
+        }
+        return {
+          profile: profileRows[0]?.profile || null,
+          accepted: acceptedRows.map(r => r.prompt_text),
+          rejected: rejectedRows.map(r => r.prompt_text),
+          charAccepted,
+        };
+      })(),
+      new Promise(resolve => setTimeout(() => resolve(empty), 5000)),
     ]);
-
-    let charAccepted = [];
-    if (character) {
-      const rows = await sql`
-        SELECT prompt_text FROM prompts
-        WHERE character_name = ${character} AND accepted = true
-        ORDER BY created_at DESC LIMIT 8
-      `;
-      charAccepted = rows.map(r => r.prompt_text);
-    }
-
-    return {
-      profile: profileRows[0]?.profile || null,
-      accepted: acceptedRows.map(r => r.prompt_text),
-      rejected: rejectedRows.map(r => r.prompt_text),
-      charAccepted,
-    };
+    return result;
   } catch {
-    return { profile: null, accepted: [], rejected: [], charAccepted: [] };
+    return empty;
   }
 }
 
