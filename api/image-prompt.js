@@ -47,7 +47,6 @@ module.exports = async (req, res) => {
       if (triggers.length) parts.push(triggers.join(', '));
     }
 
-    parts.push('photorealistic, detailed, sharp focus');
     parts.push('preserve the original face exactly');
 
     res.json({ prompts: [parts.join(', ')] });
