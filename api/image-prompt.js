@@ -22,28 +22,31 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, characterContext, image } = req.body || {};
+    const { description, characterContext, image, loraEnabled = true } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     const base = description.trim().replace(/[.!]+$/, '');
-    const llmInput = characterContext
-      ? `Character context: ${characterContext}\n\nEdit request: ${description}`
-      : description;
-
-    const raw = await callOpenRouter(
-      SYSTEM_PROMPT,
-      buildUserContent(llmInput, image),
-      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 80 },
-    );
-
-    // Extract only known triggers from the response — ignore anything else the LLM outputs
-    const baseLower = base.toLowerCase();
-    const triggers = LORA_TRIGGERS.filter(t =>
-      raw.toLowerCase().includes(t) && !baseLower.includes(t)
-    );
-
     const parts = [base];
-    if (triggers.length) parts.push(triggers.join(', '));
+
+    if (loraEnabled) {
+      const llmInput = characterContext
+        ? `Character context: ${characterContext}\n\nEdit request: ${description}`
+        : description;
+
+      const raw = await callOpenRouter(
+        SYSTEM_PROMPT,
+        buildUserContent(llmInput, image),
+        { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 80 },
+      );
+
+      // Extract only known triggers — ignore anything else the LLM outputs
+      const baseLower = base.toLowerCase();
+      const triggers = LORA_TRIGGERS.filter(t =>
+        raw.toLowerCase().includes(t) && !baseLower.includes(t)
+      );
+      if (triggers.length) parts.push(triggers.join(', '));
+    }
+
     parts.push('photorealistic, detailed, sharp focus');
     parts.push('preserve the original face exactly');
 
