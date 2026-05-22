@@ -1,4 +1,4 @@
-const VISION_MODEL = 'google/gemini-2.0-flash-001'; // fast multimodal — sub-5s for describe
+const VISION_MODEL = 'qwen/qwen2.5-vl-7b-instruct';  // fast, explicit-safe vision for describe
 const TEXT_MODEL   = 'qwen/qwen2.5-vl-72b-instruct'; // quality model for generate/suggest
 
 function buildUserContent(description, image) {
