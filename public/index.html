@@ -1024,7 +1024,6 @@
       nextStepsEl.style.display = 'none';
       lastPrompts = [];
 
-      const fullDescription = describedCharacter ? `Character: ${describedCharacter}\n\n${description}` : description;
       const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
       const body = { description, characterContext: describedCharacter || null };
       lastEndpoint = endpoint;
