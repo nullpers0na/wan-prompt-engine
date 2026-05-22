@@ -9,26 +9,33 @@ function buildUserContent(description, image) {
   ];
 }
 
-async function callOpenRouter(systemPrompt, userContent, { model, maxTokens = 1024 } = {}) {
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userContent },
-      ],
-    }),
-  });
+async function callOpenRouter(systemPrompt, userContent, { model, maxTokens = 1024, timeoutMs = 25000 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent },
+        ],
+      }),
+    });
 
-  if (!response.ok) throw new Error(await response.text());
-  const data = await response.json();
-  return data.choices[0].message.content.trim();
+    if (!response.ok) throw new Error(await response.text());
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 module.exports = { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL };

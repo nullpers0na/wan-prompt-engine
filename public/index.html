@@ -1175,13 +1175,16 @@
       uploadArea.classList.add('analysing');
       try {
         const knownCharacters = loadMemoryBank();
-        const memoryData = await fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null);
-        const describeRes = await fetch('/api/describe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image, mode, knownCharacters, userProfile: memoryData?.profile || null }),
-          signal,
-        });
+        // Kick off memory fetch and describe in parallel — describe doesn't need to wait for memory
+        const [memoryData, describeRes] = await Promise.all([
+          fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/api/describe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image, mode, knownCharacters, userProfile: null }),
+            signal,
+          }),
+        ]);
         if (!describeRes.ok) { const err = await describeRes.json().catch(() => ({})); throw new Error(err.error || `describe failed (${describeRes.status})`); }
         const data = await describeRes.json();
         if (data.description) {

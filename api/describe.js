@@ -67,21 +67,24 @@ module.exports = async (req, res) => {
     // Treat non-name responses as blank
     if (/^(unknown|unidentified|unnamed|unrecognized|unrecognised|n\/a|none|-)$/i.test(name)) name = '';
 
-    // Always check memory bank first — user-saved names take priority over vision model names
-    if (description && knownCharacters.length > 0) {
-      const matchResult = await callOpenRouter(
-        buildDescriptionMatchPrompt(description, knownCharacters),
-        'Output the matched character name or unknown.',
-        { model: TEXT_MODEL, maxTokens: 40 },
-      ).catch(() => '');
+    // Run memory match and quip generation in parallel
+    const [matchResult, quip] = await Promise.all([
+      description && knownCharacters.length > 0
+        ? callOpenRouter(
+            buildDescriptionMatchPrompt(description, knownCharacters),
+            'Output the matched character name or unknown.',
+            { model: TEXT_MODEL, maxTokens: 40 },
+          ).catch(() => '')
+        : Promise.resolve(''),
+      description
+        ? generateQuip(name, description, mode, userProfile).catch(() => '')
+        : Promise.resolve(''),
+    ]);
+
+    if (matchResult) {
       const matched = matchResult.trim();
       if (matched && matched.toLowerCase() !== 'unknown') name = matched;
     }
-
-    // Always generate quip separately — vision model drops it when overloaded
-    const quip = description
-      ? await generateQuip(name, description, mode, userProfile).catch(() => '')
-      : '';
 
     res.json({ name, description, quip });
   } catch (err) {
