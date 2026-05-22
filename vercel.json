@@ -1,5 +1,13 @@
 {
   "version": 2,
+  "functions": {
+    "api/describe.js":     { "maxDuration": 60 },
+    "api/generate.js":     { "maxDuration": 60 },
+    "api/short.js":        { "maxDuration": 60 },
+    "api/suggest.js":      { "maxDuration": 60 },
+    "api/image-prompt.js": { "maxDuration": 60 },
+    "api/memory.js":       { "maxDuration": 30 }
+  },
   "builds": [
     { "src": "api/generate.js", "use": "@vercel/node" },
     { "src": "api/image-prompt.js", "use": "@vercel/node" },

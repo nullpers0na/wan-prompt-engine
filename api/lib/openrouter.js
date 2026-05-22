@@ -1,5 +1,5 @@
-const VISION_MODEL = 'qwen/qwen2.5-vl-72b-instruct';
-const TEXT_MODEL   = VISION_MODEL; // same model handles both vision and text tasks
+const VISION_MODEL = 'google/gemini-2.0-flash-001'; // fast multimodal — sub-5s for describe
+const TEXT_MODEL   = 'qwen/qwen2.5-vl-72b-instruct'; // quality model for generate/suggest
 
 function buildUserContent(description, image) {
   if (!image) return description.trim();
