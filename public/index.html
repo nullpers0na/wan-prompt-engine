@@ -546,8 +546,8 @@
               <button class="memory-panel-dismiss" id="memoryDismiss">✕</button>
             </div>
             <div>
-              <div class="memory-section-title">Preferences</div>
-              <div class="memory-pref-list" id="memoryPrefList"><span class="memory-empty">No preferences yet.</span></div>
+              <div class="memory-section-title">AI Profile</div>
+              <div class="memory-pref-list" id="memoryPrefList"><span class="memory-empty">No profile yet.</span></div>
             </div>
             <div>
               <div class="memory-section-title">Saved Characters</div>
@@ -708,20 +708,13 @@
         const res = await fetch('/api/memory');
         if (!res.ok) throw new Error('Failed to load memory');
         const data = await res.json();
-        // Preferences
-        const prefs = Object.entries(data.preferences || {})
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10);
-        memoryPrefList.innerHTML = '';
-        if (prefs.length === 0) {
-          memoryPrefList.innerHTML = '<span class="memory-empty">No preferences yet.</span>';
+        // AI profile
+        const nextSynth = data.promptCount === 0 ? 5 : (5 - (data.promptCount % 5)) || 5;
+        if (data.profile) {
+          memoryPrefList.innerHTML = `<div style="font-size:0.82rem;color:var(--text);line-height:1.6;white-space:pre-wrap">${escapeHtml(data.profile)}</div><div style="font-size:0.72rem;color:var(--text-dim);margin-top:6px">${data.promptCount} prompts logged · next update in ${nextSynth}</div>`;
         } else {
-          prefs.forEach(([tag, count]) => {
-            const el = document.createElement('div');
-            el.className = 'memory-pref-item';
-            el.innerHTML = `<span>${escapeHtml(tag)}</span><span class="memory-pref-count">${Math.round(count * 10) / 10}</span>`;
-            memoryPrefList.appendChild(el);
-          });
+          const needed = Math.max(0, 5 - data.promptCount);
+          memoryPrefList.innerHTML = `<span class="memory-empty">No profile yet — generate ${needed} more prompt${needed !== 1 ? 's' : ''} to build one.</span>`;
         }
         // Recent prompts (last 5)
         const recents = (data.recentPrompts || []).slice(0, 5);
@@ -732,7 +725,7 @@
           recents.forEach(p => {
             const el = document.createElement('div');
             el.className = 'memory-recent-item';
-            el.textContent = (p.mode ? `[${p.mode}] ` : '') + p.prompt;
+            el.textContent = (p.mode ? `[${p.mode}] ` : '') + (p.prompt_text || '');
             memoryRecentList.appendChild(el);
           });
         }

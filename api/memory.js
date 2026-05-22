@@ -46,17 +46,32 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     try {
       const sql = await db();
-      const [profileRows, recentRows, charRows] = await Promise.all([
+      const [profileRows, recentRows, charRows, totalRows] = await Promise.all([
         sql`SELECT profile, prompt_count, updated_at FROM user_profile WHERE id = 1`,
         sql`SELECT prompt_text, mode, character_name, accepted, created_at FROM prompts ORDER BY created_at DESC LIMIT 20`,
         sql`SELECT name, description, prompt_count FROM characters ORDER BY prompt_count DESC LIMIT 20`,
+        sql`SELECT COUNT(*)::int AS count FROM prompts`,
       ]);
+
+      // Build characterHistory: most recent accepted prompt per character
+      const charHistRows = await sql`
+        SELECT DISTINCT ON (character_name) character_name, prompt_text, created_at
+        FROM prompts
+        WHERE character_name IS NOT NULL AND accepted = true
+        ORDER BY character_name, created_at DESC
+      `;
+      const characterHistory = {};
+      charHistRows.forEach(r => {
+        characterHistory[r.character_name.toLowerCase()] = { prompts: [{ prompt: r.prompt_text }] };
+      });
+
       return res.json({
         profile: profileRows[0]?.profile || null,
-        promptCount: profileRows[0]?.prompt_count || 0,
+        promptCount: totalRows[0]?.count || 0,
         updatedAt: profileRows[0]?.updated_at || null,
         recentPrompts: recentRows,
         characters: charRows,
+        characterHistory,
       });
     } catch (err) {
       console.error('memory GET error:', err.message);
