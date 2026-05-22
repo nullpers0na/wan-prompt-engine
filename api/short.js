@@ -43,9 +43,13 @@ module.exports = async (req, res) => {
 
     const { physics, negative } = parseResponse(text);
 
+    const CAMERA_MOVEMENT_RE = /\b(zoom|pan|tilt|dolly|orbit|track|pull.?back|push.?in|crane|follow|sweep|rotate|circl|drift|slide|handheld|whip)\b/i;
+    const hasCameraMove = CAMERA_MOVEMENT_RE.test(description);
+    const cameraSuffix = hasCameraMove ? ', face locked' : ', camera locked, face locked, static scene';
+
     const prompt = physics
-      ? `${base}, ${physics}, camera locked, face locked, static scene`
-      : `${base}, camera locked, face locked, static scene`;
+      ? `${base}, ${physics}${cameraSuffix}`
+      : `${base}${cameraSuffix}`;
 
     res.json({ prompts: [prompt], negative });
   } catch (err) {

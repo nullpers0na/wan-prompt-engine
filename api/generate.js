@@ -42,6 +42,8 @@ function parseLines(text) {
     .slice(0, 5);
 }
 
+const CAMERA_MOVEMENT_RE = /\b(zoom|pan|tilt|dolly|orbit|track|pull.?back|push.?in|crane|follow|sweep|rotate|circl|drift|slide|handheld|whip)\b/i;
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -67,9 +69,11 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: `Expected 5 prompts, got ${physicsList.length}. Raw: ${text.slice(0, 300)}` });
     }
 
+    const hasCameraMove = CAMERA_MOVEMENT_RE.test(cleaned || description);
+    const cameraSuffix = hasCameraMove ? ', face locked' : ', camera locked, face locked, static scene';
     const suffix = clauses.length ? ', ' + clauses.join(', ') : '';
     const prompts = physicsList.map(physics =>
-      `${base}, ${physics}, camera locked, face locked, static scene${suffix}`
+      `${base}, ${physics}${cameraSuffix}${suffix}`
     );
 
     res.json({ prompts });
