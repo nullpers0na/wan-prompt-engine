@@ -46,19 +46,17 @@ module.exports = async (req, res) => {
 
     const { cleaned, clauses } = extractRemember(description);
 
-    let systemPrompt = SYSTEM_PROMPT;
-    if (clauses.length) {
-      const constraints = clauses.join(', ');
-      systemPrompt += `\n- PERSISTENT CONSTRAINT (append to every prompt, after all other tags): , ${constraints}`;
-    }
-
     const text = await callOpenRouter(
-      systemPrompt,
+      SYSTEM_PROMPT,
       buildUserContent(cleaned || description, image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 1024 },
     );
 
-    const prompts = parsePrompts(text);
+    let prompts = parsePrompts(text);
+    if (clauses.length) {
+      const suffix = ', ' + clauses.join(', ');
+      prompts = prompts.map(p => p.replace(/[.!]+$/, '') + suffix);
+    }
     if (prompts.length !== 5) {
       return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}. Raw: ${text.slice(0, 200)}` });
     }
