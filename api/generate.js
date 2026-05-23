@@ -17,7 +17,6 @@ How to write each segment:
 
 Rules:
 - Copy the user's exact words for each action — never paraphrase or soften
-- If feet or toes are mentioned: add stable feet, anatomically correct
 - If cum or semen is mentioned: add creamy white, thick, opaque, dripping
 - Camera is always locked — no pan, zoom, tilt, orbit, track
 - If the user explicitly writes camera movement, include it and drop "camera locked, static scene" but keep "face locked"`;
@@ -59,14 +58,19 @@ module.exports = async (req, res) => {
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 600 },
     );
 
-    const prompts = parseLines(text);
+    let prompts = parseLines(text);
     if (prompts.length !== 5) {
       return res.status(500).json({ error: `Expected 5 prompts, got ${prompts.length}. Raw: ${text.slice(0, 300)}` });
     }
 
-    if (clauses.length) {
-      const suffix = ', ' + clauses.join(', ');
-      return res.json({ prompts: prompts.map(p => p.replace(/[.!]+$/, '') + suffix) });
+    const hasFeet = /\b(feet|foot|toes?|sole|heels?)\b/i.test(description);
+    const extras = [];
+    if (hasFeet) extras.push('stable feet, anatomically correct');
+    if (clauses.length) extras.push(clauses.join(', '));
+
+    if (extras.length) {
+      const suffix = ', ' + extras.join(', ');
+      prompts = prompts.map(p => p.replace(/[.!]+$/, '') + suffix);
     }
 
     res.json({ prompts });
