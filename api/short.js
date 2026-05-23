@@ -3,7 +3,7 @@ const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('
 const SYSTEM_PROMPT = `You are a WAN2.2 motion physics assistant. The user has written their prompt — your job is to add technical WAN2.2 physics tags and negatives only.
 
 Output format — two lines only:
-PHYSICS: [comma-separated motion physics additions only — e.g. "slow motion, soft-body jiggle, heavy ripple, extreme close-up". Do NOT repeat anything already in the description]
+PHYSICS: [comma-separated motion physics additions only — e.g. "slow motion, soft-body jiggle, heavy ripple, rhythmic bounce". Do NOT repeat anything already in the description]
 NEGATIVE: [comma-separated prompt-specific negatives]
 
 Rules:
