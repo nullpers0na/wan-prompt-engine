@@ -17,7 +17,6 @@ How to write each segment:
 
 Rules:
 - Copy the user's exact words for each action — never paraphrase or soften
-- If cum or semen is mentioned: add creamy white, thick, opaque, dripping
 - Camera is always locked — no pan, zoom, tilt, orbit, track
 - If the user explicitly writes camera movement, include it and drop "camera locked, static scene" but keep "face locked"`;
 

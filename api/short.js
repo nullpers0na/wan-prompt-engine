@@ -9,7 +9,6 @@ NEGATIVE: [comma-separated prompt-specific negatives]
 Rules:
 - PHYSICS line: additions only, no repetition of the user's words
 - If feet or toes are the subject, include: stable feet, anatomically correct
-- When cum or semen is in the description: include creamy white, thick, opaque, dripping
 - NEGATIVE line: prompt-specific terms only — general negatives are added by the UI
 - Keep PHYSICS short — 3 to 6 tags`;
 
