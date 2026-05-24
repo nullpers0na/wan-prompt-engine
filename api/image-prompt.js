@@ -15,7 +15,14 @@ const PHRASE_ENHANCEMENTS = [
   },
 ];
 
-const SYSTEM_PROMPT = `You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
+// Phrases the LLM adds on its own that we never want in output
+const STRIP_PHRASES = [
+  /,?\s*subtle skin folds where (the )?breasts? meet (the )?chest/gi,
+  /,?\s*natural skin texture/gi,
+  /,?\s*skin folds?[^,.]*/gi,
+];
+
+`You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
 
 Qwen uses a language model as its text encoder — it responds to clear instructions, not comma-separated keyword lists.
 
@@ -65,6 +72,8 @@ module.exports = async (req, res) => {
       buildUserContent(parts.join('\n'), image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 200 },
     );
+    // Strip phrases the LLM adds uninstructed
+    for (const re of STRIP_PHRASES) prompt = prompt.replace(re, '');
     prompt = prompt.trim();
 
     // Append phrase enhancements verbatim after LLM output
