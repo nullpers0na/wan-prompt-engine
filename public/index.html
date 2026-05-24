@@ -226,13 +226,17 @@
     .suggestions-name-prompt { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; }
     .suggestions-name-prompt.visible { display: flex; }
     .suggestions-name-label { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.05em; }
-    .suggestions-name-row { display: flex; gap: 8px; }
+    .suggestions-name-row { display: flex; gap: 8px; position: relative; }
     .suggestions-name-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; }
     .suggestions-name-input:focus { border-color: rgba(232,53,122,0.5); }
     .suggestions-name-save { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 500; background: var(--gradient); border: none; border-radius: 8px; padding: 8px 16px; color: #fff; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
     .suggestions-name-save:hover { opacity: 0.85; }
     .suggestions-name-saved { font-size: 0.78rem; color: var(--rose-light); display: none; }
     .suggestions-name-saved.visible { display: block; }
+    .name-autocomplete { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 56px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .name-autocomplete.open { display: block; }
+    .name-ac-item { padding: 8px 12px; font-size: 0.85rem; color: var(--text); cursor: pointer; transition: background 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .name-ac-item:hover, .name-ac-item.active { background: rgba(232,53,122,0.15); color: var(--rose-light); }
 
     /* ── Actions ───────────────────────────────────────────────────────────── */
     .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -491,6 +495,7 @@
         <span class="suggestions-name-label">Don't recognise her? Name her and she'll be remembered:</span>
         <div class="suggestions-name-row">
           <input class="suggestions-name-input" id="characterNameInput" type="text" placeholder="e.g. Elena Fisher from Uncharted" autocomplete="off" />
+          <div class="name-autocomplete" id="nameAutocomplete"></div>
           <button class="suggestions-name-save" id="saveCharacterBtn" type="button">Save</button>
         </div>
         <span class="suggestions-name-saved" id="characterNameSaved">Saved to memory ✓</span>
@@ -874,6 +879,62 @@
       }).catch(() => {});
     });
     characterNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveCharacterBtn.click(); });
+
+    // ── Character name autocomplete ───────────────────────────────────────────
+    const nameAutocomplete = document.getElementById('nameAutocomplete');
+    let acIndex = -1;
+
+    function acItems() { return nameAutocomplete.querySelectorAll('.name-ac-item'); }
+
+    function acOpen(items) {
+      nameAutocomplete.innerHTML = '';
+      acIndex = -1;
+      items.forEach(name => {
+        const el = document.createElement('div');
+        el.className = 'name-ac-item';
+        el.textContent = name;
+        el.addEventListener('mousedown', e => {
+          e.preventDefault(); // keep focus on input
+          characterNameInput.value = name;
+          nameAutocomplete.classList.remove('open');
+          saveCharacterBtn.click();
+        });
+        nameAutocomplete.appendChild(el);
+      });
+      nameAutocomplete.classList.toggle('open', items.length > 0);
+    }
+
+    function acClose() { nameAutocomplete.classList.remove('open'); acIndex = -1; }
+
+    characterNameInput.addEventListener('input', () => {
+      const q = characterNameInput.value.trim().toLowerCase();
+      if (!q) { acClose(); return; }
+      const matches = loadMemoryBank()
+        .map(c => c.name)
+        .filter(n => n.toLowerCase().includes(q))
+        .slice(0, 6);
+      acOpen(matches);
+    });
+
+    characterNameInput.addEventListener('keydown', e => {
+      if (!nameAutocomplete.classList.contains('open')) return;
+      const items = acItems();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acIndex = Math.min(acIndex + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+        if (acIndex >= 0) characterNameInput.value = items[acIndex].textContent;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acIndex = Math.max(acIndex - 1, -1);
+        items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+        if (acIndex >= 0) characterNameInput.value = items[acIndex].textContent;
+      } else if (e.key === 'Escape') {
+        acClose();
+      }
+    });
+
+    characterNameInput.addEventListener('blur', () => setTimeout(acClose, 150));
 
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
