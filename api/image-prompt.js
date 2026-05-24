@@ -11,7 +11,7 @@ const LORA_TRIGGERS = [
 const PHRASE_ENHANCEMENTS = [
   {
     detect: /\b(saggy|droopy|hanging|pendulous)\b/i,
-    append: 'naturally saggy breasts, hanging low, nipples pointing downward, same size as original, natural skin texture.',
+    append: 'naturally saggy breasts, hanging low, nipples pointing downward, same size as original.',
   },
 ];
 
