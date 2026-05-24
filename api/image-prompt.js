@@ -7,20 +7,12 @@ const LORA_TRIGGERS = [
   'hard nipples', 'erect nipples',
 ];
 
-// Code-detected enhancements appended verbatim to the LLM output (bypasses LLM reformulation)
-const PHRASE_ENHANCEMENTS = [
+// When detected, bypass LLM for breast shape and use this sentence verbatim
+const BREAST_SHAPE_OVERRIDES = [
   {
     detect: /\b(saggy|droopy|hanging|pendulous)\b/i,
-    append: 'naturally saggy breasts, hanging low, nipples pointing downward.',
+    sentence: 'Make the breasts naturally saggy, hanging low with nipples pointing downward.',
   },
-];
-
-// Phrases the LLM adds on its own that we never want in output
-const STRIP_PHRASES = [
-  /[,.]?\s*(subtle\s+)?skin\s+fold[s]?\b[^.,]*/gi,
-  /[,.]?\s*(natural\s+)?skin\s+texture\b[^.,]*/gi,
-  /[,.]?\s*skin\s+crease[s]?\b[^.,]*/gi,
-  /[,.]?\s*where (the )?breasts? meet (the )?(chest|torso|body)\b[^.,]*/gi,
 ];
 
 const SYSTEM_PROMPT = `You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
@@ -32,7 +24,6 @@ Rules:
 - Preserve the user's exact adjectives and intent — never soften, substitute, or change the meaning
 - Do not add physical detail descriptors the user did not mention (no skin texture, skin folds, weight descriptions, etc.)
 - If LoRA trigger phrases are provided, embed them verbatim within a sentence
-- If additional instructions are provided, incorporate them naturally
 - End with exactly: Preserve the original face exactly.
 - No preamble, no commentary — just the sentences`;
 
@@ -50,40 +41,37 @@ module.exports = async (req, res) => {
     const isMultiImage = normalized.includes('<image_2>') || normalized.includes('<image_1>');
     const baseLower = normalized.toLowerCase();
 
+    const ending = isMultiImage
+      ? 'Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged.'
+      : 'Preserve the original face exactly.';
+
     // Detect LoRA triggers
     const triggers = loraEnabled
       ? LORA_TRIGGERS.filter(t => baseLower.includes(t))
       : [];
 
-    // Detect phrase enhancements — collected for direct append, not LLM input
-    const appendPhrases = [];
-    for (const { detect, append } of PHRASE_ENHANCEMENTS) {
-      if (detect.test(normalized)) appendPhrases.push(append);
+    // Check for breast shape override — bypass LLM entirely to avoid contradictions
+    const breastOverride = BREAST_SHAPE_OVERRIDES.find(({ detect }) => detect.test(normalized));
+    if (breastOverride) {
+      const parts = [breastOverride.sentence];
+      if (triggers.length) parts.push(`Use these LoRA terms: ${triggers.join(', ')}.`);
+      parts.push(ending);
+      return res.json({ prompts: [parts.join(' ')] });
     }
 
     // Build LLM user message
     const parts = [`Edit request: ${normalized}`];
     if (characterContext) parts.unshift(`Character context: ${characterContext}\n`);
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
-    if (isMultiImage) parts.push(`\nEnd with: Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged.`);
-    else parts.push(`\nEnd with: Preserve the original face exactly.`);
+    parts.push(`\nEnd with: ${ending}`);
 
-    let prompt = await callOpenRouter(
+    const prompt = await callOpenRouter(
       SYSTEM_PROMPT,
       buildUserContent(parts.join('\n'), image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 200 },
     );
-    // Strip phrases the LLM adds uninstructed
-    for (const re of STRIP_PHRASES) prompt = prompt.replace(re, '');
-    // Clean up dangling prepositions/conjunctions left by stripping
-    prompt = prompt.replace(/\b(with|and|,)\s*\./g, '.').replace(/\s{2,}/g, ' ').trim();
 
-    // Append phrase enhancements verbatim after LLM output
-    if (appendPhrases.length) {
-      prompt = `${prompt} ${appendPhrases.join(' ')}`;
-    }
-
-    res.json({ prompts: [prompt] });
+    res.json({ prompts: [prompt.trim()] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || 'API call failed' });

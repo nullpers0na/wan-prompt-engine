@@ -8,7 +8,6 @@ NEGATIVE: [comma-separated prompt-specific negatives]
 
 Rules:
 - PHYSICS line: additions only, no repetition of the user's words
-- If feet or toes are the subject, include: stable feet, anatomically correct
 - NEGATIVE line: prompt-specific terms only — general negatives are added by the UI
 - Keep PHYSICS short — 3 to 6 tags`;
 
@@ -46,9 +45,12 @@ module.exports = async (req, res) => {
     const hasCameraMove = CAMERA_MOVEMENT_RE.test(description);
     const cameraSuffix = hasCameraMove ? ', face locked' : ', camera locked, face locked, static scene';
 
+    const hasFeet = /\b(feet|foot|toes?|sole|heels?)\b/i.test(description);
+    const feetSuffix = hasFeet ? ', stable feet, anatomically correct' : '';
+
     const prompt = physics
-      ? `${base}, ${physics}${cameraSuffix}`
-      : `${base}${cameraSuffix}`;
+      ? `${base}, ${physics}${feetSuffix}${cameraSuffix}`
+      : `${base}${feetSuffix}${cameraSuffix}`;
 
     res.json({ prompts: [prompt], negative });
   } catch (err) {
