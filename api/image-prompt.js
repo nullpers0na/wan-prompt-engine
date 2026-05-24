@@ -22,6 +22,7 @@ Qwen uses a language model as its text encoder — it responds to clear instruct
 Rules:
 - Write as direct instructions: "Make...", "Change...", "Transform...", "Add...", "Keep..."
 - Preserve the user's exact adjectives and intent — never soften, substitute, or change the meaning
+- Do not add physical detail descriptors the user did not mention (no skin texture, skin folds, weight descriptions, etc.)
 - If LoRA trigger phrases are provided, embed them verbatim within a sentence
 - If additional instructions are provided, incorporate them naturally
 - End with exactly: Preserve the original face exactly.
