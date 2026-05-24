@@ -1,23 +1,22 @@
 const { callOpenRouter, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are a character name lookup for games, anime, and fiction. Given a partial name or query, suggest matching characters.
+const SYSTEM_PROMPT = `You are a character name lookup. The user is typing a character name — return only characters whose name literally contains the query string.
 
 Output: up to 5 results, one per line, format: "Name, Source"
-Examples:
-Tifa Lockhart, Final Fantasy VII
-2B, NieR: Automata
+Example for query "tifa": Tifa Lockhart, Final Fantasy VII
+Example for query "2b": 2B, NieR: Automata
 
 Rules:
-- Only output the list, no preamble
-- If nothing matches, output nothing
-- Prioritise exact prefix matches first, then contains matches`;
+- ONLY return characters whose name contains the query (case-insensitive)
+- If no character names contain the query, output nothing at all
+- No preamble, no explanation, no filler — just the list`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const { query } = req.body || {};
-    if (!query?.trim() || query.trim().length < 2) return res.json({ suggestions: [] });
+    if (!query?.trim() || query.trim().length < 3) return res.json({ suggestions: [] });
 
     const text = await callOpenRouter(
       SYSTEM_PROMPT,

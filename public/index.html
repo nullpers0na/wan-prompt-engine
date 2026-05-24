@@ -929,6 +929,7 @@
     characterNameInput.addEventListener('input', () => {
       const q = characterNameInput.value.trim();
       if (!q || q.length < 2) { acClose(); clearTimeout(acDebounce); return; }
+      if (q.length < 3) { clearTimeout(acDebounce); }
       const ql = q.toLowerCase();
 
       // Instant: localStorage + DB
