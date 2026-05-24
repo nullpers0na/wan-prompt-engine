@@ -1,46 +1,76 @@
 const { callOpenRouter, buildUserContent, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const SYSTEM_PROMPT = `You are an expert prompt engineer for Qwen image editing. Take the user's edit request and write a single precise prompt.
+const LORA_TRIGGERS = [
+  'tiny breasts', 'small breasts', 'medium breasts', 'large breasts',
+  'tiny areoles', 'small areoles', 'medium areoles', 'large areoles', 'medium sized areoles',
+  'pale areoles', 'ghost areoles', 'brown areoles', 'dark areoles',
+  'hard nipples', 'erect nipples',
+];
 
-Qwen responds best to:
-- Visual description of the end result, not just the instruction: describe what it looks like
-- Quality tags that genuinely help: "photorealistic, highly detailed, 8k, sharp focus"
-- Describing the change specifically — texture, weight, shape, size, appearance
-- Keeping preservation notes short and targeted
+// Code-detected enhancements injected as additional instructions
+const PHRASE_ENHANCEMENTS = [
+  {
+    detect: /\b(saggy|droopy|hanging|pendulous)\b/i,
+    instructions: [
+      'Make the breasts naturally saggy, hanging low with nipples pointing downward.',
+      'Keep them the same size as the original — do not make them larger.',
+      'Add subtle skin folds where the breasts meet the chest, with natural skin texture.',
+    ],
+  },
+];
 
-Structure: [describe the change and exactly how it looks] + [quality tags] + [preserve the original face exactly] + [anything the user explicitly asked to preserve]
+const SYSTEM_PROMPT = `You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
+
+Qwen uses a language model as its text encoder — it responds to clear instructions, not comma-separated keyword lists.
 
 Rules:
-- Only describe what the user asked to change — do not add, infer, or expand with attributes from the image
-- Describe the specific change in visual detail — what does it actually look like?
-- Do not reframe the edit as a full character description or use language like "transform into"
-- Always include "preserve the original face exactly" unless the user is changing the face
-- When cum or semen is mentioned, describe it as creamy white, thick, opaque
-- When the description references multiple images, use <image_1> <image_2> syntax: state what to take from <image_2>, then "Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged"
-- Images are STATIC — no motion language
-- Output one prompt only, no labels, no commentary`;
+- Write as direct instructions: "Make...", "Change...", "Transform...", "Add...", "Keep..."
+- Preserve the user's exact adjectives and intent — never soften, substitute, or change the meaning
+- If LoRA trigger phrases are provided, embed them verbatim within a sentence
+- If additional instructions are provided, incorporate them naturally
+- End with exactly: Preserve the original face exactly.
+- No preamble, no commentary — just the sentences`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, image } = req.body || {};
+    const { description, characterContext, image, loraEnabled = true } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
-    const text = await callOpenRouter(
-      SYSTEM_PROMPT,
-      buildUserContent(description, image),
-      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 512 },
-    );
 
-    const prompt = text
-      .replace(/^[\s*#]*(?:prompt|segment)?\s*\d*\s*[:\-*#.)\]"'`]+\s*/i, '')
-      .replace(/^["'`]+/, '')
-      .trim();
-    if (prompt.length < 10) {
-      return res.status(500).json({ error: `Empty response. Raw: ${text.slice(0, 200)}` });
+    // Replace "image 2" / "image 1" with <image_2> / <image_1> syntax
+    const normalized = description.trim()
+      .replace(/\bimage\s+2\b/gi, '<image_2>')
+      .replace(/\bimage\s+1\b/gi, '<image_1>');
+    const isMultiImage = normalized.includes('<image_2>') || normalized.includes('<image_1>');
+    const baseLower = normalized.toLowerCase();
+
+    // Detect LoRA triggers
+    const triggers = loraEnabled
+      ? LORA_TRIGGERS.filter(t => baseLower.includes(t))
+      : [];
+
+    // Detect phrase enhancements
+    const extraInstructions = [];
+    for (const { detect, instructions } of PHRASE_ENHANCEMENTS) {
+      if (detect.test(normalized)) extraInstructions.push(...instructions);
     }
 
-    res.json({ prompts: [prompt] });
+    // Build LLM user message
+    const parts = [`Edit request: ${normalized}`];
+    if (characterContext) parts.unshift(`Character context: ${characterContext}\n`);
+    if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
+    if (extraInstructions.length) parts.push(`\nAlso incorporate: ${extraInstructions.join(' ')}`);
+    if (isMultiImage) parts.push(`\nEnd with: Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged.`);
+    else parts.push(`\nEnd with: Preserve the original face exactly.`);
+
+    const prompt = await callOpenRouter(
+      SYSTEM_PROMPT,
+      buildUserContent(parts.join('\n'), image),
+      { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 200 },
+    );
+
+    res.json({ prompts: [prompt.trim()] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || 'API call failed' });
