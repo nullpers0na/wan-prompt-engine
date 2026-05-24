@@ -5,6 +5,7 @@
     { "src": "api/image-prompt.js", "use": "@vercel/node", "config": { "maxDuration": 60 } },
     { "src": "api/short.js",        "use": "@vercel/node", "config": { "maxDuration": 60 } },
     { "src": "api/suggest.js",      "use": "@vercel/node", "config": { "maxDuration": 60 } },
+    { "src": "api/character-suggest.js", "use": "@vercel/node", "config": { "maxDuration": 15 } },
     { "src": "api/describe.js",     "use": "@vercel/node", "config": { "maxDuration": 60 } },
     { "src": "api/memory.js",       "use": "@vercel/node", "config": { "maxDuration": 30 } },
     { "src": "public/**",           "use": "@vercel/static" }
@@ -14,6 +15,7 @@
     { "src": "/api/image-prompt", "dest": "/api/image-prompt.js" },
     { "src": "/api/short",        "dest": "/api/short.js" },
     { "src": "/api/suggest",      "dest": "/api/suggest.js" },
+    { "src": "/api/character-suggest", "dest": "/api/character-suggest.js" },
     { "src": "/api/describe",     "dest": "/api/describe.js" },
     { "src": "/api/memory",       "dest": "/api/memory.js" },
     { "src": "/",                 "dest": "/public/index.html" },

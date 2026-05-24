@@ -883,37 +883,74 @@
     // ── Character name autocomplete ───────────────────────────────────────────
     const nameAutocomplete = document.getElementById('nameAutocomplete');
     let acIndex = -1;
+    let acDebounce = null;
+    let dbCharacters = []; // populated from /api/memory on first use
+
+    // Load DB characters once on first focus
+    characterNameInput.addEventListener('focus', () => {
+      if (dbCharacters.length) return;
+      fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(data => {
+        if (data?.characters) dbCharacters = data.characters.map(c => c.name);
+      });
+    }, { once: true });
 
     function acItems() { return nameAutocomplete.querySelectorAll('.name-ac-item'); }
 
-    function acOpen(items) {
+    function acOpen(names) {
       nameAutocomplete.innerHTML = '';
       acIndex = -1;
-      items.forEach(name => {
+      names.forEach(name => {
         const el = document.createElement('div');
         el.className = 'name-ac-item';
         el.textContent = name;
         el.addEventListener('mousedown', e => {
-          e.preventDefault(); // keep focus on input
+          e.preventDefault();
           characterNameInput.value = name;
           nameAutocomplete.classList.remove('open');
           saveCharacterBtn.click();
         });
         nameAutocomplete.appendChild(el);
       });
-      nameAutocomplete.classList.toggle('open', items.length > 0);
+      nameAutocomplete.classList.toggle('open', names.length > 0);
     }
 
     function acClose() { nameAutocomplete.classList.remove('open'); acIndex = -1; }
 
+    function mergeAcResults(local, db, llm) {
+      const seen = new Set();
+      const out = [];
+      for (const name of [...local, ...db, ...llm]) {
+        const key = name.toLowerCase();
+        if (!seen.has(key)) { seen.add(key); out.push(name); }
+      }
+      return out.slice(0, 8);
+    }
+
     characterNameInput.addEventListener('input', () => {
-      const q = characterNameInput.value.trim().toLowerCase();
-      if (!q) { acClose(); return; }
-      const matches = loadMemoryBank()
-        .map(c => c.name)
-        .filter(n => n.toLowerCase().includes(q))
-        .slice(0, 6);
-      acOpen(matches);
+      const q = characterNameInput.value.trim();
+      if (!q || q.length < 2) { acClose(); clearTimeout(acDebounce); return; }
+      const ql = q.toLowerCase();
+
+      // Instant: localStorage + DB
+      const local = loadMemoryBank().map(c => c.name).filter(n => n.toLowerCase().includes(ql));
+      const db    = dbCharacters.filter(n => n.toLowerCase().includes(ql) && !local.map(x=>x.toLowerCase()).includes(n.toLowerCase()));
+      acOpen(mergeAcResults(local, db, []));
+
+      // Debounced: LLM
+      clearTimeout(acDebounce);
+      acDebounce = setTimeout(async () => {
+        try {
+          const res = await fetch('/api/character-suggest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: q }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (characterNameInput.value.trim().toLowerCase() !== ql) return; // stale
+          acOpen(mergeAcResults(local, db, data.suggestions || []));
+        } catch (_) {}
+      }, 400);
     });
 
     characterNameInput.addEventListener('keydown', e => {
