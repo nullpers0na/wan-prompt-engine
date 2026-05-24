@@ -7,6 +7,18 @@ const LORA_TRIGGERS = [
   'hard nipples', 'erect nipples',
 ];
 
+// Phrase enhancements — injected in code when keywords are detected
+const PHRASE_ENHANCEMENTS = [
+  {
+    detect: /\b(saggy|droopy|hanging|pendulous)\b/i,
+    phrases: [
+      'naturally saggy breasts, hanging low, nipples pointing downward',
+      'same size as original, do not make breasts larger',
+      'subtle skin folds where breasts meet chest, natural skin texture',
+    ],
+  },
+];
+
 const SYSTEM_PROMPT = `You are a LoRA trigger selector. Given an image edit request, output only the LoRA trigger words from the list below that directly apply.
 
 Available triggers:
@@ -33,7 +45,19 @@ module.exports = async (req, res) => {
 
     const isMultiImage = normalized.includes('<image_2>') || normalized.includes('<image_1>');
     const base = normalized;
+    const baseLower = base.toLowerCase();
     const parts = [base];
+
+    // Inject phrase enhancements for known prompt patterns
+    for (const { detect, phrases } of PHRASE_ENHANCEMENTS) {
+      if (detect.test(base)) {
+        for (const phrase of phrases) {
+          if (!baseLower.includes(phrase.split(',')[0].toLowerCase())) {
+            parts.push(phrase);
+          }
+        }
+      }
+    }
 
     if (loraEnabled) {
       const llmInput = characterContext
@@ -47,7 +71,6 @@ module.exports = async (req, res) => {
       );
 
       // Extract only known triggers — ignore anything else the LLM outputs
-      const baseLower = base.toLowerCase();
       const triggers = LORA_TRIGGERS.filter(t =>
         raw.toLowerCase().includes(t) && !baseLower.includes(t)
       );
