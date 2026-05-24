@@ -22,7 +22,7 @@ const STRIP_PHRASES = [
   /,?\s*skin folds?[^,.]*/gi,
 ];
 
-`You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
+const SYSTEM_PROMPT = `You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
 
 Qwen uses a language model as its text encoder — it responds to clear instructions, not comma-separated keyword lists.
 
