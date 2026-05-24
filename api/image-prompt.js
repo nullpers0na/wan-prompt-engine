@@ -17,9 +17,10 @@ const PHRASE_ENHANCEMENTS = [
 
 // Phrases the LLM adds on its own that we never want in output
 const STRIP_PHRASES = [
-  /,?\s*subtle skin folds where (the )?breasts? meet (the )?chest/gi,
-  /,?\s*natural skin texture/gi,
-  /,?\s*skin folds?[^,.]*/gi,
+  /[,.]?\s*(subtle\s+)?skin\s+fold[s]?\b[^.,]*/gi,
+  /[,.]?\s*(natural\s+)?skin\s+texture\b[^.,]*/gi,
+  /[,.]?\s*skin\s+crease[s]?\b[^.,]*/gi,
+  /[,.]?\s*where (the )?breasts? meet (the )?(chest|torso|body)\b[^.,]*/gi,
 ];
 
 const SYSTEM_PROMPT = `You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
@@ -74,7 +75,8 @@ module.exports = async (req, res) => {
     );
     // Strip phrases the LLM adds uninstructed
     for (const re of STRIP_PHRASES) prompt = prompt.replace(re, '');
-    prompt = prompt.trim();
+    // Clean up dangling prepositions/conjunctions left by stripping
+    prompt = prompt.replace(/\b(with|and|,)\s*\./g, '.').replace(/\s{2,}/g, ' ').trim();
 
     // Append phrase enhancements verbatim after LLM output
     if (appendPhrases.length) {
