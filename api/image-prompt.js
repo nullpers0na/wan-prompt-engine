@@ -54,11 +54,9 @@ module.exports = async (req, res) => {
     const parts = [`Edit request: ${normalized}`];
     if (characterContext) parts.unshift(`Character context: ${characterContext}\n`);
 
-    // If a breast shape override applies, inject the exact sentence so the LLM
-    // includes it verbatim rather than generating a contradictory description
-    const breastOverride = BREAST_SHAPE_OVERRIDES.find(({ detect }) => detect.test(normalized));
-    if (breastOverride) {
-      parts.push(`\nRequired sentence for breast shape (copy verbatim, do not paraphrase): ${breastOverride.sentence}`);
+    // If saggy/droopy detected, constrain the LLM instead of hardcoding a sentence
+    if (BREAST_SHAPE_OVERRIDES.some(({ detect }) => detect.test(normalized))) {
+      parts.push(`\nBreast shape constraint: describe the breasts as hanging low with nipples pointing downward. Preserve the user's exact adjectives. Never use "lifted", "firm", "perky", or any upward description.`);
     }
 
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
