@@ -50,18 +50,17 @@ module.exports = async (req, res) => {
       ? LORA_TRIGGERS.filter(t => baseLower.includes(t))
       : [];
 
-    // Check for breast shape override — bypass LLM entirely to avoid contradictions
-    const breastOverride = BREAST_SHAPE_OVERRIDES.find(({ detect }) => detect.test(normalized));
-    if (breastOverride) {
-      const parts = [breastOverride.sentence];
-      if (triggers.length) parts.push(`Use these LoRA terms: ${triggers.join(', ')}.`);
-      parts.push(ending);
-      return res.json({ prompts: [parts.join(' ')] });
-    }
-
     // Build LLM user message
     const parts = [`Edit request: ${normalized}`];
     if (characterContext) parts.unshift(`Character context: ${characterContext}\n`);
+
+    // If a breast shape override applies, inject the exact sentence so the LLM
+    // includes it verbatim rather than generating a contradictory description
+    const breastOverride = BREAST_SHAPE_OVERRIDES.find(({ detect }) => detect.test(normalized));
+    if (breastOverride) {
+      parts.push(`\nRequired sentence for breast shape (copy verbatim, do not paraphrase): ${breastOverride.sentence}`);
+    }
+
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
     parts.push(`\nEnd with: ${ending}`);
 
