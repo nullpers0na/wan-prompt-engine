@@ -581,6 +581,12 @@
         </div>
       </div>
 
+      <div style="position:relative;">
+        <label class="field-label" for="characterField">Character (optional)</label>
+        <input class="character-input" id="characterField" type="text" placeholder="e.g. Tifa Lockhart — loads saved context" autocomplete="off" />
+        <div class="name-autocomplete" id="characterFieldAC"></div>
+      </div>
+
       <div class="upload-area" id="uploadArea">
         <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" />
         <div class="upload-hint" id="uploadHint">
@@ -973,6 +979,81 @@
     });
 
     characterNameInput.addEventListener('blur', () => setTimeout(acClose, 150));
+
+    // ── Main character field autocomplete ────────────────────────────────────
+    const characterField   = document.getElementById('characterField');
+    const characterFieldAC = document.getElementById('characterFieldAC');
+    let cfIndex = -1;
+
+    function cfItems() { return characterFieldAC.querySelectorAll('.name-ac-item'); }
+
+    function cfOpen(names) {
+      characterFieldAC.innerHTML = '';
+      cfIndex = -1;
+      names.forEach(name => {
+        const el = document.createElement('div');
+        el.className = 'name-ac-item';
+        el.textContent = name;
+        el.addEventListener('mousedown', e => {
+          e.preventDefault();
+          const cleanName = name.split(',')[0].trim();
+          characterField.value = cleanName;
+          characterFieldAC.classList.remove('open');
+          // Load saved description for this character
+          const saved = loadMemoryBank().find(c => c.name.toLowerCase() === cleanName.toLowerCase());
+          if (saved?.description) {
+            describedCharacter = saved.description;
+            characterName = saved.name;
+          }
+        });
+        characterFieldAC.appendChild(el);
+      });
+      characterFieldAC.classList.toggle('open', names.length > 0);
+    }
+
+    function cfClose() { characterFieldAC.classList.remove('open'); cfIndex = -1; }
+
+    characterField.addEventListener('input', () => {
+      const q = characterField.value.trim();
+      // Clear context if field is cleared
+      if (!q) { describedCharacter = ''; characterName = ''; cfClose(); return; }
+      if (q.length < 2) { cfClose(); return; }
+      const ql = q.toLowerCase();
+      const local = loadMemoryBank().map(c => c.name).filter(n => n.toLowerCase().includes(ql));
+      const db    = dbCharacters.filter(n => n.toLowerCase().includes(ql) && !local.map(x => x.toLowerCase()).includes(n.toLowerCase()));
+      cfOpen(mergeAcResults(local, db, []));
+    });
+
+    characterField.addEventListener('keydown', e => {
+      if (!characterFieldAC.classList.contains('open')) return;
+      const items = cfItems();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        cfIndex = Math.min(cfIndex + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('active', i === cfIndex));
+        if (cfIndex >= 0) characterField.value = items[cfIndex].textContent.split(',')[0].trim();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        cfIndex = Math.max(cfIndex - 1, -1);
+        items.forEach((el, i) => el.classList.toggle('active', i === cfIndex));
+        if (cfIndex >= 0) characterField.value = items[cfIndex].textContent.split(',')[0].trim();
+      } else if (e.key === 'Escape') {
+        cfClose();
+      } else if (e.key === 'Enter' && cfIndex >= 0) {
+        e.preventDefault();
+        items[cfIndex].dispatchEvent(new MouseEvent('mousedown'));
+      }
+    });
+
+    characterField.addEventListener('blur', () => setTimeout(cfClose, 150));
+
+    // Also load DB characters on focus of the main field
+    characterField.addEventListener('focus', () => {
+      if (dbCharacters.length) return;
+      fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(data => {
+        if (data?.characters) dbCharacters = data.characters.map(c => c.name);
+      });
+    }, { once: true });
 
     function handleFile(file) {
       if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
