@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>60fps Video Interpolator</title>
+  <!-- Must be first: registers a service worker that injects COOP/COEP headers,
+       enabling SharedArrayBuffer (required for ffmpeg.wasm multi-threading). -->
+  <script src="/coi-serviceworker.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #080810;
+      color: #d4d4e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #0f0f1a;
+      border: 1px solid #1e1e30;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 580px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7b9fff, #b97fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #5a5a78;
+      font-size: 0.875rem;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed #2a2a40;
+      border-radius: 14px;
+      padding: 44px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+      position: relative;
+    }
+    .drop-zone:hover { border-color: #7b9fff; background: #121220; }
+    .drop-zone.drag-over { border-color: #7b9fff; background: #13132a; }
+    .drop-zone svg { color: #3a3a58; margin-bottom: 14px; transition: color 0.2s; }
+    .drop-zone:hover svg, .drop-zone.drag-over svg { color: #7b9fff; }
+    .drop-zone p { color: #4a4a68; font-size: 0.95rem; line-height: 1.6; }
+    .drop-zone p span { color: #7b9fff; text-decoration: underline; text-underline-offset: 2px; }
+    #file-input { display: none; }
+
+    /* ── File info chip ── */
+    .file-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #13132a;
+      border: 1px solid #2a2a40;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 14px;
+    }
+    .file-chip svg { color: #7b9fff; flex-shrink: 0; }
+    .file-chip-name {
+      flex: 1;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-chip-size { color: #4a4a68; font-size: 0.8rem; flex-shrink: 0; }
+
+    /* ── Warning ── */
+    .warning {
+      background: #171200;
+      border: 1px solid #3a2d00;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: #b89a00;
+      line-height: 1.65;
+    }
+    .warning strong { color: #e8c200; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 11px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+      text-decoration: none;
+      margin-top: 14px;
+    }
+    .btn:active { transform: scale(0.99); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7b9fff, #b97fff);
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+    }
+    .btn-success:hover { opacity: 0.88; }
+
+    /* ── Progress ── */
+    .progress-section { margin-top: 22px; }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+    }
+    #progress-label { color: #a0a0c0; }
+    #progress-pct { color: #7b9fff; font-weight: 600; }
+
+    .progress-track {
+      background: #1a1a28;
+      border-radius: 99px;
+      height: 7px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #7b9fff, #b97fff);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    #status-text {
+      color: #4a4a68;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    /* ── Log ── */
+    .log-toggle {
+      background: none;
+      border: none;
+      color: #3a3a58;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 6px 0 0;
+      display: block;
+    }
+    .log-toggle:hover { color: #5a5a78; }
+
+    #log-output {
+      background: #090912;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      color: #4a4a68;
+      max-height: 130px;
+      overflow-y: auto;
+      margin-top: 6px;
+      line-height: 1.55;
+      word-break: break-all;
+    }
+
+    /* ── Error ── */
+    .error-box {
+      background: #180000;
+      border: 1px solid #3a0000;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      color: #ff7070;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* ── Spinner ── */
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>60fps Interpolator</h1>
+    <p class="subtitle">
+      Drop any video to interpolate it to 60fps using the <code>minterpolate</code> filter —
+      processed entirely in your browser, no upload required.
+    </p>
+
+    <!-- Drop zone -->
+    <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Drop video file here">
+      <input type="file" id="file-input" accept="video/*">
+      <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+      </svg>
+      <p>Drop a video file here<br>or <span>click to browse</span></p>
+    </div>
+
+    <!-- Selected file -->
+    <div id="file-chip" class="file-chip hidden">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+      </svg>
+      <span id="chip-name" class="file-chip-name"></span>
+      <span id="chip-size" class="file-chip-size"></span>
+    </div>
+
+    <!-- Time warning -->
+    <div id="warning" class="warning hidden">
+      <strong>⏱ Heads-up:</strong> <code>minterpolate</code> is extremely CPU-intensive.
+      Expect processing to take <strong>10–30× the video's duration</strong>
+      (a 10-second clip may take 2–5 minutes). Keep this tab active; closing it
+      will cancel processing.
+    </div>
+
+    <!-- Start button -->
+    <button id="process-btn" class="btn btn-primary hidden">
+      Interpolate to 60fps
+    </button>
+
+    <!-- Progress -->
+    <div id="progress-section" class="progress-section hidden">
+      <div class="progress-header">
+        <span id="progress-label">Loading…</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div id="progress-bar"></div>
+      </div>
+      <p id="status-text"></p>
+      <button class="log-toggle" id="log-toggle">▸ show ffmpeg log</button>
+      <div id="log-output" class="hidden"></div>
+    </div>
+
+    <!-- Error -->
+    <div id="error-box" class="error-box hidden"></div>
+
+    <!-- Download -->
+    <a id="download-btn" class="btn btn-success hidden" download>
+      ↓ Download 60fps Video
+    </a>
+  </div>
+
+  <script type="module">
+    import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
+    import { fetchFile, toBlobURL } from 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js';
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const dropZone      = document.getElementById('drop-zone');
+    const fileInput     = document.getElementById('file-input');
+    const fileChip      = document.getElementById('file-chip');
+    const chipName      = document.getElementById('chip-name');
+    const chipSize      = document.getElementById('chip-size');
+    const warningEl     = document.getElementById('warning');
+    const processBtn    = document.getElementById('process-btn');
+    const progressSec   = document.getElementById('progress-section');
+    const progressLabel = document.getElementById('progress-label');
+    const progressPct   = document.getElementById('progress-pct');
+    const progressBar   = document.getElementById('progress-bar');
+    const statusText    = document.getElementById('status-text');
+    const logToggle     = document.getElementById('log-toggle');
+    const logOutput     = document.getElementById('log-output');
+    const errorBox      = document.getElementById('error-box');
+    const downloadBtn   = document.getElementById('download-btn');
+
+    let selectedFile = null;
+    let logVisible   = false;
+    const ffmpeg = new FFmpeg();
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function fmtSize(b) {
+      return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+    }
+
+    function setProgress(pct, label, status) {
+      const clamped = Math.min(Math.max(pct, 0), 100);
+      progressBar.style.width = clamped + '%';
+      progressPct.textContent = Math.round(clamped) + '%';
+      if (label  !== undefined) progressLabel.textContent = label;
+      if (status !== undefined) statusText.textContent    = status;
+    }
+
+    function showError(msg) {
+      errorBox.textContent = '⚠ ' + msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    // ── File selection ────────────────────────────────────────────────────────
+    function onFileSelected(file) {
+      if (!file || !file.type.startsWith('video/')) {
+        showError('Please select a video file.');
+        return;
+      }
+      selectedFile = file;
+      chipName.textContent = file.name;
+      chipSize.textContent = fmtSize(file.size);
+      fileChip.classList.remove('hidden');
+      warningEl.classList.remove('hidden');
+      processBtn.classList.remove('hidden');
+      downloadBtn.classList.add('hidden');
+      errorBox.classList.add('hidden');
+      progressSec.classList.add('hidden');
+    }
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      onFileSelected(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => onFileSelected(e.target.files[0]));
+
+    // ── Log toggle ────────────────────────────────────────────────────────────
+    logToggle.addEventListener('click', () => {
+      logVisible = !logVisible;
+      logOutput.classList.toggle('hidden', !logVisible);
+      logToggle.textContent = (logVisible ? '▾ hide' : '▸ show') + ' ffmpeg log';
+    });
+
+    // ── ffmpeg events ─────────────────────────────────────────────────────────
+    ffmpeg.on('progress', ({ progress, time }) => {
+      const pct = Math.min(progress * 100, 99);
+      const secs = time > 0 ? ` — ${(time / 1_000_000).toFixed(1)}s processed` : '';
+      setProgress(pct, 'Interpolating…', `Running minterpolate${secs}`);
+    });
+
+    ffmpeg.on('log', ({ message }) => {
+      logOutput.textContent += message + '\n';
+      logOutput.scrollTop = logOutput.scrollHeight;
+    });
+
+    // ── Process ───────────────────────────────────────────────────────────────
+    processBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      processBtn.disabled = true;
+      progressSec.classList.remove('hidden');
+      downloadBtn.classList.add('hidden');
+      errorBox.classList.add('hidden');
+      logOutput.textContent = '';
+      setProgress(0, 'Loading ffmpeg.wasm…', 'Downloading processing engine (~30 MB) — one-time download…');
+
+      try {
+        // Load the multi-threaded ffmpeg core (requires SharedArrayBuffer)
+        if (!ffmpeg.loaded) {
+          const base = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm';
+          await ffmpeg.load({
+            coreURL:   await toBlobURL(`${base}/ffmpeg-core.js`,      'text/javascript'),
+            wasmURL:   await toBlobURL(`${base}/ffmpeg-core.wasm`,    'application/wasm'),
+            workerURL: await toBlobURL(`${base}/ffmpeg-core.worker.js`, 'text/javascript'),
+          });
+        }
+
+        setProgress(2, 'Reading file…', 'Writing video to in-browser filesystem…');
+
+        // Use the original extension so ffmpeg can detect the container format
+        const ext = selectedFile.name.includes('.')
+          ? selectedFile.name.slice(selectedFile.name.lastIndexOf('.'))
+          : '.mp4';
+        const inputFile = 'input' + ext;
+
+        await ffmpeg.writeFile(inputFile, await fetchFile(selectedFile));
+
+        setProgress(3, 'Interpolating…', 'Starting minterpolate — this will take a while, please be patient…');
+
+        await ffmpeg.exec([
+          '-i', inputFile,
+          '-filter:v', 'minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_algo=ds:vsbmc=1',
+          '-c:v', 'libx264',
+          '-crf',  '19',
+          '-pix_fmt', 'yuv420p',
+          'output_60fps.mp4',
+        ]);
+
+        setProgress(100, 'Done!', 'Processing complete — your file is ready.');
+
+        // Read output and trigger download
+        const data = await ffmpeg.readFile('output_60fps.mp4');
+        const blob = new Blob([data.buffer], { type: 'video/mp4' });
+        const url  = URL.createObjectURL(blob);
+
+        const baseName = selectedFile.name.replace(/\.[^.]+$/, '');
+        downloadBtn.href     = url;
+        downloadBtn.download = baseName + '_60fps.mp4';
+        downloadBtn.classList.remove('hidden');
+
+        // Clean up virtual filesystem
+        await ffmpeg.deleteFile(inputFile).catch(() => {});
+        await ffmpeg.deleteFile('output_60fps.mp4').catch(() => {});
+
+      } catch (err) {
+        setProgress(0, 'Error', '');
+        showError(err?.message || String(err));
+        console.error(err);
+      }
+
+      processBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
