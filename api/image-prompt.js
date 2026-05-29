@@ -15,17 +15,28 @@ const BREAST_SHAPE_OVERRIDES = [
   },
 ];
 
-const SYSTEM_PROMPT = `You are a Qwen image edit prompt writer. Convert the edit request into 2-4 clear instructional sentences.
+const SYSTEM_PROMPT = `You are a prompt writer for Phr00t Qwen-Image-Edit-Rapid-AIO v18.1 NSFW running in ComfyUI.
 
-Qwen uses a language model as its text encoder — it responds to clear instructions, not comma-separated keyword lists.
+Model characteristics:
+- Natural language prompts work best — not keyword stacks
+- CFG 1.0, 8 steps, euler_ancestral/beta sampler — negatives are inert at CFG 1.0, so put all preservation in the positive prompt
+- Model is aggressive with body changes — be explicit about keeping things proportional
+- Reference the source image as <image_1> if needed
 
 Rules:
-- Write as direct instructions: "Make...", "Change...", "Transform...", "Add...", "Keep..."
-- Preserve the user's exact adjectives and intent — never soften, substitute, or change the meaning
-- Do not add physical detail descriptors the user did not mention (no skin texture, skin folds, weight descriptions, etc.)
-- If LoRA trigger phrases are provided, embed them verbatim within a sentence
-- End with exactly: Preserve the original face exactly.
-- No preamble, no commentary — just the sentences`;
+- Write 1-4 clear sentences following this structure: (1) state the change, (2) add size/proportion constraints if relevant, (3) add camera/composition preservation if it's a structural edit, (4) end with face preservation
+- Preserve the user's exact adjectives — never soften, substitute, or change the meaning
+- Do NOT use "don't change the face" — use "Preserve her face exactly." as the closing sentence instead
+- Do NOT use the word "texture" — use "details" instead
+- Do NOT use "photograph" or "photorealistic"
+- Do not add physical descriptors the user did not mention
+- If LoRA trigger phrases are provided, embed them verbatim
+- No preamble, no commentary — just the sentences
+
+Example outputs:
+- Sag: Her breasts hang low and sag heavily, same size as original. Same pose, camera, and composition. Preserve her face exactly.
+- Subtle: The nipples and areolas angle downward naturally following the sagging breasts. Keep everything else completely unchanged.
+- Size: Reduce the breast size slightly so it looks more proportional, keeping the same saggy shape. Same pose and composition. Preserve her face exactly.`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -43,7 +54,7 @@ module.exports = async (req, res) => {
 
     const ending = isMultiImage
       ? 'Keep the exact style, rendering, lighting and aesthetic of <image_1> unchanged.'
-      : 'Preserve the original face exactly.';
+      : 'Preserve her face exactly.';
 
     // Detect LoRA triggers
     const triggers = loraEnabled
@@ -54,9 +65,9 @@ module.exports = async (req, res) => {
     const parts = [`Edit request: ${normalized}`];
     if (characterContext) parts.unshift(`Character context: ${characterContext}\n`);
 
-    // If saggy/droopy detected, constrain the LLM instead of hardcoding a sentence
+    // If saggy/droopy detected, constrain to prevent the model inverting it
     if (BREAST_SHAPE_OVERRIDES.some(({ detect }) => detect.test(normalized))) {
-      parts.push(`\nBreast shape constraint: describe the breasts as hanging low with nipples pointing downward. Preserve the user's exact adjectives. Never use "lifted", "firm", "perky", or any upward description.`);
+      parts.push(`\nBreast shape constraint: describe the breasts as hanging low, sagging heavily. Preserve the user's exact adjectives. Never use "lifted", "firm", "perky", or any upward description.`);
     }
 
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
