@@ -54,14 +54,20 @@ module.exports = async (req, res) => {
       ? LORA_TRIGGERS.filter(t => baseLower.includes(t))
       : [];
 
-    // Build LLM user message — no character context, it causes the LLM to pad unrequested preservation notes
-    const parts = [`Edit request: ${normalized}`];
-
-    // If saggy/droopy detected, constrain to prevent the model inverting it
-    if (BREAST_SHAPE_OVERRIDES.some(({ detect }) => detect.test(normalized))) {
-      parts.push(`\nBreast shape constraint: describe the breasts as the user specified. Never use "lifted", "firm", "perky", or any upward description. Do NOT add size preservation ("same size", "maintaining size", etc.) — only mention size if the user did.`);
+    // Saggy/droopy: build directly from user's words — LLM reliably inverts this
+    const saggyMatch = BREAST_SHAPE_OVERRIDES.find(({ detect }) => detect.test(normalized));
+    if (saggyMatch) {
+      // Extract adjectives the user used (e.g. "slightly", "very", "extremely")
+      const adverbMatch = normalized.match(/\b(slightly|very|extremely|quite|fairly|heavily|naturally)\b/i);
+      const adverb = adverbMatch ? `${adverbMatch[1]} ` : '';
+      const parts = [`Her breasts are ${adverb}saggy, hanging low.`];
+      if (triggers.length) parts.push(`${triggers.join(', ')}.`);
+      parts.push(ending);
+      return res.json({ prompts: [parts.join(' ')] });
     }
 
+    // Build LLM user message — no character context, it causes the LLM to pad unrequested preservation notes
+    const parts = [`Edit request: ${normalized}`];
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
     parts.push(`\nEnd with: ${ending}`);
 
