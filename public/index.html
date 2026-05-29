@@ -1300,8 +1300,10 @@
       showError(null);
       const controller = new AbortController();
       const fetchTimeout = setTimeout(() => controller.abort(), 60000);
+      // Pass rejected prompts so the LLM knows what not to repeat
+      const regenBody = { ...lastBody, previousPrompts: lastPrompts.length ? lastPrompts : undefined };
       try {
-        const res = await fetch(lastEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(lastBody), signal: controller.signal });
+        const res = await fetch(lastEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(regenBody), signal: controller.signal });
         clearTimeout(fetchTimeout);
         let data;
         try { data = await res.json(); } catch (_) { throw new Error(`Server error (${res.status})`); }

@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, characterContext, image, loraEnabled = true } = req.body || {};
+    const { description, characterContext, image, loraEnabled = true, previousPrompts } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     // Replace "image 2" / "image 1" with <image_2> / <image_1> syntax
@@ -66,6 +66,9 @@ module.exports = async (req, res) => {
 
     // Build LLM user message
     const parts = [`Edit request: ${normalized}`];
+    if (previousPrompts?.length) {
+      parts.push(`\nPrevious attempt(s) the user rejected — do not repeat these, try a different approach:\n${previousPrompts.map(p => `- ${p}`).join('\n')}`);
+    }
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
     parts.push(`\nEnd with: ${ending}`);
 

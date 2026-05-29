@@ -42,14 +42,17 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, characterContext, image } = req.body || {};
+    const { description, characterContext, image, previousPrompts } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     const { cleaned, clauses } = extractRemember(description);
 
+    const rejectedNote = previousPrompts?.length
+      ? `\n\nPrevious attempt(s) the user rejected — write different segments:\n${previousPrompts.map(p => `- ${p}`).join('\n')}`
+      : '';
     const llmInput = characterContext
-      ? `Character: ${characterContext}\n\nScene: ${cleaned || description}`
-      : `Scene: ${cleaned || description}`;
+      ? `Character: ${characterContext}\n\nScene: ${cleaned || description}${rejectedNote}`
+      : `Scene: ${cleaned || description}${rejectedNote}`;
 
     const text = await callOpenRouter(
       SYSTEM_PROMPT,

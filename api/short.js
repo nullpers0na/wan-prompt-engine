@@ -23,15 +23,17 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, characterContext, image } = req.body || {};
+    const { description, characterContext, image, previousPrompts } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     const base = description.trim().replace(/[.!]+$/, '');
 
-    // Give LLM character context so physics tags are appropriate, but only the user's text becomes the base
+    const rejectedNote = previousPrompts?.length
+      ? `\n\nPrevious attempt(s) the user rejected — vary the physics tags:\n${previousPrompts.map(p => `- ${p}`).join('\n')}`
+      : '';
     const llmInput = characterContext
-      ? `Character: ${characterContext}\n\nUser prompt: ${description}`
-      : description;
+      ? `Character: ${characterContext}\n\nUser prompt: ${description}${rejectedNote}`
+      : `${description}${rejectedNote}`;
 
     const text = await callOpenRouter(
       SYSTEM_PROMPT,
