@@ -7,13 +7,6 @@ const LORA_TRIGGERS = [
   'hard nipples', 'erect nipples',
 ];
 
-// When detected, bypass LLM for breast shape and use this sentence verbatim
-const BREAST_SHAPE_OVERRIDES = [
-  {
-    detect: /\b(saggy|droopy|hanging|pendulous)\b/i,
-    sentence: 'Make the breasts naturally saggy, hanging low with nipples pointing downward.',
-  },
-];
 
 const SYSTEM_PROMPT = `You are a prompt writer for Phr00t Qwen-Image-Edit-Rapid-AIO v18.1 NSFW running in ComfyUI.
 
@@ -27,9 +20,26 @@ Model characteristics:
 Rules:
 - Write 1-2 sentences only: (1) state the change clearly, (2) end with "Preserve her face exactly."
 - Only mention things the user explicitly asked to change — do not add preservation notes for body parts, skin, pose, or clothing the user did not mention
-- Preserve the user's exact adjectives — never soften or substitute
+- Preserve the user's exact adjectives — never soften, invert, or substitute
+- If the user says saggy/droopy/hanging, describe them that way — never write "rounded", "lifted", "firm", or "perky"
 - If LoRA trigger phrases are provided, embed them verbatim
-- No preamble, no commentary — just the sentences`;
+- No preamble, no commentary — just the sentences
+
+Examples:
+User: her breasts are saggy
+Output: Her breasts are saggy, hanging low. Preserve her face exactly.
+
+User: her breasts are slightly saggy
+Output: Her breasts are slightly saggy, hanging low. Preserve her face exactly.
+
+User: make her breasts large and droopy
+Output: Her breasts are large and droopy, hanging low. Preserve her face exactly.
+
+User: bigger breasts
+Output: Her breasts are larger. Preserve her face exactly.
+
+User: remove her top
+Output: Her top is removed, breasts exposed. Preserve her face exactly.`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -54,19 +64,7 @@ module.exports = async (req, res) => {
       ? LORA_TRIGGERS.filter(t => baseLower.includes(t))
       : [];
 
-    // Saggy/droopy: build directly from user's words — LLM reliably inverts this
-    const saggyMatch = BREAST_SHAPE_OVERRIDES.find(({ detect }) => detect.test(normalized));
-    if (saggyMatch) {
-      // Extract adjectives the user used (e.g. "slightly", "very", "extremely")
-      const adverbMatch = normalized.match(/\b(slightly|very|extremely|quite|fairly|heavily|naturally)\b/i);
-      const adverb = adverbMatch ? `${adverbMatch[1]} ` : '';
-      const parts = [`Her breasts are ${adverb}saggy, hanging low.`];
-      if (triggers.length) parts.push(`${triggers.join(', ')}.`);
-      parts.push(ending);
-      return res.json({ prompts: [parts.join(' ')] });
-    }
-
-    // Build LLM user message — no character context, it causes the LLM to pad unrequested preservation notes
+    // Build LLM user message
     const parts = [`Edit request: ${normalized}`];
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
     parts.push(`\nEnd with: ${ending}`);
