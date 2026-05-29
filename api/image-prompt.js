@@ -59,19 +59,27 @@ module.exports = async (req, res) => {
 
     // If saggy/droopy detected, constrain to prevent the model inverting it
     if (BREAST_SHAPE_OVERRIDES.some(({ detect }) => detect.test(normalized))) {
-      parts.push(`\nBreast shape constraint: describe the breasts as hanging low, sagging heavily. Preserve the user's exact adjectives. Never use "lifted", "firm", "perky", or any upward description.`);
+      parts.push(`\nBreast shape constraint: describe the breasts as the user specified. Never use "lifted", "firm", "perky", or any upward description. Do NOT add size preservation ("same size", "maintaining size", etc.) — only mention size if the user did.`);
     }
 
     if (triggers.length) parts.push(`\nLoRA trigger phrases to embed verbatim: ${triggers.join(', ')}`);
     parts.push(`\nEnd with: ${ending}`);
 
-    const prompt = await callOpenRouter(
+    let prompt = await callOpenRouter(
       SYSTEM_PROMPT,
       buildUserContent(parts.join('\n'), image),
       { model: image ? VISION_MODEL : TEXT_MODEL, maxTokens: 200 },
     );
 
-    res.json({ prompts: [prompt.trim()] });
+    // Strip size preservation phrases the LLM adds uninstructed
+    prompt = prompt
+      .replace(/,?\s*\b(maintaining|keeping|retaining)\s+(\w+\s+){0,3}size\b[^.,]*/gi, '')
+      .replace(/,?\s*\b(same|original)\s+size\b[^.,]*/gi, '')
+      .replace(/\b(with|and|,)\s*\./g, '.')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
+    res.json({ prompts: [prompt] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || 'API call failed' });
