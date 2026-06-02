@@ -190,12 +190,13 @@
 
     /* Standalone prompt card */
     .prompt-card {
-      margin-left: 40px; /* align past avatar + gap */
-      width: calc(100% - 40px);
-      max-width: calc(90% - 0px);
+      margin-left: 40px;
+      max-width: 75%;
+      align-self: flex-start;
       background: rgba(0,0,0,0.5);
       border: 1px solid rgba(232,53,122,0.3);
-      border-radius: 12px;
+      border-left: 3px solid var(--rose);
+      border-radius: 0 12px 12px 12px;
       overflow: hidden;
     }
     .prompt-card-header {
@@ -229,6 +230,8 @@
     /* Negative card */
     .negative-card {
       margin-left: 40px;
+      max-width: 75%;
+      align-self: flex-start;
       padding: 8px 14px;
       background: rgba(252,165,165,0.04);
       border: 1px solid rgba(252,165,165,0.12);
