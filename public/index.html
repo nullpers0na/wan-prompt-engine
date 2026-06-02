@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WAN 2.2 Prompt Engine</title>
+  <title>Muse — WAN Prompt Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -11,44 +11,45 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --rose:       #e8357a;
-      --rose-light: #f472b6;
-      --magenta:    #9b1d6e;
-      --bg:         #07000d;
-      --surface:    rgba(255,255,255,0.04);
+      --rose:          #e8357a;
+      --rose-light:    #f472b6;
+      --magenta:       #9b1d6e;
+      --bg:            #07000d;
+      --surface:       rgba(255,255,255,0.04);
       --surface-hover: rgba(255,255,255,0.07);
-      --border:     rgba(232,53,122,0.15);
-      --text:       #f0dde8;
-      --text-muted: #8b6476;
-      --text-dim:   #4a2d3a;
-      --gradient:   linear-gradient(135deg, var(--rose), var(--magenta));
+      --border:        rgba(232,53,122,0.15);
+      --text:          #f0dde8;
+      --text-muted:    #8b6476;
+      --text-dim:      #4a2d3a;
+      --gradient:      linear-gradient(135deg, var(--rose), var(--magenta));
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Space Grotesk', system-ui, sans-serif;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 60px 16px 100px;
-      overflow-x: hidden;
     }
 
-    /* ── Background ────────────────────────────────────────────────────────── */
+    /* ── Background ──────────────────────────────────── */
     .bg-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .bg-glow::before {
       content: ''; position: absolute;
       width: 900px; height: 900px;
-      background: radial-gradient(circle, rgba(155,29,110,0.2) 0%, transparent 65%);
+      background: radial-gradient(circle, rgba(155,29,110,0.18) 0%, transparent 65%);
       top: -300px; left: 50%;
       animation: driftA 20s ease-in-out infinite alternate;
     }
     .bg-glow::after {
       content: ''; position: absolute;
       width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(232,53,122,0.12) 0%, transparent 65%);
+      background: radial-gradient(circle, rgba(232,53,122,0.10) 0%, transparent 65%);
       bottom: -100px; right: -100px;
       animation: driftB 26s ease-in-out infinite alternate;
     }
@@ -57,1453 +58,657 @@
 
     .grid-bg {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image: linear-gradient(rgba(232,53,122,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(232,53,122,0.03) 1px, transparent 1px);
+      background-image:
+        linear-gradient(rgba(232,53,122,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,53,122,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
       mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
     }
 
-    .silhouette { position: fixed; pointer-events: none; z-index: 0; opacity: 0.06; }
-    .silhouette-left  { left: -80px; top: 50%; transform: translateY(-50%); width: 300px; }
-    .silhouette-right { right: -60px; top: 30%; width: 260px; transform: scaleX(-1); }
-
-    /* ── Loading overlay ───────────────────────────────────────────────────── */
-    .loading-overlay {
-      position: fixed; inset: 0; z-index: 100;
-      background: rgba(7,0,13,0.75);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .loading-overlay.active { display: flex; }
-    .loading-overlay-spinner {
-      width: 40px; height: 40px;
-      border: 3px solid rgba(232,53,122,0.2);
-      border-top-color: var(--rose-light);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    .loading-overlay-text {
-      font-size: 0.8rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--text-muted);
+    /* ── Header ──────────────────────────────────────── */
+    .site-header {
+      position: relative; z-index: 10;
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(7,0,13,0.92);
+      backdrop-filter: blur(10px);
+      max-width: 100%;
     }
 
-    /* ── Page wrapper ──────────────────────────────────────────────────────── */
-    .page {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 780px;
-      display: flex; flex-direction: column; align-items: center;
-    }
-
-    /* ── Header ────────────────────────────────────────────────────────────── */
-    header { text-align: center; width: 100%; margin-bottom: 28px; }
-    .logo {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 68px; height: 68px;
+    .header-logo {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; flex-shrink: 0;
       background: rgba(155,29,110,0.15);
       border: 1px solid rgba(232,53,122,0.3);
-      border-radius: 20px; margin-bottom: 20px; position: relative;
+      border-radius: 10px;
     }
-    .logo::before { content: ''; position: absolute; inset: -1px; border-radius: 20px; background: var(--gradient); z-index: -1; opacity: 0.5; }
-    .logo svg { width: 34px; height: 34px; }
-    header h1 {
+    .header-logo svg { width: 20px; height: 20px; }
+
+    .header-titles { flex: 1; min-width: 0; }
+    .header-name {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 2.8rem; font-weight: 300; font-style: italic; letter-spacing: 0.04em;
+      font-size: 1.25rem; font-weight: 400; font-style: italic;
       background: linear-gradient(135deg, #f9d0e4 20%, var(--rose-light) 60%, var(--rose) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 10px; line-height: 1.1;
+      line-height: 1.2; display: block;
     }
-    header p { font-size: 0.82rem; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
-    .header-rule { display: flex; align-items: center; gap: 14px; justify-content: center; margin-top: 18px; }
-    .header-rule::before, .header-rule::after { content: ''; width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(232,53,122,0.5)); }
-    .header-rule::after { transform: scaleX(-1); }
-    .header-rule-diamond { width: 6px; height: 6px; background: var(--rose); transform: rotate(45deg); flex-shrink: 0; }
-
-    /* ── Body icons ────────────────────────────────────────────────────────── */
-    .body-icons { display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; margin-bottom: 36px; }
-    .body-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.45; transition: opacity 0.25s; cursor: pointer; }
-    .body-icon.active { opacity: 1; }
-    .body-icon.active .body-icon-img { background: rgba(232,53,122,0.18); border-color: rgba(232,53,122,0.5); }
-    .body-icon:hover { opacity: 1; }
-    .body-icon-img {
-      width: 48px; height: 48px;
-      background: rgba(155,29,110,0.1); border: 1px solid rgba(232,53,122,0.18);
-      border-radius: 14px; display: flex; align-items: center; justify-content: center;
-      transition: background 0.25s, border-color 0.25s;
+    .header-sub {
+      font-size: 0.65rem; color: var(--text-dim);
+      letter-spacing: 0.08em; text-transform: uppercase;
     }
-    .body-icon:hover .body-icon-img { background: rgba(232,53,122,0.12); border-color: rgba(232,53,122,0.4); }
-    .body-icon-img svg { width: 30px; height: 30px; }
 
-    /* ── Container ─────────────────────────────────────────────────────────── */
-    .container { width: 100%; display: flex; flex-direction: column; gap: 16px; }
-
-    /* ── Mode toggle ───────────────────────────────────────────────────────── */
-    .mode-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; width: fit-content; max-width: 100%; padding: 3px; gap: 3px; }
-    .mode-btn { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; border: none; background: transparent; color: var(--text-muted); padding: 8px 22px; border-radius: 9px; transition: background 0.2s, color 0.2s; }
-    .mode-btn.active { background: var(--gradient); color: #fff; }
-    .mode-btn:hover:not(.active) { color: var(--text); background: var(--surface-hover); }
-
-    /* ── Character field ───────────────────────────────────────────────────── */
-    .field-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 7px; }
-    .character-input {
-      width: 100%;
+    .new-chat-btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem; font-weight: 500;
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--text);
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem;
-      padding: 11px 14px; outline: none;
+      color: var(--text-muted); border-radius: 8px;
+      padding: 6px 14px; cursor: pointer; white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .new-chat-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); background: rgba(232,53,122,0.06); }
+
+    /* ── Chat area ───────────────────────────────────── */
+    .chat-area {
+      position: relative; z-index: 1;
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-track { background: transparent; }
+    .chat-area::-webkit-scrollbar-thumb { background: rgba(232,53,122,0.2); border-radius: 4px; }
+
+    .chat-inner {
+      width: 100%; max-width: 780px;
+      margin: 0 auto;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+
+    /* ── Messages ────────────────────────────────────── */
+    .message {
+      display: flex;
+      animation: msgIn 0.2s ease;
+    }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .message-user { justify-content: flex-end; }
+    .message-assistant { justify-content: flex-start; }
+
+    /* User bubble */
+    .user-bubble {
+      max-width: 80%;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+    }
+    .user-text {
+      background: var(--gradient);
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 16px 16px 4px 16px;
+      font-size: 0.9rem; line-height: 1.6;
+      word-break: break-word;
+    }
+    .user-image {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      max-width: 220px; max-height: 220px;
+      object-fit: cover;
+    }
+
+    /* AI bubble */
+    .ai-wrap {
+      display: flex; gap: 10px; align-items: flex-start;
+      max-width: 90%;
+    }
+    .ai-avatar {
+      flex-shrink: 0;
+      width: 30px; height: 30px; margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(155,29,110,0.15);
+      border: 1px solid rgba(232,53,122,0.25);
+      border-radius: 8px;
+    }
+    .ai-avatar svg { width: 16px; height: 16px; }
+    .ai-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px 16px 16px 16px;
+      padding: 12px 15px;
+      font-size: 0.9rem; line-height: 1.65;
+      color: var(--text);
+      flex: 1; min-width: 0;
+    }
+    .ai-content .msg-text { white-space: pre-wrap; word-break: break-word; }
+    .ai-content strong { color: var(--rose-light); font-weight: 600; }
+
+    /* Prompt block inside AI message */
+    .prompt-block {
+      position: relative;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(232,53,122,0.22);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 10px 0;
+    }
+    .prompt-block:first-child { margin-top: 0; }
+    .prompt-block:last-child { margin-bottom: 0; }
+    .prompt-block pre {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem; line-height: 1.75;
+      white-space: pre-wrap; word-break: break-word;
+      color: var(--rose-light);
+      padding-right: 52px;
+    }
+    .copy-prompt-btn {
+      position: absolute; top: 8px; right: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem; font-weight: 500;
+      background: rgba(232,53,122,0.12); border: 1px solid rgba(232,53,122,0.3);
+      color: var(--rose-light); border-radius: 6px;
+      padding: 3px 10px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .copy-prompt-btn:hover { background: rgba(232,53,122,0.25); }
+    .copy-prompt-btn.copied { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.4); color: #4ade80; }
+
+    /* Negative line */
+    .negative-line {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 6px 10px;
+      background: rgba(252,165,165,0.05);
+      border: 1px solid rgba(252,165,165,0.12);
+      border-radius: 7px;
+      font-family: 'Space Mono', monospace;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .negative-line .neg-label { color: rgba(252,165,165,0.6); font-size: 0.7rem; display: block; margin-bottom: 2px; }
+
+    /* Error message */
+    .error-message {
+      background: rgba(252,165,165,0.07);
+      border: 1px solid rgba(252,165,165,0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #fca5a5;
+      max-width: 85%;
+      word-break: break-word;
+    }
+
+    /* ── Typing indicator ────────────────────────────── */
+    .typing-wrap {
+      display: flex; align-items: flex-start; gap: 10px;
+      animation: msgIn 0.2s ease;
+    }
+    .typing-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px 16px 16px 16px;
+      padding: 14px 16px;
+      display: flex; gap: 5px; align-items: center;
+    }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--rose-light);
+      animation: typingPulse 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingPulse { 0%,80%,100% { opacity: 0.2; transform: scale(0.75); } 40% { opacity: 1; transform: scale(1); } }
+
+    /* ── Input dock ──────────────────────────────────── */
+    .input-dock {
+      position: relative; z-index: 10;
+      flex-shrink: 0;
+      padding: 10px 16px 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(7,0,13,0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .input-inner {
+      width: 100%; max-width: 780px;
+      margin: 0 auto;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    /* Attachment preview bar */
+    .attachment-bar {
+      display: none;
+      align-items: center; gap: 10px;
+      padding: 8px 12px;
+      background: rgba(232,53,122,0.06);
+      border: 1px solid rgba(232,53,122,0.2);
+      border-radius: 10px;
+    }
+    .attachment-bar.visible { display: flex; }
+    .attach-thumb {
+      width: 44px; height: 44px;
+      object-fit: cover; border-radius: 7px;
+      border: 1px solid rgba(232,53,122,0.25);
+      flex-shrink: 0;
+    }
+    .attach-name {
+      flex: 1; font-size: 0.8rem; color: var(--text-muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .attach-remove {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 1rem; cursor: pointer; padding: 2px 6px;
+      transition: color 0.15s; line-height: 1;
+    }
+    .attach-remove:hover { color: var(--rose-light); }
+
+    /* Input row */
+    .input-row {
+      display: flex; align-items: flex-end; gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 8px 8px 12px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .character-input::placeholder { color: var(--text-dim); }
-    .character-input:focus { border-color: rgba(232,53,122,0.4); box-shadow: 0 0 0 3px rgba(232,53,122,0.08); }
-
-    /* ── Textarea ──────────────────────────────────────────────────────────── */
-    .textarea-wrap { position: relative; }
-    .clear-btn {
-      position: absolute; top: 10px; right: 10px;
-      background: none; border: none; color: var(--text-dim);
-      font-size: 0.75rem; cursor: pointer; padding: 2px 6px;
-      border-radius: 4px; line-height: 1; transition: color 0.2s;
-      font-family: 'Space Grotesk', sans-serif;
+    .input-row:focus-within {
+      border-color: rgba(232,53,122,0.35);
+      box-shadow: 0 0 0 3px rgba(232,53,122,0.07);
     }
-    .clear-btn:hover { color: var(--rose-light); }
-    textarea {
-      width: 100%; min-height: 120px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; color: var(--text);
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem;
-      padding: 16px 18px; resize: vertical; outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.7;
-    }
-    textarea::placeholder { color: var(--text-dim); }
-    textarea:focus { border-color: rgba(232,53,122,0.4); box-shadow: 0 0 0 3px rgba(232,53,122,0.08); }
 
-    .example-chip { font-family: 'Space Grotesk', sans-serif; font-size: 0.76rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 5px 14px; cursor: pointer; transition: border-color 0.2s, color 0.2s, background 0.2s; text-align: left; }
-    .example-chip:hover { border-color: rgba(232,53,122,0.5); color: var(--rose-light); background: rgba(232,53,122,0.08); }
-
-    /* ── Upload ────────────────────────────────────────────────────────────── */
-    .upload-area { border: 1px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; transition: border-color 0.2s, background 0.2s; position: relative; background: var(--surface); }
-    .upload-area:not(.has-preview) { cursor: pointer; }
-    .upload-area:not(.has-preview):hover, .upload-area.drag-over { border-color: rgba(232,53,122,0.35); background: rgba(232,53,122,0.04); }
-    .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
-    .upload-area.has-preview input[type="file"] { display: none; }
-    .upload-hint { pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .upload-icon { width: 40px; height: 40px; background: rgba(155,29,110,0.12); border: 1px solid rgba(232,53,122,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
-    .upload-icon svg { width: 20px; height: 20px; color: var(--rose-light); }
-    .upload-hint-text { font-size: 0.84rem; color: var(--text-muted); }
-    .upload-hint-text span { color: var(--rose-light); font-weight: 500; }
-    .upload-hint-sub { font-size: 0.72rem; color: var(--text-dim); }
-    .upload-preview { display: none; align-items: center; gap: 14px; }
-    .upload-preview.visible { display: flex; }
-    .upload-preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); flex-shrink: 0; transition: opacity 0.3s; }
-    .upload-preview.analysing img { opacity: 0.4; }
-    .upload-analysing-badge { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; border-radius: 12px; background: rgba(7,0,13,0.6); gap: 10px; pointer-events: none; }
-    .upload-area.has-preview.analysing .upload-analysing-badge { display: flex; }
-    .upload-analysing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rose-light); animation: analysingPulse 1.2s ease-in-out infinite; }
-    .upload-analysing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .upload-analysing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes analysingPulse { 0%,80%,100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.2); } }
-    .upload-analysing-text { font-size: 0.78rem; color: var(--rose-light); letter-spacing: 0.05em; }
-    .upload-preview-info { flex: 1; text-align: left; }
-    .upload-preview-name { font-size: 0.85rem; color: var(--text); word-break: break-all; font-weight: 500; }
-    .upload-preview-size { font-size: 0.74rem; color: var(--text-muted); margin-top: 4px; }
-    .upload-remove { font-family: 'Space Grotesk', sans-serif; font-size: 0.74rem; font-weight: 500; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s; }
-    .upload-remove:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
-
-    /* ── Suggestions ───────────────────────────────────────────────────────── */
-    /* ── Suggestions popup ────────────────────────────────────────────────── */
-    .suggestions-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
-    .suggestions-overlay.visible { display: flex; animation: fadeIn 0.18s ease; }
-    .suggestions-box { display: flex; flex-direction: column; gap: 14px; background: #130719; border: 1px solid rgba(232,53,122,0.3); border-radius: 16px; padding: 24px; width: 100%; max-width: 520px; box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,53,122,0.08); animation: popUp 0.22s cubic-bezier(0.34,1.56,0.64,1); }
-    @keyframes popUp { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: none; } }
-    .suggestions-header { display: flex; align-items: center; justify-content: space-between; }
-    .suggestions-title { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-    .suggestions-dismiss { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; line-height: 1; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0; transition: color 0.2s; }
-    .suggestions-dismiss:hover { color: var(--rose-light); }
-.suggestions-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .suggestions-loading { font-size: 0.78rem; color: var(--text-dim); }
-    .suggestions-name-prompt { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; }
-    .suggestions-name-prompt.visible { display: flex; }
-    .suggestions-name-label { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.05em; }
-    .suggestions-name-row { display: flex; gap: 8px; position: relative; }
-    .suggestions-name-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; }
-    .suggestions-name-input:focus { border-color: rgba(232,53,122,0.5); }
-    .suggestions-name-save { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 500; background: var(--gradient); border: none; border-radius: 8px; padding: 8px 16px; color: #fff; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
-    .suggestions-name-save:hover { opacity: 0.85; }
-    .suggestions-name-saved { font-size: 0.78rem; color: var(--rose-light); display: none; }
-    .suggestions-name-saved.visible { display: block; }
-    .name-autocomplete { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 56px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-    .name-autocomplete.open { display: block; }
-    .name-ac-item { padding: 8px 12px; font-size: 0.85rem; color: var(--text); cursor: pointer; transition: background 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .name-ac-item:hover, .name-ac-item.active { background: rgba(232,53,122,0.15); color: var(--rose-light); }
-
-    /* ── Actions ───────────────────────────────────────────────────────────── */
-    .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .lora-toggle { display: none; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-dim); white-space: nowrap; }
-    .lora-toggle.visible { display: flex; }
-    .lora-switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
-    .lora-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .lora-slider { position: absolute; inset: 0; background: var(--surface-2); border-radius: 20px; cursor: pointer; transition: background 0.2s; }
-    .lora-slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-    .lora-switch input:checked + .lora-slider { background: var(--rose); }
-    .lora-switch input:checked + .lora-slider::before { transform: translateX(16px); }
-    button { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; border-radius: 10px; padding: 12px 28px; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s; }
-    #generateBtn { background: var(--gradient); color: #fff; box-shadow: 0 4px 24px rgba(232,53,122,0.35); letter-spacing: 0.03em; }
-    #generateBtn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 32px rgba(232,53,122,0.55); }
-    #generateBtn:active:not(:disabled) { transform: translateY(0); }
-    #generateBtn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
-    #copyAllBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; }
-    #copyAllBtn:hover { background: var(--surface-hover); color: var(--text); }
-    #copyAllBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
-    #regenBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; padding: 12px 16px; }
-    #regenBtn:hover { background: var(--surface-hover); color: var(--text); }
-    #copyNumBtn { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); display: none; padding: 12px 14px; font-size: 0.78rem; }
-    #copyNumBtn:hover { background: var(--surface-hover); color: var(--text); }
-    #copyNumBtn.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
-    .splitter-note { margin-top: 12px; font-size: 0.74rem; color: var(--text-dim); text-align: center; letter-spacing: 0.01em; }
-    .splitter-note strong { color: var(--text-muted); font-weight: 500; }
-
-    /* ── Error ─────────────────────────────────────────────────────────────── */
-    #error { font-size: 0.82rem; color: #fca5a5; background: rgba(252,165,165,0.07); border: 1px solid rgba(252,165,165,0.2); border-radius: 8px; padding: 10px 14px; display: none; word-break: break-word; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
-
-    /* ── Negative prompt ───────────────────────────────────────────────────── */
-    .negative-box { display: none; flex-direction: column; gap: 8px; }
-    .negative-box.visible { display: flex; }
-    .negative-header { display: flex; align-items: center; justify-content: space-between; }
-    .negative-copy {
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 500;
-      background: none; border: 1px solid var(--border); color: var(--text-dim);
-      border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
-    }
-    .negative-copy:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); }
-    .negative-copy.copied { color: #f9a8d4; border-color: rgba(249,168,212,0.3); }
-    .negative-textarea {
-      width: 100%; min-height: 72px;
-      background: rgba(252,165,165,0.04); border: 1px solid rgba(252,165,165,0.15);
-      border-radius: 10px; color: var(--text-muted);
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.82rem;
-      padding: 12px 14px; resize: vertical; outline: none;
-      transition: border-color 0.2s; line-height: 1.6;
-    }
-    .negative-textarea:focus { border-color: rgba(252,165,165,0.3); }
-
-    /* ── Segments ──────────────────────────────────────────────────────────── */
-    .segments { display: flex; flex-direction: column; gap: 10px; }
-    .segment {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 14px 16px;
-      display: flex; gap: 16px; align-items: flex-start;
-      opacity: 0; transform: translateY(10px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
-      position: relative; overflow: hidden;
-    }
-    .segment::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gradient); border-radius: 3px 0 0 3px; }
-    .segment:hover { border-color: rgba(232,53,122,0.25); }
-    .segment.visible { opacity: 1; transform: translateY(0); }
-    .segment-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--text-dim); white-space: nowrap; padding-top: 2px; min-width: 68px; }
-    .segment-label span { display: block; font-size: 0.66rem; color: var(--rose-light); margin-bottom: 2px; font-weight: 700; }
-    .segment-text { font-size: 0.9rem; line-height: 1.65; color: var(--text); flex: 1; }
-
-    /* Copy button on segment */
-    .segment-copy {
+    .attach-btn {
       flex-shrink: 0;
-      background: none; border: 1px solid transparent;
-      color: var(--text-dim); border-radius: 6px;
-      padding: 4px 7px; cursor: pointer;
-      font-size: 0; /* hide text, show icon only */
-      opacity: 0; transition: opacity 0.2s, color 0.2s, border-color 0.2s;
-      line-height: 1;
+      background: none; border: none; color: var(--text-dim);
+      cursor: pointer; padding: 4px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s, background 0.2s;
     }
-    .segment-copy svg { width: 13px; height: 13px; display: block; }
-    .segment:hover .segment-copy { opacity: 1; }
-    .segment-copy:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.3); }
-    .segment-copy.flash { color: #4ade80; border-color: rgba(74,222,128,0.3); opacity: 1; }
-    .segment-text[contenteditable="true"] { outline: none; border-radius: 4px; box-shadow: 0 0 0 2px rgba(232,53,122,0.3); padding: 2px 6px; margin: -2px -6px; cursor: text; }
-    .segment-reorder { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; opacity: 0; transition: opacity 0.2s; }
-    .segment:hover .segment-reorder { opacity: 1; }
-    .segment-reorder button { background: none; border: none; color: var(--text-dim); padding: 2px 4px; font-size: 0.65rem; line-height: 1; border-radius: 4px; cursor: pointer; transition: color 0.15s; }
-    .segment-reorder button:hover { color: var(--rose-light); }
-    .segment-reorder button:disabled { opacity: 0.2; cursor: default; }
+    .attach-btn:hover { color: var(--rose-light); background: rgba(232,53,122,0.08); }
+    .attach-btn svg { width: 20px; height: 20px; }
 
-    /* ── History ───────────────────────────────────────────────────────────── */
-    .history-section { width: 100%; margin-top: 8px; }
-    .history-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 10px 0; user-select: none; }
-    .history-title { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-    .history-toggle { font-size: 0.68rem; color: var(--text-dim); transition: color 0.2s; }
-    .history-header:hover .history-title, .history-header:hover .history-toggle { color: var(--text-muted); }
-    .history-list { display: flex; flex-direction: column; gap: 8px; }
-    .history-item {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px 14px; cursor: pointer;
-      transition: border-color 0.2s;
+    #msgInput {
+      flex: 1;
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem; line-height: 1.55;
+      resize: none; overflow-y: hidden;
+      padding: 3px 0;
+      max-height: 140px; overflow-y: auto;
     }
-    .history-item:hover { border-color: rgba(232,53,122,0.3); }
-    .history-item-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
-    .history-item-mode { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rose-light); }
-    .history-item-time { font-size: 0.68rem; color: var(--text-dim); }
-    .history-item-desc { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .history-empty { font-size: 0.78rem; color: var(--text-dim); text-align: center; padding: 16px 0; }
+    #msgInput::placeholder { color: var(--text-dim); }
+    #msgInput::-webkit-scrollbar { width: 3px; }
+    #msgInput::-webkit-scrollbar-thumb { background: rgba(232,53,122,0.2); border-radius: 3px; }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Memory button ─────────────────────────────────────────────────────── */
-    .memory-btn {
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 500;
-      background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
-      border-radius: 9px; padding: 8px 16px; cursor: pointer; letter-spacing: 0.04em;
-      transition: color 0.2s, border-color 0.2s, background 0.2s; white-space: nowrap;
+    .send-btn {
+      flex-shrink: 0;
+      background: var(--gradient); border: none;
+      color: #fff; border-radius: 9px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 2px 12px rgba(232,53,122,0.3);
     }
-    .memory-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); background: rgba(232,53,122,0.06); }
+    .send-btn:hover:not(:disabled) { opacity: 0.88; transform: scale(1.05); }
+    .send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .send-btn svg { width: 16px; height: 16px; }
 
-    /* ── Next steps ────────────────────────────────────────────────────────── */
-    .scene-summary { font-size: 0.78rem; color: var(--text-muted); font-style: italic; border-top: 1px solid var(--border); padding-top: 10px; line-height: 1.5; }
-    .feedback-row { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-    .feedback-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-    .feedback-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .feedback-chip { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
-    .feedback-chip:hover { border-color: rgba(232,53,122,0.4); color: var(--text); }
-    .feedback-chip.selected { background: rgba(232,53,122,0.15); border-color: rgba(232,53,122,0.6); color: var(--rose-light); }
-    .next-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-    .next-steps-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-    .next-steps-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .next-step-chip {
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.76rem;
-      background: rgba(232,53,122,0.06); border: 1px solid rgba(232,53,122,0.25); color: var(--rose-light);
-      border-radius: 20px; padding: 5px 14px; cursor: pointer;
-      transition: border-color 0.2s, color 0.2s, background 0.2s; text-align: left;
-    }
-    .next-step-chip:hover { border-color: rgba(232,53,122,0.6); background: rgba(232,53,122,0.14); color: var(--text); }
-
-    /* ── Memory overlay ────────────────────────────────────────────────────── */
-    .memory-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
-    .memory-overlay.visible { display: flex; animation: fadeIn 0.18s ease; }
-    .memory-panel {
-      display: flex; flex-direction: column; gap: 16px;
-      background: #130719; border: 1px solid rgba(232,53,122,0.3);
-      border-radius: 16px; padding: 24px; width: 100%; max-width: 520px;
-      max-height: 80vh; overflow-y: auto;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,53,122,0.08);
-      animation: popUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .memory-panel-header { display: flex; align-items: center; justify-content: space-between; }
-    .memory-panel-title { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-    .memory-panel-dismiss { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; line-height: 1; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0; transition: color 0.2s; }
-    .memory-panel-dismiss:hover { color: var(--rose-light); }
-    .memory-section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rose-light); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 4px; }
-    .memory-pref-list { display: flex; flex-direction: column; gap: 4px; }
-    .memory-pref-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); padding: 4px 0; }
-    .memory-pref-count { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--rose-light); }
-    .memory-char-list { display: flex; flex-direction: column; gap: 6px; }
-    .memory-char-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .memory-char-info { flex: 1; min-width: 0; }
-    .memory-char-name { font-size: 0.82rem; font-weight: 500; color: var(--text); margin-bottom: 2px; }
-    .memory-char-desc { font-size: 0.74rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .memory-char-del { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; padding: 4px 8px; cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s; }
-    .memory-char-del:hover { color: #fca5a5; border-color: rgba(252,165,165,0.4); }
-    .memory-recent-list { display: flex; flex-direction: column; gap: 4px; }
-    .memory-recent-item { font-size: 0.8rem; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
-    .memory-recent-item:last-child { border-bottom: none; }
-    .memory-empty { font-size: 0.78rem; color: var(--text-dim); }
-
-    /* ── Continue chip ─────────────────────────────────────────────────────── */
-    .continue-chip {
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600;
-      background: var(--gradient); border: none; color: #fff;
-      border-radius: 20px; padding: 7px 16px; cursor: pointer;
-      transition: opacity 0.2s; text-align: left; width: 100%;
-    }
-    .continue-chip:hover { opacity: 0.88; }
-
-    /* ── Mobile ────────────────────────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      body {
-        padding: max(env(safe-area-inset-top), 32px) 14px max(env(safe-area-inset-bottom), 48px);
-        align-items: stretch;
-      }
-      .page { align-items: stretch; }
-
-      /* Header */
-      header { margin-bottom: 20px; }
-      .logo { width: 54px; height: 54px; border-radius: 16px; margin-bottom: 14px; }
-      .logo svg { width: 26px; height: 26px; }
-      header h1 { font-size: 2rem; }
-      header p { font-size: 0.74rem; }
-      .header-rule { margin-top: 14px; }
-      .header-rule::before, .header-rule::after { width: 40px; }
-
-      /* Hide decorative silhouettes */
-      .silhouette { display: none; }
-
-      /* Body icons — tighter, smaller */
-      .body-icons { gap: 12px; margin-bottom: 24px; }
-      .body-icon-img { width: 42px; height: 42px; border-radius: 12px; }
-      .body-icon-img svg { width: 26px; height: 26px; }
-      /* Always show on touch — no hover */
-      .body-icon { opacity: 0.6; }
-
-      /* Mode toggle — full width */
-      .mode-toggle { width: 100%; }
-      .mode-btn { flex: 1; text-align: center; padding: 10px 8px; font-size: 0.78rem; }
-
-      /* Inputs — 16px prevents iOS auto-zoom */
-      .character-input { font-size: 1rem; padding: 13px 14px; }
-      textarea { font-size: 1rem; min-height: 100px; padding: 14px 16px; }
-
-      /* Example chips — bigger touch area */
-      .example-chip { padding: 8px 14px; font-size: 0.78rem; }
-      /* Upload area — more compact */
-      .upload-area { padding: 18px 14px; }
-      .upload-hint-text { font-size: 0.8rem; }
-
-      /* Actions — generate full width, copy alongside */
-      .actions { flex-wrap: wrap; }
-      #generateBtn { flex: 1; padding: 14px 20px; font-size: 0.9rem; }
-      #copyAllBtn { padding: 14px 18px; }
-
-      /* Segments — always show copy and reorder buttons (no hover on mobile) */
-      .segment { padding: 12px 12px 12px 14px; gap: 10px; }
-      .segment-copy { opacity: 1; }
-      .segment-reorder { opacity: 1; }
-      #regenBtn, #copyNumBtn { padding: 14px 12px; }
-      .segment-label { min-width: 56px; font-size: 0.58rem; }
-      .segment-label span { font-size: 0.62rem; }
-      .segment-text { font-size: 0.86rem; }
-
-      /* History */
-      .history-item { padding: 12px; }
-      .history-item-desc { font-size: 0.78rem; }
-
-      /* Error */
-      #error { font-size: 0.8rem; }
-
-      /* Splitter note */
-      .splitter-note { font-size: 0.72rem; }
+    .input-hint {
+      text-align: center;
+      font-size: 0.65rem; color: var(--text-dim);
+      letter-spacing: 0.04em;
     }
 
+    /* ── Mobile ──────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .header-sub { display: none; }
+      .chat-area { padding: 14px 10px 6px; }
+      .input-dock { padding: 8px 10px max(env(safe-area-inset-bottom), 10px); }
+      .user-bubble { max-width: 90%; }
+      .ai-wrap { max-width: 96%; }
+      #msgInput { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-overlay-spinner"></div>
-    <div class="loading-overlay-text">Generating…</div>
-  </div>
-
-  <div class="suggestions-overlay" id="suggestionsOverlay">
-    <div class="suggestions-box" id="suggestionsBox">
-      <div class="suggestions-header">
-        <span class="suggestions-title">Suggested prompts</span>
-        <button class="suggestions-dismiss" id="suggestionsDismiss">✕</button>
-      </div>
-      <div class="suggestions-chips" id="suggestionsChips">
-        <span class="suggestions-loading">Analysing image…</span>
-      </div>
-      <div class="suggestions-name-prompt" id="suggestionsNamePrompt">
-        <span class="suggestions-name-label">Don't recognise her? Name her and she'll be remembered:</span>
-        <div class="suggestions-name-row">
-          <input class="suggestions-name-input" id="characterNameInput" type="text" placeholder="e.g. Elena Fisher from Uncharted" autocomplete="off" />
-          <div class="name-autocomplete" id="nameAutocomplete"></div>
-          <button class="suggestions-name-save" id="saveCharacterBtn" type="button">Save</button>
-        </div>
-        <span class="suggestions-name-saved" id="characterNameSaved">Saved to memory ✓</span>
-      </div>
-    </div>
-  </div>
-
   <div class="bg-glow"></div>
   <div class="grid-bg"></div>
 
-  <svg class="silhouette silhouette-left" viewBox="0 0 340 700" fill="none">
-    <path d="M280 0 C280 0 340 80 320 180 C300 280 200 300 220 420 C240 540 340 580 320 700" stroke="url(#sl1)" stroke-width="2" fill="none"/>
-    <path d="M240 0 C240 0 310 100 280 220 C250 340 160 360 180 480 C200 600 300 640 270 700" stroke="url(#sl1)" stroke-width="1" fill="none" opacity="0.5"/>
-    <defs><linearGradient id="sl1" x1="0" y1="0" x2="0" y2="700" gradientUnits="userSpaceOnUse"><stop stop-color="#e8357a" stop-opacity="0"/><stop offset="0.4" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e" stop-opacity="0"/></linearGradient></defs>
-  </svg>
-  <svg class="silhouette silhouette-right" viewBox="0 0 280 600" fill="none">
-    <path d="M60 0 C60 0 0 70 20 160 C40 250 140 270 120 380 C100 490 0 530 30 600" stroke="url(#sr1)" stroke-width="2" fill="none"/>
-    <path d="M100 0 C100 0 30 90 60 190 C90 290 180 310 160 420 C140 530 40 560 70 600" stroke="url(#sr1)" stroke-width="1" fill="none" opacity="0.5"/>
-    <defs><linearGradient id="sr1" x1="0" y1="0" x2="0" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#e8357a" stop-opacity="0"/><stop offset="0.4" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e" stop-opacity="0"/></linearGradient></defs>
-  </svg>
-
-  <div class="page">
-    <header>
-      <div class="logo">
-        <svg viewBox="0 0 34 34" fill="none">
-          <circle cx="17" cy="17" r="4" fill="url(#lg)"/>
-          <path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#lg)" opacity="0.9"/>
-          <path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#lg)" opacity="0.75"/>
-          <path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#lg)" opacity="0.9"/>
-          <path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#lg)" opacity="0.75"/>
-          <defs><linearGradient id="lg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs>
-        </svg>
-      </div>
-      <h1>WAN 2.2 Prompt Engine</h1>
-      <p>Cinematic &middot; Sensual &middot; Precise</p>
-      <div class="header-rule"><div class="header-rule-diamond"></div></div>
-    </header>
-
-    <div class="body-icons">
-      <div class="body-icon" data-icon="lips"><div class="body-icon-img"><svg viewBox="0 0 30 30" fill="none"><path d="M3 14 Q6 9 10 11 Q12 12 15 10 Q18 12 20 11 Q24 9 27 14 Q25 21 15 22 Q5 21 3 14Z" fill="url(#gi1)" opacity="0.35"/><path d="M3 14 Q6 9 10 11 Q12 12 15 10 Q18 12 20 11 Q24 9 27 14 Q25 21 15 22 Q5 21 3 14Z" stroke="url(#gi1)" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M3 14 Q15 17 27 14" stroke="url(#gi1)" stroke-width="0.8"/><path d="M15 14 Q11 18 15 19.5 Q19 18 15 14Z" fill="url(#gi1)"/><defs><linearGradient id="gi1" x1="3" y1="10" x2="27" y2="22" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="1" stop-color="#e8357a"/></linearGradient></defs></svg></div></div>
-      <div class="body-icon" data-icon="breasts"><div class="body-icon-img"><svg viewBox="0 0 30 30" fill="none"><path d="M1 23 Q1 11 8.5 10 Q12 9.5 14 13.5 Q16 9.5 21.5 10 Q29 11 29 23Z" fill="url(#gi2)" opacity="0.3"/><path d="M1 23 Q1 11 8.5 10 Q12 9.5 14 13.5 Q16 9.5 21.5 10 Q29 11 29 23Z" stroke="url(#gi2)" stroke-width="1.4" fill="none"/><circle cx="8.5" cy="18" r="2" fill="url(#gi2)" opacity="0.9"/><circle cx="8.5" cy="18" r="0.7" fill="#f9d0e4"/><circle cx="21.5" cy="18" r="2" fill="url(#gi2)" opacity="0.9"/><circle cx="21.5" cy="18" r="0.7" fill="#f9d0e4"/><defs><linearGradient id="gi2" x1="1" y1="10" x2="29" y2="23" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="1" stop-color="#e8357a"/></linearGradient></defs></svg></div></div>
-      <div class="body-icon" data-icon="body"><div class="body-icon-img"><svg viewBox="0 0 30 30" fill="none"><path d="M8 2 Q4 6 4 10 Q4 14 10 15.5 Q4 17 4 21 Q4 25 9 28 Q15 30 21 28 Q26 25 26 21 Q26 17 20 15.5 Q26 14 26 10 Q26 6 22 2 Q15 0 8 2Z" fill="url(#gi3)" opacity="0.2"/><path d="M8 2 Q4 6 4 10 Q4 14 10 15.5 Q4 17 4 21 Q4 25 9 28 Q15 30 21 28 Q26 25 26 21 Q26 17 20 15.5 Q26 14 26 10 Q26 6 22 2 Q15 0 8 2Z" stroke="url(#gi3)" stroke-width="1.3" fill="none"/><defs><linearGradient id="gi3" x1="4" y1="2" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="1" stop-color="#e8357a"/></linearGradient></defs></svg></div></div>
-      <div class="body-icon" data-icon="ass"><div class="body-icon-img"><svg viewBox="0 0 30 30" fill="none"><path d="M2 26 Q1 13 8 10 Q12 8.5 15 12 Q18 8.5 22 10 Q29 13 28 26Z" fill="url(#gi4)" opacity="0.3"/><path d="M2 26 Q1 13 8 10 Q12 8.5 15 12 Q18 8.5 22 10 Q29 13 28 26Z" stroke="url(#gi4)" stroke-width="1.4" fill="none"/><path d="M2 26 Q15 29.5 28 26" stroke="url(#gi4)" stroke-width="1"/><path d="M15 12 Q15.5 18 15.5 25" stroke="url(#gi4)" stroke-width="1" stroke-linecap="round"/><defs><linearGradient id="gi4" x1="2" y1="10" x2="28" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="1" stop-color="#e8357a"/></linearGradient></defs></svg></div></div>
-      <div class="body-icon" data-icon="legs"><div class="body-icon-img"><svg viewBox="0 0 30 30" fill="none"><path d="M7 2 Q5 2 4 5 Q3 10 5 16 Q6 20 7 24 Q7.5 27 7 29" stroke="url(#gi5)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.2"/><path d="M7 2 Q5 2 4 5 Q3 10 5 16 Q6 20 7 24 Q7.5 27 7 29" stroke="url(#gi5)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M23 2 Q25 2 26 5 Q27 10 25 16 Q24 20 23 24 Q22.5 27 23 29" stroke="url(#gi5)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.2"/><path d="M23 2 Q25 2 26 5 Q27 10 25 16 Q24 20 23 24 Q22.5 27 23 29" stroke="url(#gi5)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M7 2 Q15 4 23 2" stroke="url(#gi5)" stroke-width="1" stroke-linecap="round"/><path d="M5 16 Q15 18.5 25 16" stroke="url(#gi5)" stroke-width="0.8"/><defs><linearGradient id="gi5" x1="4" y1="2" x2="26" y2="29" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="1" stop-color="#e8357a"/></linearGradient></defs></svg></div></div>
-      <div class="body-icon" data-icon="feet"><div class="body-icon-img"><svg viewBox="0 0 30 30" fill="none"><path d="M22 4 Q26 5 27 9 Q28 13 25 17 Q22 21 18 22 L7 22 Q4 22 3 20 Q2 17 5 16 Q8 15 10 14 Q13 12 15 9 Q17 5 22 4Z" fill="url(#gi6)" opacity="0.25"/><path d="M22 4 Q26 5 27 9 Q28 13 25 17 Q22 21 18 22 L7 22 Q4 22 3 20 Q2 17 5 16 Q8 15 10 14 Q13 12 15 9 Q17 5 22 4Z" stroke="url(#gi6)" stroke-width="1.3" fill="none"/><circle cx="7" cy="22" r="1.2" fill="url(#gi6)"/><circle cx="10" cy="23.5" r="1.3" fill="url(#gi6)"/><circle cx="13.5" cy="24.5" r="1.3" fill="url(#gi6)"/><circle cx="17" cy="24" r="1.2" fill="url(#gi6)"/><circle cx="20" cy="22.5" r="1" fill="url(#gi6)"/><defs><linearGradient id="gi6" x1="2" y1="4" x2="28" y2="25" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="1" stop-color="#e8357a"/></linearGradient></defs></svg></div></div>
+  <header class="site-header">
+    <div class="header-logo">
+      <svg viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="4" fill="url(#hlg)"/>
+        <path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#hlg)" opacity="0.9"/>
+        <path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#hlg)" opacity="0.75"/>
+        <path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#hlg)" opacity="0.9"/>
+        <path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#hlg)" opacity="0.75"/>
+        <defs><linearGradient id="hlg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs>
+      </svg>
     </div>
+    <div class="header-titles">
+      <span class="header-name">Muse</span>
+      <span class="header-sub">WAN 2.2 Prompt Engine</span>
+    </div>
+    <button class="new-chat-btn" id="newChatBtn">New chat</button>
+  </header>
 
-    <div class="container">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div class="mode-toggle">
-          <button class="mode-btn active" data-mode="video">Video Segments</button>
-          <button class="mode-btn" data-mode="short">Short Clip</button>
-          <button class="mode-btn" data-mode="image">Phr00t Edit</button>
-        </div>
-        <div class="memory-overlay" id="memoryOverlay">
-          <div class="memory-panel" id="memoryPanel">
-            <div class="memory-panel-header">
-              <span class="memory-panel-title">Memory Bank</span>
-              <button class="memory-panel-dismiss" id="memoryDismiss">✕</button>
-            </div>
-            <div>
-              <div class="memory-section-title">AI Profile</div>
-              <div class="memory-pref-list" id="memoryPrefList"><span class="memory-empty">No profile yet.</span></div>
-            </div>
-            <div>
-              <div class="memory-section-title">Saved Characters</div>
-              <div class="memory-char-list" id="memoryCharList"><span class="memory-empty">No saved characters.</span></div>
-            </div>
-            <div>
-              <div class="memory-section-title">Recent Prompts</div>
-              <div class="memory-recent-list" id="memoryRecentList"><span class="memory-empty">No recent prompts.</span></div>
-            </div>
-          </div>
-        </div>
-        <button class="memory-btn" id="memoryBtn" type="button">Memory</button>
-      </div>
+  <main class="chat-area" id="chatArea">
+    <div class="chat-inner" id="chatInner">
+      <!-- messages rendered here -->
+    </div>
+  </main>
 
-      <div>
-        <label class="field-label" for="description">Scene / Edit</label>
-        <div class="textarea-wrap">
-          <textarea id="description" placeholder="Describe your video scene…" rows="4"></textarea>
-          <button class="clear-btn" id="clearDescBtn" type="button" title="Clear">✕</button>
-        </div>
+  <div class="input-dock">
+    <div class="input-inner">
+      <div class="attachment-bar" id="attachmentBar">
+        <img class="attach-thumb" id="attachThumb" src="" alt="" />
+        <span class="attach-name" id="attachName"></span>
+        <button class="attach-remove" id="attachRemove" title="Remove image">✕</button>
       </div>
-
-      <div style="position:relative;">
-        <label class="field-label" for="characterField">Character (optional)</label>
-        <input class="character-input" id="characterField" type="text" placeholder="e.g. Tifa Lockhart — loads saved context" autocomplete="off" />
-        <div class="name-autocomplete" id="characterFieldAC"></div>
+      <div class="input-row">
+        <button class="attach-btn" id="attachBtn" title="Attach image">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
+        </button>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+        <textarea id="msgInput" placeholder="Tell me what you want…" rows="1"></textarea>
+        <button class="send-btn" id="sendBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
       </div>
-
-      <div class="upload-area" id="uploadArea">
-        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" />
-        <div class="upload-hint" id="uploadHint">
-          <div class="upload-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-            </svg>
-          </div>
-          <div class="upload-hint-text">Drop a reference image or <span>click to browse</span></div>
-          <div class="upload-hint-sub">Optional &mdash; auto-describes your character &middot; JPEG, PNG, WebP</div>
-        </div>
-        <div class="upload-preview" id="uploadPreview">
-          <img id="previewImg" src="" alt="preview" />
-          <div class="upload-preview-info">
-            <div class="upload-preview-name" id="previewName"></div>
-            <div class="upload-preview-size" id="previewSize"></div>
-          </div>
-          <button class="upload-remove" id="removeBtn" type="button">Remove</button>
-        </div>
-        <div class="upload-analysing-badge">
-          <div class="upload-analysing-dot"></div>
-          <div class="upload-analysing-dot"></div>
-          <div class="upload-analysing-dot"></div>
-          <span class="upload-analysing-text">Analysing…</span>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button id="generateBtn">Generate Prompts</button>
-        <button id="regenBtn" title="Regenerate">↻</button>
-        <button id="copyAllBtn">Copy All</button>
-        <button id="copyNumBtn" title="Copy as numbered list">1,2,3</button>
-        <label class="lora-toggle" id="loraToggle">
-          <span class="lora-switch"><input type="checkbox" id="loraCheckbox" checked /><span class="lora-slider"></span></span>
-          LoRA triggers
-        </label>
-      </div>
-
-      <div id="error"></div>
-      <div class="segments" id="segments"></div>
-      <div class="feedback-row" id="feedbackRow" style="display:none">
-        <span class="feedback-label">What was wrong?</span>
-        <div class="feedback-chips" id="feedbackChips"></div>
-      </div>
-      <div class="next-steps" id="nextSteps" style="display:none">
-        <span class="next-steps-label">What next?</span>
-        <div class="next-steps-chips" id="nextStepsChips"></div>
-      </div>
-
-      <div class="negative-box" id="negativeBox">
-        <div class="negative-header">
-          <span class="field-label" style="margin:0">Negative Prompt</span>
-          <button class="negative-copy" id="negativeCopyBtn">Copy</button>
-        </div>
-        <textarea class="negative-textarea" id="negativeTextarea" spellcheck="false"></textarea>
-      </div>
-      <div class="splitter-note" id="splitterNote" style="display:none">Paste into <strong>CLIPPromptSplitter5</strong> — blank line between each segment</div>
-
-      <div class="history-section" id="historySection" style="display:none">
-        <div class="history-header" id="historyHeader">
-          <span class="history-title">Recent generations</span>
-          <span class="history-toggle" id="historyToggle">▾ Show</span>
-        </div>
-        <div class="history-list" id="historyList" style="display:none"></div>
-      </div>
+      <div class="input-hint">Enter to send &middot; Shift+Enter for new line</div>
     </div>
   </div>
 
   <script>
-    const VIDEO_TIMESTAMPS  = ['~1–4s', '~5–8s', '~9–12s', '~13–16s', '~17–20s'];
-    const SHORT_LABEL       = 'Clip';
-    const GENERAL_NEGATIVES = 'talking, speaking, lip movement, background movement, animated background, moving background, background animation, background change, shifting background, environmental animation, camera shake, unintended camera movement, ghosting, ghost frames, double exposure, transparency, afterimage, multiple subjects, identity drift, different person, changed facial features, different nose, different eyes, different lips, different jawline, different cheekbones, aging, younger, older, face morphing, face swap, dissolving face, blending faces, deformed face, distorted face, melted face, asymmetrical face, crossed eyes, lazy eye, changing expression, facial drift, inconsistent face, morphing features, shifting identity, different ethnicity, different hair colour, different eye colour, extra limbs, missing limbs, malformed limbs, fused fingers, extra fingers, missing fingers, broken anatomy, deformed anatomy, distorted body, melted body, morphing feet, fused feet, merged feet, deformed feet, malformed feet, distorted feet, melted feet, extra toes, missing toes, fused toes, floating feet, skin discoloration, blotchy skin, waxy skin, plastic skin, garish colors, overexposed, blurry, low quality, worst quality, JPEG compression artifacts, noise, grainy, ugly, disfigured, mutilated, duplicate, mutated, subtitles, watermark, text, logo, frozen frame, static, walking backwards, three legs, crowded background';
-    const ALLOWED_TYPES    = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const HISTORY_KEY      = 'wan_history';
-    const HISTORY_MAX      = 10;
-    let mode = 'video';
-    let lastPrompts = [];
-    let lastBody = null;
-    let userProfile = null;
-    let selectedFeedback = null;
+    // ── State ──────────────────────────────────────────
+    const GREETING = "Hey 💋 Tell me what you want — describe a scene, a clip, or drop an image. I'll write the prompt.";
 
-    // Fetch memory profile once on load — injected into every generation request
-    fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(data => {
-      if (data?.profile) userProfile = data.profile;
-    });
-    let lastEndpoint = null;
-    let uploadedImage = null;
-    let historyOpen = false;
-    let describedCharacter = '';
-    let describedScene = '';
-    let characterName = '';   // AI-identified or user-entered name, used as memory key
-    let lastDescription = ''; // physical description of last analysed image
-    let sessionPrompts = []; // session continuity tracking
-    let describeAbortController = null; // cancels in-flight describe when new image uploaded
+    let conversation = [{ role: 'assistant', content: GREETING }];
+    let pendingImage = null;
+    let isLoading = false;
 
-    const CHARACTERS_KEY = 'wan_characters';
-    function loadMemoryBank() { try { return JSON.parse(localStorage.getItem(CHARACTERS_KEY) || '[]'); } catch { return []; } }
-    function saveToMemoryBank(name, description) {
-      const bank = loadMemoryBank().filter(c => c.name.toLowerCase() !== name.toLowerCase());
-      bank.unshift({ name, description });
-      localStorage.setItem(CHARACTERS_KEY, JSON.stringify(bank.slice(0, 50)));
-    }
+    // ── DOM refs ───────────────────────────────────────
+    const chatInner    = document.getElementById('chatInner');
+    const chatArea     = document.getElementById('chatArea');
+    const msgInput     = document.getElementById('msgInput');
+    const sendBtn      = document.getElementById('sendBtn');
+    const attachBtn    = document.getElementById('attachBtn');
+    const fileInput    = document.getElementById('fileInput');
+    const attachmentBar = document.getElementById('attachmentBar');
+    const attachThumb  = document.getElementById('attachThumb');
+    const attachName   = document.getElementById('attachName');
+    const attachRemove = document.getElementById('attachRemove');
+    const newChatBtn   = document.getElementById('newChatBtn');
 
-    const generateBtn    = document.getElementById('generateBtn');
-    const copyAllBtn     = document.getElementById('copyAllBtn');
-    const regenBtn       = document.getElementById('regenBtn');
-    const loraToggle     = document.getElementById('loraToggle');
-    const loraCheckbox   = document.getElementById('loraCheckbox');
-    const copyNumBtn     = document.getElementById('copyNumBtn');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const errorEl        = document.getElementById('error');
-    const segmentsEl     = document.getElementById('segments');
-    const descriptionEl  = document.getElementById('description');
-    const modeBtns       = document.querySelectorAll('.mode-btn');
-    const uploadArea     = document.getElementById('uploadArea');
-    const fileInput      = document.getElementById('fileInput');
-    const uploadHint     = document.getElementById('uploadHint');
-    const uploadPreview  = document.getElementById('uploadPreview');
-    const previewImg     = document.getElementById('previewImg');
-    const previewName    = document.getElementById('previewName');
-    const previewSize    = document.getElementById('previewSize');
-    const removeBtn      = document.getElementById('removeBtn');
-    const clearDescBtn     = document.getElementById('clearDescBtn');
-    const suggestionsOverlay = document.getElementById('suggestionsOverlay');
-    const suggestionsBox     = document.getElementById('suggestionsBox');
-    const suggestionsChips   = document.getElementById('suggestionsChips');
-    const suggestionsDismiss   = document.getElementById('suggestionsDismiss');
-    const suggestionsNamePrompt = document.getElementById('suggestionsNamePrompt');
-    const characterNameInput   = document.getElementById('characterNameInput');
-    const saveCharacterBtn     = document.getElementById('saveCharacterBtn');
-    const characterNameSaved   = document.getElementById('characterNameSaved');
-    function showSuggestions() { suggestionsOverlay.classList.add('visible'); }
-    function hideSuggestions() {
-      suggestionsOverlay.classList.remove('visible');
-      suggestionsNamePrompt.classList.remove('visible');
-      characterNameInput.value = ''; characterNameSaved.classList.remove('visible');
-    }
+    // ── Init ───────────────────────────────────────────
+    appendMessage('assistant', GREETING);
+    msgInput.focus();
 
-    const nextStepsEl    = document.getElementById('nextSteps');
-    const nextStepsChips = document.getElementById('nextStepsChips');
-    const feedbackRow    = document.getElementById('feedbackRow');
-    const feedbackChips  = document.getElementById('feedbackChips');
-    const memoryBtn      = document.getElementById('memoryBtn');
-    const memoryOverlay  = document.getElementById('memoryOverlay');
-    const memoryDismiss  = document.getElementById('memoryDismiss');
-    const memoryPrefList = document.getElementById('memoryPrefList');
-    const memoryCharList = document.getElementById('memoryCharList');
-    const memoryRecentList = document.getElementById('memoryRecentList');
-
-    // ── Memory viewer ─────────────────────────────────────────────────────────
-    function showMemory() { memoryOverlay.classList.add('visible'); }
-    function hideMemory() { memoryOverlay.classList.remove('visible'); }
-    memoryBtn.addEventListener('click', async () => {
-      showMemory();
-      try {
-        const res = await fetch('/api/memory');
-        if (!res.ok) throw new Error('Failed to load memory');
-        const data = await res.json();
-        // AI profile
-        const nextSynth = data.promptCount === 0 ? 5 : (5 - (data.promptCount % 5)) || 5;
-        if (data.profile) {
-          memoryPrefList.innerHTML = `<div style="font-size:0.82rem;color:var(--text);line-height:1.6;white-space:pre-wrap">${escapeHtml(data.profile)}</div><div style="font-size:0.72rem;color:var(--text-dim);margin-top:6px">${data.promptCount} prompts logged · next update in ${nextSynth}</div>`;
-        } else {
-          const needed = Math.max(0, 5 - data.promptCount);
-          memoryPrefList.innerHTML = `<span class="memory-empty">No profile yet — generate ${needed} more prompt${needed !== 1 ? 's' : ''} to build one.</span>`;
-        }
-        // Recent prompts (last 5)
-        const recents = (data.recentPrompts || []).slice(0, 5);
-        memoryRecentList.innerHTML = '';
-        if (recents.length === 0) {
-          memoryRecentList.innerHTML = '<span class="memory-empty">No recent prompts.</span>';
-        } else {
-          recents.forEach(p => {
-            const el = document.createElement('div');
-            el.className = 'memory-recent-item';
-            el.textContent = (p.mode ? `[${p.mode}] ` : '') + (p.prompt_text || '');
-            memoryRecentList.appendChild(el);
-          });
-        }
-      } catch (err) {
-        memoryPrefList.innerHTML = '<span class="memory-empty">Could not load memory.</span>';
-      }
-      // Characters from localStorage
-      const chars = loadMemoryBank();
-      memoryCharList.innerHTML = '';
-      if (chars.length === 0) {
-        memoryCharList.innerHTML = '<span class="memory-empty">No saved characters.</span>';
-      } else {
-        chars.forEach(c => {
-          const el = document.createElement('div');
-          el.className = 'memory-char-item';
-          el.innerHTML = `<div class="memory-char-info"><div class="memory-char-name">${escapeHtml(c.name)}</div><div class="memory-char-desc">${escapeHtml(c.description || '')}</div></div><button class="memory-char-del" data-name="${escapeHtml(c.name)}">Delete</button>`;
-          el.querySelector('.memory-char-del').addEventListener('click', () => {
-            const bank = loadMemoryBank().filter(x => x.name !== c.name);
-            localStorage.setItem(CHARACTERS_KEY, JSON.stringify(bank));
-            el.remove();
-            if (memoryCharList.children.length === 0) memoryCharList.innerHTML = '<span class="memory-empty">No saved characters.</span>';
-          });
-          memoryCharList.appendChild(el);
-        });
-      }
-    });
-    memoryDismiss.addEventListener('click', hideMemory);
-    memoryOverlay.addEventListener('click', e => { if (e.target === memoryOverlay) hideMemory(); });
-    const negativeBox      = document.getElementById('negativeBox');
-    const negativeTextarea = document.getElementById('negativeTextarea');
-    const negativeCopyBtn  = document.getElementById('negativeCopyBtn');
-    const historySection   = document.getElementById('historySection');
-    const splitterNote   = document.getElementById('splitterNote');
-    const historyHeader  = document.getElementById('historyHeader');
-    const historyToggle  = document.getElementById('historyToggle');
-    const historyList    = document.getElementById('historyList');
-    // ── Mode ─────────────────────────────────────────────────────────────────
-    // ── Body icon prompts ─────────────────────────────────────────────────────
-    const ICON_PROMPTS = {
-      lips: {
-        video: 'close-up on lips, slow parting, tongue tip visible, jaw dropping, glossy wet lips',
-        image: 'detailed lips, glossy, slightly parted, tongue just visible, soft focus on mouth',
-        short: 'lips parting slowly, tongue tip, glossy wet, close-up',
-      },
-      breasts: {
-        video: 'close-up on breasts, heavy jiggle in slow motion, soft-body physics, exaggerated natural bounce',
-        image: 'large natural breasts, detailed nipples, areola detail, smooth skin, full and heavy',
-        short: 'breasts jiggle, heavy natural bounce, soft-body physics, slow motion',
-      },
-      body: {
-        video: 'full body shot, slow weight shift side to side, curves accentuated, natural body sway, wide angle',
-        image: 'full body visible, hourglass figure, smooth curves, detailed skin, photorealistic, 8k',
-        short: 'body sway, natural weight shift, curves jiggling, wide shot',
-      },
-      ass: {
-        video: 'close-up from behind on ass, heavy jiggle, rippling soft flesh, slow motion, soft-body physics',
-        image: 'round ass, detailed, presenting, arched back, smooth skin, close-up rear angle',
-        short: 'ass jiggle, heavy soft-body ripple, slow motion, rear close-up',
-      },
-      legs: {
-        video: 'legs spreading slowly, thighs quivering, close-up on inner thighs, weight shifting between legs',
-        image: 'legs spread wide, detailed inner thighs, smooth skin, heels on, close-up low angle',
-        short: 'thigh jiggle, legs spreading slowly, inner thigh wobble',
-      },
-      feet: {
-        video: 'close-up on feet, toes curling and spreading slowly, arched sole, slow toe wiggle, static camera',
-        image: 'detailed feet, bare soles visible, toes spread, high arch, clean smooth skin, close-up',
-        short: 'toes curling slowly, arched sole, close-up, static shot',
-      },
-    };
-
-    document.querySelectorAll('.body-icon[data-icon]').forEach(icon => {
-      icon.addEventListener('click', () => {
-        const key = icon.dataset.icon;
-        const prompt = ICON_PROMPTS[key]?.[mode];
-        if (!prompt) return;
-        const current = descriptionEl.value.trim();
-        descriptionEl.value = current ? `${current}, ${prompt}` : prompt;
-        icon.classList.add('active');
-        setTimeout(() => icon.classList.remove('active'), 600);
-        descriptionEl.focus();
-      });
+    // ── Input handling ─────────────────────────────────
+    msgInput.addEventListener('input', () => {
+      autoResize();
+      sendBtn.disabled = isLoading || (!msgInput.value.trim() && !pendingImage);
     });
 
-    modeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        mode = btn.dataset.mode;
-        modeBtns.forEach(b => b.classList.toggle('active', b === btn));
-        descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
-        segmentsEl.innerHTML = '';
-        nextStepsEl.style.display = 'none';
-        negativeBox.classList.remove('visible');
-        copyAllBtn.style.display = 'none';
-        regenBtn.style.display = 'none';
-        copyNumBtn.style.display = 'none';
-        splitterNote.style.display = 'none';
-        showError(null);
-        lastPrompts = [];
-        sessionPrompts = [];
-        if (describedCharacter && suggestionsOverlay.classList.contains('visible')) fetchSuggestions(describedCharacter);
-        loraToggle.classList.toggle('visible', mode === 'image');
-      });
-    });
-
-    // ── Upload ────────────────────────────────────────────────────────────────
-    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
-    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
-    uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
-    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
-    removeBtn.addEventListener('click', () => clearUpload());
-    clearDescBtn.addEventListener('click', () => { descriptionEl.value = ''; descriptionEl.focus(); });
-    suggestionsDismiss.addEventListener('click', hideSuggestions);
-    suggestionsOverlay.addEventListener('click', e => { if (e.target === suggestionsOverlay) hideSuggestions(); });
-
-    saveCharacterBtn.addEventListener('click', () => {
-      const raw = characterNameInput.value.trim();
-      if (!raw || !lastDescription) return;
-      // Normalise various formats → "elena fisher, uncharted"
-      // Handles: "Elena Fisher (Uncharted)", "Elena Fisher from Uncharted", "Elena Fisher, Uncharted"
-      const name = raw
-        .replace(/\s+from\s+/i, ', ')   // "from" → comma
-        .replace(/\s*\(\s*/g, ', ')     // opening paren → comma
-        .replace(/\s*\)\s*/g, '')       // closing paren → removed
-        .replace(/,\s*,/g, ',')         // double commas → single
-        .trim().toLowerCase();
-      saveToMemoryBank(name, lastDescription);
-      characterName = name;
-      characterNameSaved.classList.add('visible');
-      fetchSuggestions(`${name}, ${lastDescription}`);
-      fetch('/api/memory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'character_named', data: { name, description: lastDescription } }),
-      }).catch(() => {});
-    });
-    characterNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveCharacterBtn.click(); });
-
-    // ── Character name autocomplete ───────────────────────────────────────────
-    const nameAutocomplete = document.getElementById('nameAutocomplete');
-    let acIndex = -1;
-    let acDebounce = null;
-    let dbCharacters = []; // populated from /api/memory on first use
-
-    // Load DB characters once on first focus
-    characterNameInput.addEventListener('focus', () => {
-      if (dbCharacters.length) return;
-      fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(data => {
-        if (data?.characters) dbCharacters = data.characters.map(c => c.name);
-      });
-    }, { once: true });
-
-    function acItems() { return nameAutocomplete.querySelectorAll('.name-ac-item'); }
-
-    function acOpen(names) {
-      nameAutocomplete.innerHTML = '';
-      acIndex = -1;
-      names.forEach(name => {
-        const el = document.createElement('div');
-        el.className = 'name-ac-item';
-        el.textContent = name;
-        el.addEventListener('mousedown', e => {
-          e.preventDefault();
-          characterNameInput.value = name;
-          nameAutocomplete.classList.remove('open');
-          saveCharacterBtn.click();
-        });
-        nameAutocomplete.appendChild(el);
-      });
-      nameAutocomplete.classList.toggle('open', names.length > 0);
-    }
-
-    function acClose() { nameAutocomplete.classList.remove('open'); acIndex = -1; }
-
-    function mergeAcResults(local, db, llm) {
-      const seen = new Set();
-      const out = [];
-      for (const name of [...local, ...db, ...llm]) {
-        const key = name.toLowerCase();
-        if (!seen.has(key)) { seen.add(key); out.push(name); }
-      }
-      return out.slice(0, 8);
-    }
-
-    characterNameInput.addEventListener('input', () => {
-      const q = characterNameInput.value.trim();
-      if (!q || q.length < 2) { acClose(); clearTimeout(acDebounce); return; }
-      if (q.length < 3) { clearTimeout(acDebounce); }
-      const ql = q.toLowerCase();
-
-      // Instant: localStorage + DB
-      const local = loadMemoryBank().map(c => c.name).filter(n => n.toLowerCase().includes(ql));
-      const db    = dbCharacters.filter(n => n.toLowerCase().includes(ql) && !local.map(x=>x.toLowerCase()).includes(n.toLowerCase()));
-      acOpen(mergeAcResults(local, db, []));
-
-      // Debounced: LLM
-      clearTimeout(acDebounce);
-      acDebounce = setTimeout(async () => {
-        try {
-          const res = await fetch('/api/character-suggest', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: q }),
-          });
-          if (!res.ok) return;
-          const data = await res.json();
-          if (characterNameInput.value.trim().toLowerCase() !== ql) return; // stale
-          acOpen(mergeAcResults(local, db, data.suggestions || []));
-        } catch (_) {}
-      }, 400);
-    });
-
-    characterNameInput.addEventListener('keydown', e => {
-      if (!nameAutocomplete.classList.contains('open')) return;
-      const items = acItems();
-      if (e.key === 'ArrowDown') {
+    msgInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        acIndex = Math.min(acIndex + 1, items.length - 1);
-        items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
-        if (acIndex >= 0) characterNameInput.value = items[acIndex].textContent;
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        acIndex = Math.max(acIndex - 1, -1);
-        items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
-        if (acIndex >= 0) characterNameInput.value = items[acIndex].textContent;
-      } else if (e.key === 'Escape') {
-        acClose();
+        if (!sendBtn.disabled) sendMessage();
       }
     });
 
-    characterNameInput.addEventListener('blur', () => setTimeout(acClose, 150));
+    sendBtn.addEventListener('click', sendMessage);
 
-    // ── Main character field autocomplete ────────────────────────────────────
-    const characterField   = document.getElementById('characterField');
-    const characterFieldAC = document.getElementById('characterFieldAC');
-    let cfIndex = -1;
-
-    function cfItems() { return characterFieldAC.querySelectorAll('.name-ac-item'); }
-
-    function cfOpen(names) {
-      characterFieldAC.innerHTML = '';
-      cfIndex = -1;
-      names.forEach(name => {
-        const el = document.createElement('div');
-        el.className = 'name-ac-item';
-        el.textContent = name;
-        el.addEventListener('mousedown', e => {
-          e.preventDefault();
-          const cleanName = name.split(',')[0].trim();
-          characterField.value = cleanName;
-          characterFieldAC.classList.remove('open');
-          // Load saved description for this character
-          const saved = loadMemoryBank().find(c => c.name.toLowerCase() === cleanName.toLowerCase());
-          if (saved?.description) {
-            describedCharacter = saved.description;
-            characterName = saved.name;
-          }
-        });
-        characterFieldAC.appendChild(el);
-      });
-      characterFieldAC.classList.toggle('open', names.length > 0);
-    }
-
-    function cfClose() { characterFieldAC.classList.remove('open'); cfIndex = -1; }
-
-    characterField.addEventListener('input', () => {
-      const q = characterField.value.trim();
-      // Clear context if field is cleared
-      if (!q) { describedCharacter = ''; characterName = ''; cfClose(); return; }
-      if (q.length < 2) { cfClose(); return; }
-      const ql = q.toLowerCase();
-      const local = loadMemoryBank().map(c => c.name).filter(n => n.toLowerCase().includes(ql));
-      const db    = dbCharacters.filter(n => n.toLowerCase().includes(ql) && !local.map(x => x.toLowerCase()).includes(n.toLowerCase()));
-      cfOpen(mergeAcResults(local, db, []));
+    newChatBtn.addEventListener('click', () => {
+      conversation = [{ role: 'assistant', content: GREETING }];
+      pendingImage = null;
+      clearAttachment();
+      chatInner.innerHTML = '';
+      appendMessage('assistant', GREETING);
+      msgInput.value = '';
+      autoResize();
+      sendBtn.disabled = true;
+      msgInput.focus();
     });
 
-    characterField.addEventListener('keydown', e => {
-      if (!characterFieldAC.classList.contains('open')) return;
-      const items = cfItems();
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        cfIndex = Math.min(cfIndex + 1, items.length - 1);
-        items.forEach((el, i) => el.classList.toggle('active', i === cfIndex));
-        if (cfIndex >= 0) characterField.value = items[cfIndex].textContent.split(',')[0].trim();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        cfIndex = Math.max(cfIndex - 1, -1);
-        items.forEach((el, i) => el.classList.toggle('active', i === cfIndex));
-        if (cfIndex >= 0) characterField.value = items[cfIndex].textContent.split(',')[0].trim();
-      } else if (e.key === 'Escape') {
-        cfClose();
-      } else if (e.key === 'Enter' && cfIndex >= 0) {
-        e.preventDefault();
-        items[cfIndex].dispatchEvent(new MouseEvent('mousedown'));
-      }
+    // ── Image attachment ───────────────────────────────
+    attachBtn.addEventListener('click', () => fileInput.click());
+    attachRemove.addEventListener('click', clearAttachment);
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) handleFile(file);
+      fileInput.value = '';
     });
-
-    characterField.addEventListener('blur', () => setTimeout(cfClose, 150));
-
-    // Also load DB characters on focus of the main field
-    characterField.addEventListener('focus', () => {
-      if (dbCharacters.length) return;
-      fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(data => {
-        if (data?.characters) dbCharacters = data.characters.map(c => c.name);
-      });
-    }, { once: true });
 
     function handleFile(file) {
-      if (!ALLOWED_TYPES.includes(file.type)) { showError('Unsupported file type. Use JPEG, PNG, GIF, or WebP.'); return; }
-      showError(null);
+      if (!file.type.startsWith('image/')) return;
       const reader = new FileReader();
-      reader.onerror = () => showError('Could not read file.');
-      reader.onload = ev => {
-        const img = new Image();
-        img.onerror = () => showError('Could not load image.');
-        img.onload = () => {
-          const MAX = 1024; let { width, height } = img;
-          if (width > MAX || height > MAX) { if (width >= height) { height = Math.round(height * MAX / width); width = MAX; } else { width = Math.round(width * MAX / height); height = MAX; } }
-          const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          uploadedImage = { data: dataUrl.split(',')[1], mediaType: 'image/jpeg' };
-          previewImg.src = dataUrl; previewName.textContent = file.name; previewSize.textContent = `${width}×${height} · compressed`;
-          uploadHint.style.display = 'none'; uploadPreview.classList.add('visible'); uploadArea.classList.add('has-preview');
-          autoDescribeCharacter(uploadedImage);
-        };
-        img.src = ev.target.result;
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        const base64  = dataUrl.split(',')[1];
+        pendingImage  = { data: base64, mediaType: file.type };
+        attachThumb.src = dataUrl;
+        attachName.textContent = file.name;
+        attachmentBar.classList.add('visible');
+        sendBtn.disabled = isLoading;
+        msgInput.focus();
       };
       reader.readAsDataURL(file);
     }
 
-    async function autoDescribeCharacter(image) {
-      if (describeAbortController) describeAbortController.abort();
-      describeAbortController = new AbortController();
-      const signal = describeAbortController.signal;
-      hideSuggestions();
-      uploadArea.classList.add('analysing');
+    function clearAttachment() {
+      pendingImage = null;
+      attachThumb.src = '';
+      attachName.textContent = '';
+      attachmentBar.classList.remove('visible');
+      sendBtn.disabled = isLoading || !msgInput.value.trim();
+    }
+
+    // ── Send ───────────────────────────────────────────
+    async function sendMessage() {
+      const text = msgInput.value.trim();
+      if ((!text && !pendingImage) || isLoading) return;
+
+      isLoading = true;
+      sendBtn.disabled = true;
+
+      // Render user message
+      appendMessage('user', text, pendingImage);
+
+      // Add to history
+      conversation.push({ role: 'user', content: text || '(image)' });
+
+      // Capture + clear image before async
+      const imgPayload = pendingImage;
+      msgInput.value = '';
+      autoResize();
+      clearAttachment();
+
+      showTyping();
+      scrollToBottom();
+
       try {
-        const knownCharacters = loadMemoryBank();
-        const describeRes = await fetch('/api/describe', {
+        const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image, mode, knownCharacters }),
-          signal,
+          body: JSON.stringify({ messages: conversation, image: imgPayload }),
         });
-        if (!describeRes.ok) { const err = await describeRes.json().catch(() => ({})); throw new Error(err.error || `describe failed (${describeRes.status})`); }
-        const data = await describeRes.json();
-        if (data.description) {
-          describedCharacter = data.description;
-          describedScene = data.scene || '';
-          characterName = data.name || '';
-          lastDescription = data.description;
-          characterNameInput.value = data.name || '';
-          characterNameSaved.classList.remove('visible');
-          suggestionsNamePrompt.querySelector('.suggestions-name-label').textContent = data.name
-            ? `Not right? Correct it:`
-            : `Don't recognise her? Name her and she'll be remembered:`;
-          suggestionsNamePrompt.classList.add('visible');
-          // Show scene summary in suggestions header
-          if (data.scene) {
-            const existing = suggestionsBox.querySelector('.scene-summary');
-            if (existing) existing.remove();
-            const sceneSummary = document.createElement('div');
-            sceneSummary.className = 'scene-summary';
-            sceneSummary.textContent = data.scene;
-            suggestionsBox.insertBefore(sceneSummary, suggestionsBox.querySelector('.suggestions-chips'));
-          }
-          showSuggestions();
-          const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
-          fetchSuggestions(suggestContext);
-          // Load "continue from last time" chip in the background — don't block on memory
-          if (data.name) {
-            fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(memoryData => {
-              if (!memoryData?.characterHistory) return;
-              const histEntry = memoryData.characterHistory[data.name.toLowerCase()];
-              const lastHistPrompt = histEntry?.prompts?.[0]?.prompt;
-              if (lastHistPrompt) {
-                const continueChip = document.createElement('button');
-                continueChip.className = 'continue-chip'; continueChip.type = 'button';
-                continueChip.textContent = `▶ Continue from last time: ${lastHistPrompt}`;
-                continueChip.addEventListener('click', () => { descriptionEl.value = lastHistPrompt; descriptionEl.focus(); hideSuggestions(); });
-                suggestionsChips.prepend(continueChip);
-              }
-            });
-          }
+
+        hideTyping();
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: res.statusText }));
+          appendError(err.error || 'Something went wrong.');
+          return;
         }
+
+        const data = await res.json();
+        conversation.push({ role: 'assistant', content: data.message });
+        appendMessage('assistant', data.message);
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('describe error:', err.message);
-          showError(`Analyse failed: ${err.message}`);
-        }
+        hideTyping();
+        appendError(err.message || 'Network error.');
       } finally {
-        uploadArea.classList.remove('analysing');
+        isLoading = false;
+        sendBtn.disabled = !msgInput.value.trim() && !pendingImage;
       }
     }
 
-    async function fetchSuggestions(characterDescription) {
-      // Preserve any existing continue chip while loading
-      const existingContinue = suggestionsChips.querySelector('.continue-chip');
-      suggestionsChips.innerHTML = '';
-      if (existingContinue) suggestionsChips.appendChild(existingContinue);
-      const loadingSpan = document.createElement('span');
-      loadingSpan.className = 'suggestions-loading'; loadingSpan.textContent = 'Generating suggestions…';
-      suggestionsChips.appendChild(loadingSpan);
-      try {
-        const res = await fetch('/api/suggest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description: characterDescription, mode, character: characterName || null, sessionPrompts: sessionPrompts.slice(-5) }),
-        });
-        if (!res.ok) throw new Error('suggest failed');
-        const data = await res.json();
-        // Remove loading span but keep continue chip
-        const continueChip = suggestionsChips.querySelector('.continue-chip');
-        suggestionsChips.innerHTML = '';
-        if (continueChip) suggestionsChips.appendChild(continueChip);
-        (data.suggestions || []).forEach(text => {
-          const chip = document.createElement('button');
-          chip.className = 'example-chip'; chip.type = 'button'; chip.textContent = text;
-          chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); hideSuggestions(); });
-          suggestionsChips.appendChild(chip);
-        });
-      } catch (err) {
-        console.error('fetchSuggestions error:', err);
-        const continueChip = suggestionsChips.querySelector('.continue-chip');
-        suggestionsChips.innerHTML = '';
-        if (continueChip) suggestionsChips.appendChild(continueChip);
-        const errSpan = document.createElement('span');
-        errSpan.className = 'suggestions-loading';
-        errSpan.style.color = 'var(--rose-light)';
-        errSpan.textContent = `Suggestions failed: ${err.message}`;
-        suggestionsChips.appendChild(errSpan);
+    // ── Render ─────────────────────────────────────────
+    function appendMessage(role, content, img = null) {
+      const wrap = document.createElement('div');
+      wrap.className = `message message-${role}`;
+
+      if (role === 'user') {
+        const bubble = document.createElement('div');
+        bubble.className = 'user-bubble';
+        if (img) {
+          const imgEl = document.createElement('img');
+          imgEl.className = 'user-image';
+          imgEl.src = `data:${img.mediaType};base64,${img.data}`;
+          bubble.appendChild(imgEl);
+        }
+        if (content) {
+          const textEl = document.createElement('div');
+          textEl.className = 'user-text';
+          textEl.textContent = content;
+          bubble.appendChild(textEl);
+        }
+        wrap.appendChild(bubble);
+      } else {
+        const aiWrap = document.createElement('div');
+        aiWrap.className = 'ai-wrap';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'ai-avatar';
+        avatar.innerHTML = `<svg viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="4" fill="url(#avg)"/><path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#avg)" opacity="0.9"/><path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#avg)" opacity="0.75"/><path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#avg)" opacity="0.9"/><path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#avg)" opacity="0.75"/><defs><linearGradient id="avg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs></svg>`;
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'ai-content';
+        contentEl.innerHTML = renderContent(content);
+
+        aiWrap.appendChild(avatar);
+        aiWrap.appendChild(contentEl);
+        wrap.appendChild(aiWrap);
       }
+
+      chatInner.appendChild(wrap);
+      scrollToBottom();
     }
 
-    async function fetchNextSteps(description, currentMode, character) {
-      nextStepsEl.style.display = 'none';
-      nextStepsChips.innerHTML = '';
-      try {
-        const res = await fetch('/api/suggest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description, mode: currentMode, character: character || null, lastPrompt: description, isNextStep: true, sessionPrompts: sessionPrompts.slice(-5) }),
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        const chips = data.suggestions || [];
-        if (chips.length === 0) return;
-        nextStepsChips.innerHTML = '';
-        chips.forEach(text => {
-          const chip = document.createElement('button');
-          chip.className = 'next-step-chip'; chip.type = 'button'; chip.textContent = text;
-          chip.addEventListener('click', () => { descriptionEl.value = text; descriptionEl.focus(); nextStepsEl.style.display = 'none'; });
-          nextStepsChips.appendChild(chip);
-        });
-        nextStepsEl.style.display = 'flex';
-      } catch (_) {
-        // silently fail
-      }
+    function appendError(msg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'message message-assistant';
+      const inner = document.createElement('div');
+      inner.className = 'error-message';
+      inner.textContent = '⚠ ' + msg;
+      wrap.appendChild(inner);
+      chatInner.appendChild(wrap);
+      scrollToBottom();
     }
 
-    function clearUpload() {
-      if (describeAbortController) { describeAbortController.abort(); describeAbortController = null; }
-      uploadedImage = null; describedCharacter = ''; describedScene = ''; characterName = ''; try { fileInput.value = ''; } catch (_) {}
-      previewImg.src = ''; uploadPreview.classList.remove('visible'); uploadArea.classList.remove('has-preview'); uploadHint.style.display = '';
-      uploadArea.classList.remove('analysing');
-      hideSuggestions();
-    }
+    // ── Content renderer ───────────────────────────────
+    function renderContent(text) {
+      // Split on fenced code blocks
+      const parts = text.split(/(```[\s\S]*?```)/g);
+      let html = '';
 
-    // ── Generate ──────────────────────────────────────────────────────────────
-    generateBtn.addEventListener('click', async () => {
-      const description = descriptionEl.value.trim();
-      if (!description) return;
-
-      setLoading(true);
-      showError(null);
-      copyAllBtn.style.display = 'none';
-      negativeBox.classList.remove('visible');
-      nextStepsEl.style.display = 'none';
-      lastPrompts = [];
-
-      const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
-      const body = { description, characterContext: describedCharacter || null, sceneContext: describedScene || null, loraEnabled: loraCheckbox.checked, userProfile: userProfile || undefined };
-      lastEndpoint = endpoint;
-      lastBody = body;
-      feedbackRow.style.display = 'none';
-      selectedFeedback = null;
-
-      const controller = new AbortController();
-      const fetchTimeout = setTimeout(() => controller.abort(), 60000);
-
-      try {
-        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal });
-        clearTimeout(fetchTimeout);
-        let data;
-        try { data = await res.json(); } catch (_) { throw new Error(`Server error (${res.status})`); }
-        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
-
-        lastPrompts = data.prompts;
-        renderSegments(data.prompts);
-        showOutputButtons();
-        if (mode === 'short') {
-          const specific = data.negative ? data.negative.replace(/,?\s*$/, '') + ', ' : '';
-          negativeTextarea.value = specific + GENERAL_NEGATIVES;
-          negativeBox.classList.add('visible');
+      for (const part of parts) {
+        if (part.startsWith('```')) {
+          const lines  = part.split('\n');
+          const code   = lines.slice(1).join('\n').replace(/```\s*$/, '').trim();
+          html += `<div class="prompt-block">
+            <button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button>
+            <pre>${escapeHtml(code)}</pre>
+          </div>`;
         } else {
-          negativeBox.classList.remove('visible');
+          // Look for NEGATIVE: lines
+          const negRe = /^NEGATIVE:\s*(.+)$/im;
+          const negMatch = part.match(negRe);
+          let cleaned = part;
+          let negHtml = '';
+          if (negMatch) {
+            cleaned = part.replace(negMatch[0], '').trim();
+            negHtml = `<div class="negative-line"><span class="neg-label">NEGATIVE</span>${escapeHtml(negMatch[1].trim())}</div>`;
+          }
+          if (cleaned.trim()) {
+            html += `<span class="msg-text">${formatText(escapeHtml(cleaned))}</span>`;
+          }
+          if (negHtml) html += negHtml;
         }
-        saveHistory({ mode, description, character: describedCharacter, characterName, prompts: data.prompts });
-        renderHistory();
-        // Track session continuity
-        sessionPrompts.push({ prompt: description, mode });
-        // Fire and forget — write to memory bank
-        fetch('/api/memory', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: 'prompt_generated', data: { prompt: description, mode, character: characterName || null } }),
-        }).catch(() => {});
-        // Fetch "What next?" chips
-        fetchNextSteps(description, mode, characterName || null);
-      } catch (err) {
-        clearTimeout(fetchTimeout);
-        showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
-      } finally {
-        setLoading(false);
       }
-    });
 
-    // ── Output buttons ────────────────────────────────────────────────────────
-    function showOutputButtons() {
-      copyAllBtn.style.display = 'inline-block';
-      copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy';
-      regenBtn.style.display = lastBody ? 'inline-block' : 'none';
-      copyNumBtn.style.display = mode === 'video' ? 'inline-block' : 'none';
-      splitterNote.style.display = mode === 'video' ? 'block' : 'none';
-      showFeedbackChips();
+      return html;
     }
 
-    function showFeedbackChips() {
-      selectedFeedback = null;
-      feedbackChips.innerHTML = '';
-      const options = mode === 'video'
-        ? ['Too similar segments', 'Too verbose', 'Wrong physics', 'Too tame', 'More extreme']
-        : mode === 'short'
-        ? ['Too verbose', 'Wrong physics', 'Too tame', 'More specific']
-        : ['Too verbose', 'Wrong direction', 'Too literal', 'More extreme', 'More specific'];
-      options.forEach(label => {
-        const btn = document.createElement('button');
-        btn.className = 'feedback-chip';
-        btn.textContent = label;
-        btn.addEventListener('click', () => {
-          feedbackChips.querySelectorAll('.feedback-chip').forEach(c => c.classList.remove('selected'));
-          btn.classList.add('selected');
-          selectedFeedback = label;
-        });
-        feedbackChips.appendChild(btn);
-      });
-      feedbackRow.style.display = 'flex';
+    function formatText(escaped) {
+      return escaped
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code style="font-family:Space Mono,monospace;font-size:0.82em;color:var(--rose-light);background:rgba(232,53,122,0.1);padding:1px 5px;border-radius:4px;">$1</code>')
+        .replace(/\n/g, '<br>');
     }
 
-    copyAllBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(lastPrompts.join('\n\n')).then(() => {
-        copyAllBtn.textContent = 'Copied!'; copyAllBtn.classList.add('copied');
-        setTimeout(() => { copyAllBtn.textContent = mode === 'video' ? 'Copy All' : 'Copy'; copyAllBtn.classList.remove('copied'); }, 1800);
-        if (lastPrompts.length > 0) {
-          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: characterName || null } }) }).catch(() => {});
-        }
-      });
-    });
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
-    copyNumBtn.addEventListener('click', () => {
-      const text = lastPrompts.map((p, i) => `${i + 1}. ${p}`).join('\n\n');
-      navigator.clipboard.writeText(text).then(() => {
-        copyNumBtn.textContent = 'Copied!'; copyNumBtn.classList.add('copied');
-        setTimeout(() => { copyNumBtn.textContent = '1,2,3'; copyNumBtn.classList.remove('copied'); }, 1800);
-      });
-    });
-
-    regenBtn.addEventListener('click', async () => {
-      if (!lastBody || !lastEndpoint) return;
-      // Fire rejected signal before regenerating
-      fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_rejected', data: { prompt: descriptionEl.value.trim(), mode, character: characterName || null } }) }).catch(() => {});
-      setLoading(true);
-      showError(null);
-      const controller = new AbortController();
-      const fetchTimeout = setTimeout(() => controller.abort(), 60000);
-      // Pass rejected prompts so the LLM knows what not to repeat
-      const regenBody = { ...lastBody, previousPrompts: lastPrompts.length ? lastPrompts : undefined, feedback: selectedFeedback || undefined };
-      feedbackRow.style.display = 'none';
-      selectedFeedback = null;
-      try {
-        const res = await fetch(lastEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(regenBody), signal: controller.signal });
-        clearTimeout(fetchTimeout);
-        let data;
-        try { data = await res.json(); } catch (_) { throw new Error(`Server error (${res.status})`); }
-        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
-        lastPrompts = data.prompts;
-        renderSegments(data.prompts);
-        fetchNextSteps(descriptionEl.value.trim(), mode, characterName || null);
-      } catch (err) {
-        clearTimeout(fetchTimeout);
-        showError(err.name === 'AbortError' ? 'Request timed out. Check your connection and try again.' : err.message);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    negativeCopyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(negativeTextarea.value).then(() => {
-        negativeCopyBtn.textContent = 'Copied!'; negativeCopyBtn.classList.add('copied');
-        setTimeout(() => { negativeCopyBtn.textContent = 'Copy'; negativeCopyBtn.classList.remove('copied'); }, 1800);
-      });
-    });
-
-    // ── Render segments ───────────────────────────────────────────────────────
-    segmentsEl.addEventListener('click', e => {
-      const btn = e.target.closest('.segment-copy');
-      if (!btn) return;
-      const idx = parseInt(btn.dataset.idx, 10);
-      navigator.clipboard.writeText(lastPrompts[idx]).then(() => {
-        btn.classList.add('flash');
-        setTimeout(() => btn.classList.remove('flash'), 1400);
-        if (lastPrompts.length > 0) {
-          fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'prompt_accepted', data: { prompt: descriptionEl.value.trim(), mode, character: characterName || null } }) }).catch(() => {});
-        }
-      });
-    });
-
-    function renderSegments(prompts, animate = true) {
-      segmentsEl.innerHTML = '';
-      prompts.forEach((text, i) => {
-        const seg = document.createElement('div');
-        seg.className = 'segment';
-        const label = mode === 'video' ? `<span>SEG ${i + 1}</span>${VIDEO_TIMESTAMPS[i]}` : mode === 'short' ? `<span>${SHORT_LABEL}</span>` : `<span>Prompt</span>`;
-        const reorderBtns = mode === 'video' ? `
-          <div class="segment-reorder">
-            <button data-move="-1" data-idx="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>▲</button>
-            <button data-move="1"  data-idx="${i}" title="Move down" ${i === prompts.length - 1 ? 'disabled' : ''}>▼</button>
-          </div>` : '';
-        seg.innerHTML = `
-          <div class="segment-label">${label}</div>
-          <div class="segment-text" contenteditable="false" data-idx="${i}">${escapeHtml(text)}</div>
-          <button class="segment-copy" title="Copy prompt" data-idx="${i}">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="5" width="9" height="9" rx="1.5"/>
-              <path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/>
-            </svg>
-          </button>${reorderBtns}`;
-
-        // Tap/click segment text to edit
-        const textEl = seg.querySelector('.segment-text');
-        textEl.addEventListener('mousedown', () => { textEl.contentEditable = 'true'; });
-        textEl.addEventListener('blur', () => {
-          textEl.contentEditable = 'false';
-          lastPrompts[i] = textEl.textContent.trim();
-        });
-        textEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); textEl.blur(); } });
-
-        segmentsEl.appendChild(seg);
-        if (animate) setTimeout(() => seg.classList.add('visible'), 40 + i * 70);
-        else seg.classList.add('visible');
+    // ── Copy ───────────────────────────────────────────
+    function copyPrompt(btn) {
+      const code = btn.nextElementSibling.textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
       });
     }
 
-    segmentsEl.addEventListener('click', e => {
-      const moveBtn = e.target.closest('[data-move]');
-      if (moveBtn) {
-        const idx = parseInt(moveBtn.dataset.idx, 10);
-        const dir = parseInt(moveBtn.dataset.move, 10);
-        const newIdx = idx + dir;
-        if (newIdx < 0 || newIdx >= lastPrompts.length) return;
-        [lastPrompts[idx], lastPrompts[newIdx]] = [lastPrompts[newIdx], lastPrompts[idx]];
-        renderSegments(lastPrompts, false);
-      }
-    });
+    // ── Typing indicator ───────────────────────────────
+    let typingEl = null;
 
-    // ── History ───────────────────────────────────────────────────────────────
-    function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; } }
-    function saveHistory(entry) {
-      const h = loadHistory();
-      h.unshift({ ...entry, ts: Date.now() });
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, HISTORY_MAX)));
+    function showTyping() {
+      typingEl = document.createElement('div');
+      typingEl.className = 'typing-wrap';
+      typingEl.innerHTML = `
+        <div class="ai-avatar" style="flex-shrink:0;width:30px;height:30px;margin-top:2px;display:flex;align-items:center;justify-content:center;background:rgba(155,29,110,0.15);border:1px solid rgba(232,53,122,0.25);border-radius:8px;">
+          <svg viewBox="0 0 34 34" fill="none" width="16" height="16"><circle cx="17" cy="17" r="4" fill="url(#tg)"/><path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#tg)" opacity="0.9"/><path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#tg)" opacity="0.75"/><path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#tg)" opacity="0.9"/><path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#tg)" opacity="0.75"/><defs><linearGradient id="tg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs></svg>
+        </div>
+        <div class="typing-bubble">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>`;
+      chatInner.appendChild(typingEl);
+      scrollToBottom();
     }
 
-    historyHeader.addEventListener('click', () => {
-      historyOpen = !historyOpen;
-      historyList.style.display = historyOpen ? 'flex' : 'none';
-      historyToggle.textContent = historyOpen ? '▴ Hide' : '▾ Show';
-    });
+    function hideTyping() {
+      if (typingEl) { typingEl.remove(); typingEl = null; }
+    }
 
-    function renderHistory() {
-      const h = loadHistory();
-      historySection.style.display = h.length ? 'block' : 'none';
-      historyList.innerHTML = '';
-      if (!h.length) { historyList.innerHTML = '<div class="history-empty">No history yet</div>'; return; }
-      h.forEach(entry => {
-        const el = document.createElement('div');
-        el.className = 'history-item';
-        const ago = timeAgo(entry.ts);
-        el.innerHTML = `<div class="history-item-meta"><span class="history-item-mode">${entry.mode}</span><span class="history-item-time">${ago}</span></div><div class="history-item-desc">${escapeHtml((entry.characterName ? `[${entry.characterName}] ` : '') + entry.description)}</div>`;
-        el.addEventListener('click', () => {
-          mode = entry.mode;
-          modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-          descriptionEl.value = entry.description;
-          describedCharacter = entry.character || '';
-          characterName = entry.characterName || '';
-          descriptionEl.placeholder = mode === 'video' ? 'Describe your video scene…' : mode === 'short' ? 'Describe the action or motion…' : 'Describe the image edit you want to make…';
-          lastPrompts = entry.prompts;
-          lastBody = null; lastEndpoint = null;
-          renderSegments(entry.prompts, false);
-          showOutputButtons();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-        historyList.appendChild(el);
+    // ── Utilities ──────────────────────────────────────
+    function autoResize() {
+      msgInput.style.height = 'auto';
+      msgInput.style.height = Math.min(msgInput.scrollHeight, 140) + 'px';
+    }
+
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        chatArea.scrollTop = chatArea.scrollHeight;
       });
     }
-
-    function timeAgo(ts) {
-      const s = Math.floor((Date.now() - ts) / 1000);
-      if (s < 60) return 'just now';
-      if (s < 3600) return `${Math.floor(s/60)}m ago`;
-      if (s < 86400) return `${Math.floor(s/3600)}h ago`;
-      return `${Math.floor(s/86400)}d ago`;
-    }
-
-    renderHistory();
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-    function setLoading(on) {
-      generateBtn.disabled = on;
-      loadingOverlay.classList.toggle('active', on);
-    }
-
-    function showError(msg) { errorEl.textContent = msg || ''; errorEl.style.display = msg ? 'block' : 'none'; }
-    function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   </script>
 </body>
 </html>
