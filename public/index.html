@@ -346,7 +346,19 @@
       color: #fca5a5;
       max-width: 85%;
       word-break: break-word;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
     }
+    .regen-btn {
+      flex-shrink: 0;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem; font-weight: 600;
+      background: rgba(252,165,165,0.12); border: 1px solid rgba(252,165,165,0.25);
+      color: #fca5a5; border-radius: 7px;
+      padding: 5px 12px; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .regen-btn:hover { background: rgba(252,165,165,0.22); border-color: rgba(252,165,165,0.45); }
 
     /* ── Typing indicator ────────────────────────────── */
     .typing-wrap {
@@ -564,6 +576,7 @@
     let pendingImage = null;
     let isLoading = false;
     let currentChatId = null;
+    let lastImgPayload = null;
 
     // ── DOM refs ───────────────────────────────────────
     const chatInner      = document.getElementById('chatInner');
@@ -797,6 +810,7 @@
       conversation.push({ role: 'user', content: text || '(image)' });
 
       const imgPayload = pendingImage;
+      lastImgPayload = imgPayload;
       msgInput.value = '';
       autoResize();
       clearAttachment();
@@ -900,12 +914,52 @@
     function appendError(msg) {
       const wrap = document.createElement('div');
       wrap.className = 'message message-assistant';
+      wrap.id = 'last-error';
       const inner = document.createElement('div');
       inner.className = 'error-message';
-      inner.textContent = '⚠ ' + msg;
+      inner.innerHTML = `<span>⚠ ${escapeHtml(msg)}</span><button class="regen-btn" onclick="regenerate()">Try again</button>`;
       wrap.appendChild(inner);
       chatInner.appendChild(wrap);
       scrollToBottom();
+    }
+
+    async function regenerate() {
+      const errEl = document.getElementById('last-error');
+      if (errEl) errEl.remove();
+
+      isLoading = true;
+      sendBtn.disabled = true;
+      showTyping();
+      scrollToBottom();
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: conversation, image: lastImgPayload }),
+        });
+
+        hideTyping();
+
+        if (!res.ok) {
+          const body = await res.text().catch(() => '');
+          let errMsg;
+          try { errMsg = JSON.parse(body).error; } catch { errMsg = null; }
+          appendError(errMsg || `HTTP ${res.status}${body ? ': ' + body.slice(0, 200) : ''}`);
+          return;
+        }
+
+        const data = await res.json();
+        conversation.push({ role: 'assistant', content: data.message });
+        appendMessage('assistant', data.message);
+        saveCurrentChat();
+      } catch (err) {
+        hideTyping();
+        appendError(err.message || 'Network error.');
+      } finally {
+        isLoading = false;
+        sendBtn.disabled = !msgInput.value.trim() && !pendingImage;
+      }
     }
 
     // ── Content parser ─────────────────────────────────
