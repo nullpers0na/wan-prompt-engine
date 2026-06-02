@@ -8,6 +8,7 @@
     { "src": "api/character-suggest.js", "use": "@vercel/node", "config": { "maxDuration": 15 } },
     { "src": "api/describe.js",     "use": "@vercel/node", "config": { "maxDuration": 60 } },
     { "src": "api/memory.js",       "use": "@vercel/node", "config": { "maxDuration": 30 } },
+    { "src": "api/chat.js",         "use": "@vercel/node", "config": { "maxDuration": 60 } },
     { "src": "public/**",           "use": "@vercel/static" }
   ],
   "routes": [
@@ -18,6 +19,7 @@
     { "src": "/api/character-suggest", "dest": "/api/character-suggest.js" },
     { "src": "/api/describe",     "dest": "/api/describe.js" },
     { "src": "/api/memory",       "dest": "/api/memory.js" },
+    { "src": "/api/chat",         "dest": "/api/chat.js" },
     { "src": "/",                 "dest": "/public/index.html" },
     { "src": "/(.*)",             "dest": "/public/$1" }
   ]
