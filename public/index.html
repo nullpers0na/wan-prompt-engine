@@ -685,15 +685,31 @@
     }
 
     // ── Content parser ─────────────────────────────────
+    const PROMPT_SIGNALS = /camera locked|face locked|static scene|preserve her face|soft-body jiggle|rhythmic bounce|heavy sway|slow motion/i;
+
     function parseContent(text) {
       const parts = [];
       const segments = text.split(/(```[\s\S]*?```)/g);
+      const hasCodeBlock = segments.some(s => s.startsWith('```'));
+
+      // Fallback: if no code block but response looks like a prompt, wrap it
+      if (!hasCodeBlock && PROMPT_SIGNALS.test(text)) {
+        const negMatch = text.match(/^NEGATIVE:\s*(.+)$/im);
+        if (negMatch) {
+          const promptPart = text.replace(negMatch[0], '').trim();
+          parts.push({ type: 'code', content: promptPart });
+          parts.push({ type: 'negative', content: negMatch[1].trim() });
+        } else {
+          parts.push({ type: 'code', content: text.trim() });
+        }
+        return parts;
+      }
+
       for (const seg of segments) {
         if (seg.startsWith('```')) {
           const code = seg.split('\n').slice(1).join('\n').replace(/```\s*$/, '').trim();
           if (code) parts.push({ type: 'code', content: code });
         } else {
-          // Pull out NEGATIVE: line if present
           const negMatch = seg.match(/^NEGATIVE:\s*(.+)$/im);
           if (negMatch) {
             const cleaned = seg.replace(negMatch[0], '').trim();
