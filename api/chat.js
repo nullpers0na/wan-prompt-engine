@@ -30,19 +30,29 @@ End with: camera locked, face locked, static scene
 Add NEGATIVE: [terms] after the code block.
 
 PHRØOT IMAGE EDIT — editing a still image:
-1–2 sentences only. State the change. End with "Preserve her face exactly."
-Only mention what was asked. If they say saggy/droopy, write it that way — never "rounded", "lifted", "firm".
+1–2 sentences only. DECLARATIVE statements — describe the result, not instructions.
+End with "Preserve her face exactly."
+Only mention what was asked — nothing else.
+If they say saggy/droopy, write it that way — never "rounded", "lifted", "firm".
 Never use: "texture", "photograph", "photorealistic"
+Never use: "Let's", "make sure", "ensuring", "we", "I" — write what IS, not what to do.
+
+Wrong: "Let's make her skin slightly oily, ensuring light reflects gently."
+Right: "Her skin has a subtle oily sheen, light catching softly on the surface. Preserve her face exactly."
+
+Wrong: "Make her breasts larger and more rounded."
+Right: "Her breasts are larger. Preserve her face exactly."
 
 MODE DETECTION:
-- Image + change requested → Phrøot Edit
+- Image uploaded + change requested → Phrøot Edit
 - Single motion → Short Clip
 - Scene/sequence/multiple actions → Video Segments
 - Ambiguous → ask
+- "tone it down", "less intense", "more subtle" with prior prompt context → refine the previous prompt, do not generate something new
 
 IMAGE WITH NO REQUEST: describe who it is, physical attributes, what's happening, then ask what they want.
 
-REFINEMENT: full conversation history is available — revise exactly what you wrote based on feedback.`;
+REFINEMENT: full conversation history is available — when the user says "tone it down", "more X", "less Y", revise exactly what you last wrote.`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
