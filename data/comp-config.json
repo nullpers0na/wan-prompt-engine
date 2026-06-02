@@ -1,0 +1,86 @@
+{
+  "ailments": [
+    "Panic",
+    "Poison",
+    "Fear",
+    "Rage",
+    "Dizzy",
+    "Exhaustion",
+    "Enervation",
+    "Mute"
+  ],
+  "baseStats": [
+    "St",
+    "Ma",
+    "En",
+    "Ag",
+    "Lu"
+  ],
+  "races": [
+    "Fool",
+    "Magician",
+    "Priestess",
+    "Empress",
+    "Emperor",
+    "Hierophant",
+    "Lovers",
+    "Chariot",
+    "Justice",
+    "Hermit",
+    "Fortune",
+    "Strength",
+    "Hanged",
+    "Death",
+    "Temperance",
+    "Devil",
+    "Tower",
+    "Star",
+    "Moon",
+    "Sun",
+    "Judgement",
+    "Aeon",
+    "Jester",
+    "World"
+  ],
+  "resistCodes": {
+    "Z": 61275,
+    "w": 60125,
+    "9": 51275,
+    "5": 50500,
+    "4": 50400,
+    "3": 50300,
+    "2": 50200,
+    "-": 50100,
+    "S": 50050,
+    "T": 50005,
+    "s": 40050,
+    "N": 30100,
+    "n": 30100,
+    "r": 20100,
+    "d": 10100
+  },
+  "resistElems": [
+    "phy",
+    "fir",
+    "ice",
+    "ele",
+    "win",
+    "lig",
+    "dar",
+    "alm"
+  ],
+  "skillHits": {
+    "physOne": 90,
+    "physAll": 80,
+    "physCrit": 5,
+    "magicOne": 98,
+    "magicAll": 95
+  },
+  "skillElems": [
+    "ail",
+    "rec",
+    "sup",
+    "spe",
+    "pas"
+  ]
+}
