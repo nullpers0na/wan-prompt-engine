@@ -357,6 +357,12 @@
     .memory-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); background: rgba(232,53,122,0.06); }
 
     /* ── Next steps ────────────────────────────────────────────────────────── */
+    .feedback-row { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .feedback-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    .feedback-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feedback-chip { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+    .feedback-chip:hover { border-color: rgba(232,53,122,0.4); color: var(--text); }
+    .feedback-chip.selected { background: rgba(232,53,122,0.15); border-color: rgba(232,53,122,0.6); color: var(--rose-light); }
     .next-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .next-steps-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
     .next-steps-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -627,6 +633,10 @@
 
       <div id="error"></div>
       <div class="segments" id="segments"></div>
+      <div class="feedback-row" id="feedbackRow" style="display:none">
+        <span class="feedback-label">What was wrong?</span>
+        <div class="feedback-chips" id="feedbackChips"></div>
+      </div>
       <div class="next-steps" id="nextSteps" style="display:none">
         <span class="next-steps-label">What next?</span>
         <div class="next-steps-chips" id="nextStepsChips"></div>
@@ -661,6 +671,13 @@
     let mode = 'video';
     let lastPrompts = [];
     let lastBody = null;
+    let userProfile = null;
+    let selectedFeedback = null;
+
+    // Fetch memory profile once on load — injected into every generation request
+    fetch('/api/memory').then(r => r.ok ? r.json() : null).catch(() => null).then(data => {
+      if (data?.profile) userProfile = data.profile;
+    });
     let lastEndpoint = null;
     let uploadedImage = null;
     let historyOpen = false;
@@ -715,6 +732,8 @@
 
     const nextStepsEl    = document.getElementById('nextSteps');
     const nextStepsChips = document.getElementById('nextStepsChips');
+    const feedbackRow    = document.getElementById('feedbackRow');
+    const feedbackChips  = document.getElementById('feedbackChips');
     const memoryBtn      = document.getElementById('memoryBtn');
     const memoryOverlay  = document.getElementById('memoryOverlay');
     const memoryDismiss  = document.getElementById('memoryDismiss');
@@ -1220,9 +1239,11 @@
       lastPrompts = [];
 
       const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
-      const body = { description, characterContext: describedCharacter || null, loraEnabled: loraCheckbox.checked };
+      const body = { description, characterContext: describedCharacter || null, loraEnabled: loraCheckbox.checked, userProfile: userProfile || undefined };
       lastEndpoint = endpoint;
       lastBody = body;
+      feedbackRow.style.display = 'none';
+      selectedFeedback = null;
 
       const controller = new AbortController();
       const fetchTimeout = setTimeout(() => controller.abort(), 60000);
@@ -1271,7 +1292,29 @@
       regenBtn.style.display = lastBody ? 'inline-block' : 'none';
       copyNumBtn.style.display = mode === 'video' ? 'inline-block' : 'none';
       splitterNote.style.display = mode === 'video' ? 'block' : 'none';
+      showFeedbackChips();
+    }
 
+    function showFeedbackChips() {
+      selectedFeedback = null;
+      feedbackChips.innerHTML = '';
+      const options = mode === 'video'
+        ? ['Too similar segments', 'Too verbose', 'Wrong physics', 'Too tame', 'More extreme']
+        : mode === 'short'
+        ? ['Too verbose', 'Wrong physics', 'Too tame', 'More specific']
+        : ['Too verbose', 'Wrong direction', 'Too literal', 'More extreme', 'More specific'];
+      options.forEach(label => {
+        const btn = document.createElement('button');
+        btn.className = 'feedback-chip';
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          feedbackChips.querySelectorAll('.feedback-chip').forEach(c => c.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedFeedback = label;
+        });
+        feedbackChips.appendChild(btn);
+      });
+      feedbackRow.style.display = 'flex';
     }
 
     copyAllBtn.addEventListener('click', () => {
@@ -1301,7 +1344,9 @@
       const controller = new AbortController();
       const fetchTimeout = setTimeout(() => controller.abort(), 60000);
       // Pass rejected prompts so the LLM knows what not to repeat
-      const regenBody = { ...lastBody, previousPrompts: lastPrompts.length ? lastPrompts : undefined };
+      const regenBody = { ...lastBody, previousPrompts: lastPrompts.length ? lastPrompts : undefined, feedback: selectedFeedback || undefined };
+      feedbackRow.style.display = 'none';
+      selectedFeedback = null;
       try {
         const res = await fetch(lastEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(regenBody), signal: controller.signal });
         clearTimeout(fetchTimeout);
