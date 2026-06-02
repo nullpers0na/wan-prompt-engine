@@ -166,6 +166,7 @@
       display: flex; gap: 10px; align-items: flex-start;
       max-width: 90%;
     }
+    .message-assistant { flex-direction: column; align-items: flex-start; }
     .ai-avatar {
       flex-shrink: 0;
       width: 30px; height: 30px; margin-top: 2px;
@@ -187,51 +188,59 @@
     .ai-content .msg-text { white-space: pre-wrap; word-break: break-word; }
     .ai-content strong { color: var(--rose-light); font-weight: 600; }
 
-    /* Prompt block inside AI message */
-    .prompt-block {
-      position: relative;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(232,53,122,0.22);
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin: 10px 0;
+    /* Standalone prompt card */
+    .prompt-card {
+      margin-left: 40px; /* align past avatar + gap */
+      width: calc(100% - 40px);
+      max-width: calc(90% - 0px);
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(232,53,122,0.3);
+      border-radius: 12px;
+      overflow: hidden;
     }
-    .prompt-block:first-child { margin-top: 0; }
-    .prompt-block:last-child { margin-bottom: 0; }
-    .prompt-block pre {
+    .prompt-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px;
+      background: rgba(232,53,122,0.08);
+      border-bottom: 1px solid rgba(232,53,122,0.15);
+    }
+    .prompt-card-label {
       font-family: 'Space Mono', monospace;
-      font-size: 0.8rem; line-height: 1.75;
-      white-space: pre-wrap; word-break: break-word;
+      font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
       color: var(--rose-light);
-      padding-right: 52px;
     }
     .copy-prompt-btn {
-      position: absolute; top: 8px; right: 8px;
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.7rem; font-weight: 500;
-      background: rgba(232,53,122,0.12); border: 1px solid rgba(232,53,122,0.3);
-      color: var(--rose-light); border-radius: 6px;
-      padding: 3px 10px; cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-      white-space: nowrap;
+      font-size: 0.75rem; font-weight: 600;
+      background: var(--gradient); border: none;
+      color: #fff; border-radius: 6px;
+      padding: 5px 14px; cursor: pointer;
+      transition: opacity 0.15s;
     }
-    .copy-prompt-btn:hover { background: rgba(232,53,122,0.25); }
-    .copy-prompt-btn.copied { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.4); color: #4ade80; }
-
-    /* Negative line */
-    .negative-line {
-      margin-top: 8px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      padding: 6px 10px;
-      background: rgba(252,165,165,0.05);
-      border: 1px solid rgba(252,165,165,0.12);
-      border-radius: 7px;
+    .copy-prompt-btn:hover { opacity: 0.85; }
+    .copy-prompt-btn.copied { background: rgba(74,222,128,0.2); color: #4ade80; }
+    .prompt-card pre {
       font-family: 'Space Mono', monospace;
-      line-height: 1.5;
-      word-break: break-word;
+      font-size: 0.82rem; line-height: 1.75;
+      white-space: pre-wrap; word-break: break-word;
+      color: var(--text); padding: 14px 16px;
     }
-    .negative-line .neg-label { color: rgba(252,165,165,0.6); font-size: 0.7rem; display: block; margin-bottom: 2px; }
+
+    /* Negative card */
+    .negative-card {
+      margin-left: 40px;
+      padding: 8px 14px;
+      background: rgba(252,165,165,0.04);
+      border: 1px solid rgba(252,165,165,0.12);
+      border-radius: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem; line-height: 1.55;
+      color: var(--text-muted); word-break: break-word;
+    }
+    .negative-card .neg-label {
+      font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(252,165,165,0.5); display: block; margin-bottom: 3px;
+    }
 
     /* Error message */
     .error-message {
@@ -583,6 +592,8 @@
     }
 
     // ── Render ─────────────────────────────────────────
+    const AVATAR_SVG = `<svg viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="4" fill="url(#avg)"/><path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#avg)" opacity="0.9"/><path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#avg)" opacity="0.75"/><path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#avg)" opacity="0.9"/><path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#avg)" opacity="0.75"/><defs><linearGradient id="avg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs></svg>`;
+
     function appendMessage(role, content, img = null) {
       const wrap = document.createElement('div');
       wrap.className = `message message-${role}`;
@@ -604,20 +615,44 @@
         }
         wrap.appendChild(bubble);
       } else {
-        const aiWrap = document.createElement('div');
-        aiWrap.className = 'ai-wrap';
+        // Parse content into text segments, code blocks, and negative lines
+        const parts = parseContent(content);
 
-        const avatar = document.createElement('div');
-        avatar.className = 'ai-avatar';
-        avatar.innerHTML = `<svg viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="4" fill="url(#avg)"/><path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#avg)" opacity="0.9"/><path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#avg)" opacity="0.75"/><path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#avg)" opacity="0.9"/><path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#avg)" opacity="0.75"/><defs><linearGradient id="avg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs></svg>`;
+        // Text bubble — only if there's conversational text
+        const textParts = parts.filter(p => p.type === 'text' && p.content.trim());
+        if (textParts.length) {
+          const aiWrap = document.createElement('div');
+          aiWrap.className = 'ai-wrap';
+          const avatar = document.createElement('div');
+          avatar.className = 'ai-avatar';
+          avatar.innerHTML = AVATAR_SVG;
+          const bubble = document.createElement('div');
+          bubble.className = 'ai-content';
+          bubble.innerHTML = textParts.map(p => `<span class="msg-text">${formatText(escapeHtml(p.content))}</span>`).join('');
+          aiWrap.appendChild(avatar);
+          aiWrap.appendChild(bubble);
+          wrap.appendChild(aiWrap);
+        }
 
-        const contentEl = document.createElement('div');
-        contentEl.className = 'ai-content';
-        contentEl.innerHTML = renderContent(content);
+        // Standalone prompt cards — one per code block
+        parts.filter(p => p.type === 'code').forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'prompt-card';
+          card.innerHTML = `<div class="prompt-card-header">
+              <span class="prompt-card-label">Prompt</span>
+              <button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button>
+            </div>
+            <pre>${escapeHtml(p.content)}</pre>`;
+          wrap.appendChild(card);
+        });
 
-        aiWrap.appendChild(avatar);
-        aiWrap.appendChild(contentEl);
-        wrap.appendChild(aiWrap);
+        // Negative cards
+        parts.filter(p => p.type === 'negative').forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'negative-card';
+          card.innerHTML = `<span class="neg-label">Negative</span>${escapeHtml(p.content)}`;
+          wrap.appendChild(card);
+        });
       }
 
       chatInner.appendChild(wrap);
@@ -635,38 +670,27 @@
       scrollToBottom();
     }
 
-    // ── Content renderer ───────────────────────────────
-    function renderContent(text) {
-      // Split on fenced code blocks
-      const parts = text.split(/(```[\s\S]*?```)/g);
-      let html = '';
-
-      for (const part of parts) {
-        if (part.startsWith('```')) {
-          const lines  = part.split('\n');
-          const code   = lines.slice(1).join('\n').replace(/```\s*$/, '').trim();
-          html += `<div class="prompt-block">
-            <button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button>
-            <pre>${escapeHtml(code)}</pre>
-          </div>`;
+    // ── Content parser ─────────────────────────────────
+    function parseContent(text) {
+      const parts = [];
+      const segments = text.split(/(```[\s\S]*?```)/g);
+      for (const seg of segments) {
+        if (seg.startsWith('```')) {
+          const code = seg.split('\n').slice(1).join('\n').replace(/```\s*$/, '').trim();
+          if (code) parts.push({ type: 'code', content: code });
         } else {
-          // Look for NEGATIVE: lines
-          const negRe = /^NEGATIVE:\s*(.+)$/im;
-          const negMatch = part.match(negRe);
-          let cleaned = part;
-          let negHtml = '';
+          // Pull out NEGATIVE: line if present
+          const negMatch = seg.match(/^NEGATIVE:\s*(.+)$/im);
           if (negMatch) {
-            cleaned = part.replace(negMatch[0], '').trim();
-            negHtml = `<div class="negative-line"><span class="neg-label">NEGATIVE</span>${escapeHtml(negMatch[1].trim())}</div>`;
+            const cleaned = seg.replace(negMatch[0], '').trim();
+            if (cleaned) parts.push({ type: 'text', content: cleaned });
+            parts.push({ type: 'negative', content: negMatch[1].trim() });
+          } else {
+            parts.push({ type: 'text', content: seg });
           }
-          if (cleaned.trim()) {
-            html += `<span class="msg-text">${formatText(escapeHtml(cleaned))}</span>`;
-          }
-          if (negHtml) html += negHtml;
         }
       }
-
-      return html;
+      return parts;
     }
 
     function formatText(escaped) {
@@ -682,7 +706,7 @@
 
     // ── Copy ───────────────────────────────────────────
     function copyPrompt(btn) {
-      const code = btn.nextElementSibling.textContent;
+      const code = btn.closest('.prompt-card').querySelector('pre').textContent;
       navigator.clipboard.writeText(code).then(() => {
         btn.textContent = 'Copied!';
         btn.classList.add('copied');
