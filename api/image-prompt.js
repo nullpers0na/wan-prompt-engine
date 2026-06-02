@@ -19,7 +19,8 @@ Model characteristics:
 
 Rules:
 - Write 1-2 sentences only: (1) state the change clearly, (2) end with "Preserve her face exactly."
-- Only mention things the user explicitly asked to change — do not add preservation notes for body parts, skin, pose, or clothing the user did not mention
+- Only mention things the user explicitly asked to change — do not add preservation notes for body parts, skin, pose, clothing, or anything else the user did not mention
+- Scene context is background knowledge only — never reference it in your output unless the user's edit directly involves it
 - Preserve the user's exact adjectives — never soften, invert, or substitute
 - If the user says saggy/droopy/hanging, describe them that way — never write "rounded", "lifted", "firm", or "perky"
 - If LoRA trigger phrases are provided, embed them verbatim
@@ -66,7 +67,7 @@ module.exports = async (req, res) => {
 
     // Build LLM user message
     const parts = [`Edit request: ${normalized}`];
-    if (sceneContext) parts.unshift(`Current scene: ${sceneContext}\n`);
+    if (sceneContext) parts.unshift(`Scene context (for understanding only — do not add preservation notes for anything not mentioned in the edit request): ${sceneContext}\n`);
     if (userProfile) parts.unshift(`User profile (use to guide style and preferences):\n${userProfile}\n`);
     if (previousPrompts?.length) {
       const feedbackNote = feedback ? ` Specific issue: "${feedback}".` : '';
