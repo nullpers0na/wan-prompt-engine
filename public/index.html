@@ -550,8 +550,10 @@
         hideTyping();
 
         if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: res.statusText }));
-          appendError(err.error || 'Something went wrong.');
+          const body = await res.text().catch(() => '');
+          let msg;
+          try { msg = JSON.parse(body).error; } catch { msg = null; }
+          appendError(msg || `HTTP ${res.status}${body ? ': ' + body.slice(0, 200) : ''}`);
           return;
         }
 

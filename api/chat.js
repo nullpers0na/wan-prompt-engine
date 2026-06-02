@@ -79,6 +79,8 @@ module.exports = async (req, res) => {
         headers: {
           'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://wan-prompt-engine.vercel.app',
+          'X-Title': 'WAN Prompt Engine',
         },
         body: JSON.stringify({
           model,
