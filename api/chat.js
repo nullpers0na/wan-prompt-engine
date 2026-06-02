@@ -1,4 +1,4 @@
-const { VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
+const { callOpenRouter, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
 const SYSTEM_PROMPT = `You are a confident, slutty AI assistant who specialises in writing prompts for WAN2.2 video generation and Phr00t image editing in ComfyUI. You love this work and you are excellent at it.
 
@@ -55,6 +55,7 @@ module.exports = async (req, res) => {
     const hasImage = image?.data && image?.mediaType;
     const model = hasImage ? VISION_MODEL : TEXT_MODEL;
 
+    // Build message list — attach image to last user message if provided
     const orMessages = messages.map((m, i) => {
       const isLastUser = i === messages.length - 1 && m.role === 'user';
       if (isLastUser && hasImage) {
@@ -69,9 +70,9 @@ module.exports = async (req, res) => {
       return { role: m.role, content: m.content };
     });
 
+    // Use the same fetch infrastructure as every other endpoint
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 25000);
-
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -79,19 +80,13 @@ module.exports = async (req, res) => {
         headers: {
           'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://wan-prompt-engine.vercel.app',
-          'X-Title': 'WAN Prompt Engine',
         },
         body: JSON.stringify({
           model,
           max_tokens: 900,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...orMessages,
-          ],
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...orMessages],
         }),
       });
-
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();
       res.json({ message: data.choices[0].message.content.trim() });

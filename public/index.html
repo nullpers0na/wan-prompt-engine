@@ -435,7 +435,7 @@
     // ── State ──────────────────────────────────────────
     const GREETING = "Hey 💋 Tell me what you want — describe a scene, a clip, or drop an image. I'll write the prompt.";
 
-    let conversation = [{ role: 'assistant', content: GREETING }];
+    let conversation = []; // greeting is UI-only, not sent to the API
     let pendingImage = null;
     let isLoading = false;
 
