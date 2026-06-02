@@ -100,7 +100,10 @@ module.exports = async (req, res) => {
       });
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();
-      res.json({ message: data.choices[0].message.content.trim() });
+      let content = data.choices[0].message.content.trim();
+      // If the model skipped the conversational lead-in, add one
+      if (content.startsWith('```')) content = 'Here you go 💋\n\n' + content;
+      res.json({ message: content });
     } finally {
       clearTimeout(timer);
     }
