@@ -444,6 +444,8 @@
     // ── State ──────────────────────────────────────────
     const GREETING = "Hey 💋 Tell me what you want — describe a scene, a clip, or drop an image. I'll write the prompt.";
 
+    const AVATAR_SVG = `<svg viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="4" fill="url(#avg)"/><path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#avg)" opacity="0.9"/><path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#avg)" opacity="0.75"/><path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#avg)" opacity="0.9"/><path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#avg)" opacity="0.75"/><defs><linearGradient id="avg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs></svg>`;
+
     let conversation = []; // greeting is UI-only, not sent to the API
     let pendingImage = null;
     let isLoading = false;
@@ -606,8 +608,6 @@
     }
 
     // ── Render ─────────────────────────────────────────
-    const AVATAR_SVG = `<svg viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="4" fill="url(#avg)"/><path d="M17 4 C17 4 22 9 22 14 C22 16 20 17 17 17 C14 17 12 16 12 14 C12 9 17 4 17 4Z" fill="url(#avg)" opacity="0.9"/><path d="M30 17 C30 17 25 22 20 22 C18 22 17 20 17 17 C17 14 18 12 20 12 C25 12 30 17 30 17Z" fill="url(#avg)" opacity="0.75"/><path d="M17 30 C17 30 12 25 12 20 C12 18 14 17 17 17 C20 17 22 18 22 20 C22 25 17 30 17 30Z" fill="url(#avg)" opacity="0.9"/><path d="M4 17 C4 17 9 12 14 12 C16 12 17 14 17 17 C17 20 16 22 14 22 C9 22 4 17 4 17Z" fill="url(#avg)" opacity="0.75"/><defs><linearGradient id="avg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f9d0e4"/><stop offset="0.5" stop-color="#e8357a"/><stop offset="1" stop-color="#9b1d6e"/></linearGradient></defs></svg>`;
-
     function appendMessage(role, content, img = null) {
       const wrap = document.createElement('div');
       wrap.className = `message message-${role}`;
