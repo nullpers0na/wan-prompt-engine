@@ -1,0 +1,1870 @@
+{
+  "Agi": {
+    "element": "fir",
+    "description": "1 foe"
+  },
+  "Agilao": {
+    "element": "fir",
+    "description": "1 foe"
+  },
+  "Agidyne": {
+    "element": "fir",
+    "description": "1 foe"
+  },
+  "Maragi": {
+    "element": "fir",
+    "description": "All foes"
+  },
+  "Maragion": {
+    "element": "fir",
+    "description": "All foes"
+  },
+  "Maragidyne": {
+    "element": "fir",
+    "description": "All foes"
+  },
+  "Prominence": {
+    "element": "fir",
+    "description": "-"
+  },
+  "Ragnarok": {
+    "element": "fir",
+    "description": "1 foe"
+  },
+  "Immortal Flame": {
+    "element": "fir",
+    "description": "-"
+  },
+  "Tiny Soul Tomato": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Tetracorn": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Run Amok": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Shake Off": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Garu": {
+    "element": "win",
+    "description": "1 foe"
+  },
+  "Garula": {
+    "element": "win",
+    "description": "1 foe"
+  },
+  "Garudyne": {
+    "element": "win",
+    "description": "1 foe"
+  },
+  "Magaru": {
+    "element": "win",
+    "description": "All foes"
+  },
+  "Magarula": {
+    "element": "win",
+    "description": "All foes"
+  },
+  "Magarudyne": {
+    "element": "win",
+    "description": "All foes"
+  },
+  "Divine Vacuum": {
+    "element": "win",
+    "description": "-"
+  },
+  "Panta Rhei": {
+    "element": "win",
+    "description": "1 foe"
+  },
+  "Hiranya Cabbage": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Cry of Denial": {
+    "element": "ail",
+    "description": "-"
+  },
+  "Hot Lightning": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Draining Fog": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Bufu": {
+    "element": "ice",
+    "description": "1 foe"
+  },
+  "Bufula": {
+    "element": "ice",
+    "description": "1 foe"
+  },
+  "Bufudyne": {
+    "element": "ice",
+    "description": "1 foe"
+  },
+  "Mabufu": {
+    "element": "ice",
+    "description": "All foes"
+  },
+  "Mabufula": {
+    "element": "ice",
+    "description": "All foes"
+  },
+  "Mabufudyne": {
+    "element": "ice",
+    "description": "All foes"
+  },
+  "Cocytus Pain": {
+    "element": "ice",
+    "description": "-"
+  },
+  "Niflheim": {
+    "element": "ice",
+    "description": "1 foe"
+  },
+  "Bloody Rain": {
+    "element": "ice",
+    "description": "-"
+  },
+  "Red Paprika": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Enclosure Shell": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Hot Lightning B": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Shell of Denial": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Zio": {
+    "element": "ele",
+    "description": "1 foe"
+  },
+  "Zionga": {
+    "element": "ele",
+    "description": "1 foe"
+  },
+  "Ziodyne": {
+    "element": "ele",
+    "description": "1 foe"
+  },
+  "Mazio": {
+    "element": "ele",
+    "description": "All foes"
+  },
+  "Mazionga": {
+    "element": "ele",
+    "description": "All foes"
+  },
+  "Maziodyne": {
+    "element": "ele",
+    "description": "All foes"
+  },
+  "Jihad": {
+    "element": "ele",
+    "description": "-"
+  },
+  "Thunder Reign": {
+    "element": "ele",
+    "description": "1 foe"
+  },
+  "Bead Melon": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Mid Soul Tomato": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Big Soul Tomato": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Makaracorn": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Megido": {
+    "element": "alm",
+    "description": "All foes"
+  },
+  "Megidola": {
+    "element": "alm",
+    "description": "All foes"
+  },
+  "Megidolaon": {
+    "element": "alm",
+    "description": "All foes"
+  },
+  "Last Resort": {
+    "element": "alm",
+    "description": "Universal"
+  },
+  "Black Viper": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Morning Star": {
+    "element": "alm",
+    "description": "All foes"
+  },
+  "White Paprika": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Blue Paprika": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Green Paprika": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Hama": {
+    "element": "lig",
+    "description": "1 foe"
+  },
+  "Hamaon": {
+    "element": "lig",
+    "description": "1 foe"
+  },
+  "Mahama": {
+    "element": "lig",
+    "description": "All foes"
+  },
+  "Mahamaon": {
+    "element": "lig",
+    "description": "All foes"
+  },
+  "Eternal White": {
+    "element": "lig",
+    "description": "-"
+  },
+  "God's Judgment": {
+    "element": "lig",
+    "description": "1 foe"
+  },
+  "Samsara": {
+    "element": "lig",
+    "description": "All foes"
+  },
+  "Mudo": {
+    "element": "dar",
+    "description": "1 foe"
+  },
+  "Mudoon": {
+    "element": "dar",
+    "description": "1 foe"
+  },
+  "Mamudo": {
+    "element": "dar",
+    "description": "All foes"
+  },
+  "Mamudoon": {
+    "element": "dar",
+    "description": "All foes"
+  },
+  "Eternal Black": {
+    "element": "dar",
+    "description": "-"
+  },
+  "Demonic Judgment": {
+    "element": "dar",
+    "description": "-"
+  },
+  "Die for Me!": {
+    "element": "dar",
+    "description": "All foes"
+  },
+  "Pulinpa": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Tentarafoo": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Evil Touch": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Evil Smile": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Ghastly Wail": {
+    "element": "dar",
+    "description": "All foes"
+  },
+  "Balzac": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Valiant Dance": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Poisma": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Poison Mist": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Soul Break": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Anima Freeze": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Enervation": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Old One": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Galgalim Eyes": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Makajam": {
+    "element": "ail",
+    "description": "1 foe"
+  },
+  "Foolish Whisper": {
+    "element": "ail",
+    "description": "All foes"
+  },
+  "Foul Breath": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Stagnant Air": {
+    "element": "alm",
+    "description": "Universal"
+  },
+  "Life Drain": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Spirit Drain": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Life Leech": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Spirit Leech": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Judgement": {
+    "element": "alm",
+    "description": "1 foe"
+  },
+  "Balzac B": {
+    "element": "ail",
+    "description": "-"
+  },
+  "Last Resort B": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Last Resort C": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Kamui Miracle": {
+    "element": "sup",
+    "description": "Universal"
+  },
+  "Kamui Miracle B": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle C": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle D": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle E": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle F": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle G": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle H": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Kamui Miracle I": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Elemental Break": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Bash": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Cleave": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Assault Dive": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Sonic Punch": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Double Fangs": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Kill Rush": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Swift Strike": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Twin Shot": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Fatal End": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Mighty Swing": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Torrent Shot": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Heat Wave": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Gigantic Fist": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Blade of Fury": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Deathbound": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Arrow Rain": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Akasha Arts": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Tempest Slash": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Heaven's Blade": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Myriad Arrows": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "God's Hand": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Pralaya": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Primal Force": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Vorpal Blade": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Power Slash": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Gale Slash": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Brave Blade": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Herculean Strike": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Vicious Strike": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Single Shot": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Skewer": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Poison Skewer": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Poison Arrow": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Blight": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Virus Wave": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Skull Cracker": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Mind Slice": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Hysterical Slap": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Crazy Chain": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Muzzle Shot": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Seal Bomb": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Arm Chopper": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Atom Smasher": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Cell Breaker": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Mustard Bomb": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Brain Shake": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Navas Nebula": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Golden Right": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Black Spot": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Rainy Death": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Hassou Tobi": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Rampage": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Aeon Rain": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Agneyastra": {
+    "element": "phy",
+    "description": "All foes"
+  },
+  "Cruel Attack": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Vile Assault": {
+    "element": "phy",
+    "description": "1 foe"
+  },
+  "Rampage B": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Attack Up Support": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Guard Up Support": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Agility Up Support": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Charge Support": {
+    "element": "sup",
+    "description": "-"
+  },
+  "HP Recovery Support": {
+    "element": "rec",
+    "description": "-"
+  },
+  "SP Recovery Support": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Dia": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Diarama": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Diarahan": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Media": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Mediarama": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Mediarahan": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Salvation": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Patra": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Me Patra": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Re Patra": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Posumudi": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Mutudi": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Enradi": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Tirundi": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Nervundi": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Energy Shower": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Amrita": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Recarm": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Samarecarm": {
+    "element": "rec",
+    "description": "1 ally"
+  },
+  "Tarunda": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Matarunda": {
+    "element": "sup",
+    "description": "All foes"
+  },
+  "Sukunda": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Masukunda": {
+    "element": "sup",
+    "description": "All foes"
+  },
+  "Rakunda": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Marakunda": {
+    "element": "sup",
+    "description": "All foes"
+  },
+  "Dekunda": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Tarukaja": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Matarukaja": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Sukukaja": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Masukukaja": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Rakukaja": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Marakukaja": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Dekaja": {
+    "element": "sup",
+    "description": "All foes"
+  },
+  "Heat Riser": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Debilitate": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Power Charge": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Mind Charge": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Tetrakarn": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Makarakarn": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Tetra Break": {
+    "element": "sup",
+    "description": "All foes"
+  },
+  "Makara Break": {
+    "element": "sup",
+    "description": "All foes"
+  },
+  "Tetraja": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Rebellion": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Revolution": {
+    "element": "sup",
+    "description": "Universal"
+  },
+  "Fire Break": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Ice Break": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Wind Break": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Elec Break": {
+    "element": "sup",
+    "description": "1 foe"
+  },
+  "Red Wall": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "White Wall": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Blue Wall": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Green Wall": {
+    "element": "sup",
+    "description": "1 ally"
+  },
+  "Trafuri": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Recarmdra": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Traesto": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Youthful Wind": {
+    "element": "rec",
+    "description": "All allies"
+  },
+  "Dragon Hustle": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Burning Petals": {
+    "element": "fir",
+    "description": "All foes"
+  },
+  "The Man's Way": {
+    "element": "alm",
+    "description": "All foes"
+  },
+  "Kamui Miracle J": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Shield of Justice": {
+    "element": "sup",
+    "description": "All allies"
+  },
+  "Complete Analysis": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Waste Money": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Yosuke Strike": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Galactic Punt": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Fan Assault": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Atomic Press": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Wild Ways": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Ultra Trigger": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Galaxy Kick": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Full Analysis": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Third Eye": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Weakness Scan": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Healing Wave": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Relaxing Wave": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Analyze": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Summon": {
+    "element": "spe",
+    "description": "1 foe"
+  },
+  "Enemy Radar": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Treasure Radar": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Certain Escape": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Myriad Truths": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Cavalry Attack": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Cavalry Attack B": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Cavalry Attack C": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Cavalry Attack D": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Cavalry Attack E": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Cavalry Attack F": {
+    "element": "phy",
+    "description": "-"
+  },
+  "All-Out Boost": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Rise's Revival": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Stamina Song": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Vigor Song": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Sarx Drop": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Medicine": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Medical Powder": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Spirit Water": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Life Stone": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Bead": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Value Medicine": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Medical Kit": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Umugi Water": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Bead Chain": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Pneuma Drop": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Snuff Soul": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Chewing Soul": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Precious Egg": {
+    "element": "rec",
+    "description": "-"
+  },
+  "Junes Bomber": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Twin Dragons": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Beauty & The Beast": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Wind of Oblivion": {
+    "element": "win",
+    "description": "-"
+  },
+  "Bottomless Envy": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Burn to Ashes": {
+    "element": "fir",
+    "description": "-"
+  },
+  "Shivering Rondo": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Summon B": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Summon C": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Forbidden Murmur": {
+    "element": "ail",
+    "description": "-"
+  },
+  "Roar of Wrath": {
+    "element": "ail",
+    "description": "-"
+  },
+  "Fanatical Spark": {
+    "element": "ele",
+    "description": "-"
+  },
+  "Supreme Insight": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Nihil Hand": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Ultra Charge": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Nullity Guidance": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Attack": {
+    "element": "phy",
+    "description": "-"
+  },
+  "Whisper": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Chant": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Prayer": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Character Setup": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Command": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Command B": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Command C": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Command D": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Command E": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Command F": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Element Zero": {
+    "element": "sup",
+    "description": "-"
+  },
+  "Mute Ray": {
+    "element": "ail",
+    "description": "-"
+  },
+  "Quad Converge": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Control": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Unerring Justice": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Nebula Oculus": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Quake": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Bewildering Fog": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Bewildering Fog B": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Thousand Curses": {
+    "element": "alm",
+    "description": "-"
+  },
+  "World's End": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Terror Voice": {
+    "element": "ail",
+    "description": "-"
+  },
+  "Control B": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Fury of Yasogami": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Bewildering Fog C": {
+    "element": "spe",
+    "description": "-"
+  },
+  "Summons to Yomi": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Kuro Ikazuchi": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Oho Ikazuchi": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Megidolaon B": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Thousand Curses B": {
+    "element": "alm",
+    "description": "-"
+  },
+  "Snow Flower Honey": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Revival Rope": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Sentou Seed": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Sentou Petal": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Sentou Fruit": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Fire Bell": {
+    "element": "fir",
+    "description": "-"
+  },
+  "Ice Bell": {
+    "element": "ice",
+    "description": "-"
+  },
+  "Wind Bell": {
+    "element": "win",
+    "description": "-"
+  },
+  "Lightning Bell": {
+    "element": "ele",
+    "description": "-"
+  },
+  "Flame Dotaku": {
+    "element": "fir",
+    "description": "-"
+  },
+  "Frigid Dotaku": {
+    "element": "ice",
+    "description": "-"
+  },
+  "Gale Dotaku": {
+    "element": "win",
+    "description": "-"
+  },
+  "Bolt Dotaku": {
+    "element": "ele",
+    "description": "-"
+  },
+  "Resist Physical": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Physical": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Physical": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Absorb Physical": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Fire": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Fire": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Fire": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Absorb Fire": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Ice": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Ice": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Ice": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Absorb Ice": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Elec": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Elec": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Elec": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Absorb Elec": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Wind": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Wind": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Wind": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Absorb Wind": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Light": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Light": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Light": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Dark": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Dark": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Repel Dark": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Confuse": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Exhaust": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Mute": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Fear": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Rage": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Poison": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Dizzy": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Null Enervate": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Unshaken Will": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Masakados": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Dodge Physical": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Evade Physical": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Dodge Fire": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Evade Fire": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Dodge Ice": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Evade Ice": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Dodge Wind": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Evade Wind": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Dodge Elec": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Evade Elec": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Angelic Grace": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Fire Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Fire Amp": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Ice Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Ice Amp": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Elec Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Elec Amp": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Wind Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Wind Amp": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Certain Escape B": {
+    "element": "pas",
+    "description": "-"
+  },
+  "HP Up 1": {
+    "element": "pas",
+    "description": "-"
+  },
+  "HP Up 2": {
+    "element": "pas",
+    "description": "-"
+  },
+  "HP Up 3": {
+    "element": "pas",
+    "description": "-"
+  },
+  "SP Up 1": {
+    "element": "pas",
+    "description": "-"
+  },
+  "SP Up 2": {
+    "element": "pas",
+    "description": "-"
+  },
+  "SP Up 3": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Counter": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Counterstrike": {
+    "element": "pas",
+    "description": "-"
+  },
+  "High Counter": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Regenerate 1": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Regenerate 2": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Regenerate 3": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Invigorate 1": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Invigorate 2": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Invigorate 3": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Growth 1": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Growth 2": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Growth 3": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Auto-Tarukaja": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Auto-Rakukaja": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Auto-Sukukaja": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Alertness": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Sharp Student": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Apt Pupil": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Ali Dance": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Firm Stance": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Spell Master": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Arms Master": {
+    "element": "pas",
+    "description": "-"
+  },
+  "HP Favor": {
+    "element": "pas",
+    "description": "-"
+  },
+  "SP Favor": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Divine Grace": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Endure": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Enduring Soul": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Survive Light": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Survive Dark": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Auto-Maraku": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Auto-Mataru": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Auto-Masuku": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Confuse Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Poison Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Exhaust Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Silence Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Fear Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Rage Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Dizzy Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Enervate Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Ailment Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Hama Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Mudo Boost": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Endure Light": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Endure Dark": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Cool Breeze": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Victory Cry": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Poison": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Confuse": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Fear": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Exhaust": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Enervate": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Rage": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Dizzy": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Resist Mute": {
+    "element": "pas",
+    "description": "-"
+  },
+  "HP Amp": {
+    "element": "pas",
+    "description": "-"
+  },
+  "SP Amp": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Fast Heal": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Insta-Heal": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Infinite Endure": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Izanami Endure": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Alienation Wall": {
+    "element": "pas",
+    "description": "-"
+  },
+  "Mudo B": {
+    "element": "pas",
+    "description": "-"
+  },
+  "AoA Level 1": {
+    "element": "spe",
+    "description": "-"
+  },
+  "AoA Level 2": {
+    "element": "spe",
+    "description": "-"
+  },
+  "AoA Level 3": {
+    "element": "spe",
+    "description": "-"
+  },
+  "AoA Level 4": {
+    "element": "spe",
+    "description": "-"
+  },
+  "AoA Level 5": {
+    "element": "spe",
+    "description": "-"
+  }
+}
