@@ -357,6 +357,7 @@
     .memory-btn:hover { color: var(--rose-light); border-color: rgba(232,53,122,0.4); background: rgba(232,53,122,0.06); }
 
     /* ── Next steps ────────────────────────────────────────────────────────── */
+    .scene-summary { font-size: 0.78rem; color: var(--text-muted); font-style: italic; border-top: 1px solid var(--border); padding-top: 10px; line-height: 1.5; }
     .feedback-row { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .feedback-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
     .feedback-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -682,6 +683,7 @@
     let uploadedImage = null;
     let historyOpen = false;
     let describedCharacter = '';
+    let describedScene = '';
     let characterName = '';   // AI-identified or user-entered name, used as memory key
     let lastDescription = ''; // physical description of last analysed image
     let sessionPrompts = []; // session continuity tracking
@@ -1116,6 +1118,7 @@
         const data = await describeRes.json();
         if (data.description) {
           describedCharacter = data.description;
+          describedScene = data.scene || '';
           characterName = data.name || '';
           lastDescription = data.description;
           characterNameInput.value = data.name || '';
@@ -1124,6 +1127,15 @@
             ? `Not right? Correct it:`
             : `Don't recognise her? Name her and she'll be remembered:`;
           suggestionsNamePrompt.classList.add('visible');
+          // Show scene summary in suggestions header
+          if (data.scene) {
+            const existing = suggestionsBox.querySelector('.scene-summary');
+            if (existing) existing.remove();
+            const sceneSummary = document.createElement('div');
+            sceneSummary.className = 'scene-summary';
+            sceneSummary.textContent = data.scene;
+            suggestionsBox.insertBefore(sceneSummary, suggestionsBox.querySelector('.suggestions-chips'));
+          }
           showSuggestions();
           const suggestContext = data.name ? `${data.name}, ${data.description}` : data.description;
           fetchSuggestions(suggestContext);
@@ -1220,7 +1232,7 @@
 
     function clearUpload() {
       if (describeAbortController) { describeAbortController.abort(); describeAbortController = null; }
-      uploadedImage = null; describedCharacter = ''; characterName = ''; try { fileInput.value = ''; } catch (_) {}
+      uploadedImage = null; describedCharacter = ''; describedScene = ''; characterName = ''; try { fileInput.value = ''; } catch (_) {}
       previewImg.src = ''; uploadPreview.classList.remove('visible'); uploadArea.classList.remove('has-preview'); uploadHint.style.display = '';
       uploadArea.classList.remove('analysing');
       hideSuggestions();
@@ -1239,7 +1251,7 @@
       lastPrompts = [];
 
       const endpoint = mode === 'video' ? '/api/generate' : mode === 'short' ? '/api/short' : '/api/image-prompt';
-      const body = { description, characterContext: describedCharacter || null, loraEnabled: loraCheckbox.checked, userProfile: userProfile || undefined };
+      const body = { description, characterContext: describedCharacter || null, sceneContext: describedScene || null, loraEnabled: loraCheckbox.checked, userProfile: userProfile || undefined };
       lastEndpoint = endpoint;
       lastBody = body;
       feedbackRow.style.display = 'none';

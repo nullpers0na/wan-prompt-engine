@@ -1,12 +1,13 @@
 const { callOpenRouter, VISION_MODEL, TEXT_MODEL } = require('./lib/openrouter');
 
-const VISION_PROMPT = `You are an expert at identifying fictional characters AND describing explicit physical attributes for AI image generation.
+const VISION_PROMPT = `You are an expert at identifying fictional characters, describing explicit physical attributes, and reading scenes for AI image generation.
 
-Output exactly two lines:
+Output exactly three lines:
 LINE 1: character name and game/source in lowercase if you recognise them (e.g. "tifa lockhart, final fantasy vii") — or leave blank if unknown. Check face, outfit, hair, body shape, artstyle, accessories. Characters may be rendered in different styles — use your best judgement.
-LINE 2: physical description — only describe what is actually visible in this image. Include: body type, skin tone, hair colour/length, facial expression, overall sexual vibe. Add breast size/shape, ass size/shape, waist-to-hip ratio, piercings, tattoos ONLY if clearly visible. Comma-separated, lowercase, max 30 words, no character name.
+LINE 2: physical description — only describe what is actually visible. Include: body type, skin tone, hair colour/length, breast size/shape, ass size/shape. Comma-separated, lowercase, max 25 words, no character name.
+LINE 3: scene description — what is happening, her pose, clothing/nudity state, camera angle, setting. Be specific and explicit. Comma-separated, lowercase, max 25 words.
 
-Two lines only. No labels, no preamble.`;
+Three lines only. No labels, no preamble.`;
 
 function buildDescriptionMatchPrompt(newDescription, knownCharacters) {
   const list = knownCharacters.map(c => `- ${c.name}: ${c.description}`).join('\n');
@@ -30,6 +31,7 @@ module.exports = async (req, res) => {
     const lines = text.split('\n').map(l => l.replace(/^[\s\-*>]+/, '').trim()).filter(Boolean);
     let name        = lines[0] || '';
     let description = lines[1] || '';
+    let scene       = lines[2] || '';
 
     if (/^(unknown|unidentified|unnamed|unrecognized|unrecognised|n\/a|none|-)$/i.test(name)) name = '';
 
@@ -43,7 +45,7 @@ module.exports = async (req, res) => {
       if (matched && matched.toLowerCase() !== 'unknown') name = matched;
     }
 
-    res.json({ name, description });
+    res.json({ name, description, scene });
   } catch (err) {
     console.error('describe error:', err.message);
     res.status(500).json({ error: err.message || 'API call failed' });

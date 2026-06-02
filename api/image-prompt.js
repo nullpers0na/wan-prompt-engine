@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { description, characterContext, image, loraEnabled = true, previousPrompts, feedback, userProfile } = req.body || {};
+    const { description, characterContext, image, loraEnabled = true, previousPrompts, feedback, userProfile, sceneContext } = req.body || {};
     if (!description?.trim()) return res.status(400).json({ error: 'Description is required' });
 
     // Replace "image 2" / "image 1" with <image_2> / <image_1> syntax
@@ -66,6 +66,7 @@ module.exports = async (req, res) => {
 
     // Build LLM user message
     const parts = [`Edit request: ${normalized}`];
+    if (sceneContext) parts.unshift(`Current scene: ${sceneContext}\n`);
     if (userProfile) parts.unshift(`User profile (use to guide style and preferences):\n${userProfile}\n`);
     if (previousPrompts?.length) {
       const feedbackNote = feedback ? ` Specific issue: "${feedback}".` : '';
