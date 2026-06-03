@@ -1,5 +1,5 @@
 const VISION_MODEL = 'qwen/qwen2.5-vl-72b-instruct';
-const TEXT_MODEL   = 'qwen/qwen2.5-vl-72b-instruct';
+const TEXT_MODEL   = 'nousresearch/hermes-3-llama-3.1-70b';
 
 function buildUserContent(description, image) {
   if (!image) return description.trim();
