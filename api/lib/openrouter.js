@@ -1,5 +1,5 @@
 const VISION_MODEL = 'qwen/qwen2.5-vl-72b-instruct';
-const TEXT_MODEL   = 'neversleep/llama-3-lumimaid-70b';
+const TEXT_MODEL   = 'sao10k/l3-euryale-70b';
 
 function buildUserContent(description, image) {
   if (!image) return description.trim();
