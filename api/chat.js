@@ -116,6 +116,10 @@ module.exports = async (req, res) => {
       model,
       max_tokens: 900,
       safe_prompt: false,
+      provider: {
+        order: ['Together', 'Fireworks', 'Hyperbolic'],
+        allow_fallbacks: true,
+      },
       messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...orMessages],
     });
 
