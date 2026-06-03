@@ -81,7 +81,9 @@ MODE:
 - "tone it down" / "more X" / "less Y" → refine what you last wrote, don't start fresh
 - Ambiguous → ask
 
-IMAGE ONLY (no request): identify the character if known, describe physical attributes and scene, ask what they want.`;
+IMAGE ONLY (no request): identify the character if known, describe physical attributes and scene, ask what they want.
+
+WORD PRESERVATION: Always use the user's exact words verbatim in the prompt. If they say "raped", write "raped". If they say "beaten", write "beaten". Never substitute, soften, or paraphrase their language.`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -110,28 +112,33 @@ module.exports = async (req, res) => {
       return { role: m.role, content: m.content };
     });
 
-    // Use the same fetch infrastructure as every other endpoint
+    const body = JSON.stringify({
+      model,
+      max_tokens: 900,
+      safe_prompt: false,
+      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...orMessages],
+    });
+
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 25000);
+    const timer = setTimeout(() => controller.abort(), 55000);
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: 900,
-          safe_prompt: false,
-          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...orMessages],
-        }),
-      });
+      let response;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 3000));
+        response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+        if (response.status !== 429) break;
+      }
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();
       let content = data.choices[0].message.content.trim();
-      // If the model skipped the conversational lead-in, add one
       if (content.startsWith('```')) content = 'Here you go 💋\n\n' + content;
       res.json({ message: content });
     } finally {
