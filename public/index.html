@@ -983,17 +983,16 @@
       for (const seg of segments) {
         if (seg.startsWith('```')) {
           const raw = seg.split('\n').slice(1).join('\n').replace(/```\s*$/, '').trim();
-          // If the code block starts with a short non-prompt line (reaction bled in),
-          // extract it as text and treat the rest as the prompt
-          const blankIdx = raw.indexOf('\n\n');
-          if (blankIdx !== -1) {
-            const head = raw.slice(0, blankIdx).trim();
-            const rest = raw.slice(blankIdx).trim();
-            if (head && rest && head.length < 140 && !PROMPT_SIGNALS.test(head)) {
-              parts.push({ type: 'text', content: head });
-              parts.push({ type: 'code', content: rest });
-              continue;
-            }
+          // If the first line looks like a reaction (short + contains emoji, no prompt keywords),
+          // extract it as text and treat the remainder as the prompt
+          const lines = raw.split('\n');
+          const firstLine = lines[0].trim();
+          const remainder = lines.slice(1).join('\n').trim();
+          const hasEmoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}💋😈🔥😏❤️]/u.test(firstLine);
+          if (firstLine && remainder && firstLine.length < 140 && hasEmoji && !PROMPT_SIGNALS.test(firstLine)) {
+            parts.push({ type: 'text', content: firstLine });
+            parts.push({ type: 'code', content: remainder });
+            continue;
           }
           if (raw) parts.push({ type: 'code', content: raw });
         } else {
