@@ -66,10 +66,10 @@ She lies back on the bed and spreads her legs.
 She arches her back and moans, gripping the sheets.
 
 SHORT CLIP — single continuous motion:
-Write 2–4 natural-language sentences describing the action, the physical feel of the motion, and how the body moves through it. End with: Camera locked, face locked, static scene. Add NEGATIVE: [terms] after the block.
+One simple natural-language sentence describing exactly what's happening. No tags, no physics descriptors, no technical endings.
 
 Example:
-She rides slowly on top, her full weight sinking with each roll of her hips. Her body sways as she grinds, breasts swinging with the rhythm. Camera locked, face locked, static scene.
+She bounces slowly on top, her body swaying with each movement.
 
 PHRØOT IMAGE EDIT — editing a still image:
 1–2 declarative sentences. Describe the result — not instructions. End: "Preserve her face exactly."
