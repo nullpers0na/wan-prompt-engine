@@ -1,35 +1,47 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+const postgres = require('postgres');
 
-const DB_DIR = process.env.COMPANION_DB_DIR || path.join(__dirname, '../../data');
-const DB_PATH = path.join(DB_DIR, 'companion.db');
+let _sql = null;
+let _ready = false;
 
-let _db = null;
+function getSql() {
+  if (_sql) return _sql;
+  _sql = postgres(process.env.POSTGRES_URL, {
+    max: 3,
+    ssl: { rejectUnauthorized: false },
+    idle_timeout: 20,
+    connect_timeout: 10,
+  });
+  return _sql;
+}
 
-function getDb() {
-  if (_db) return _db;
-  fs.mkdirSync(DB_DIR, { recursive: true });
-  _db = new Database(DB_PATH);
-  _db.pragma('journal_mode = WAL');
-  _db.exec(`
-    CREATE TABLE IF NOT EXISTS conversations (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS messages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      conversation_id TEXT NOT NULL REFERENCES conversations(id),
-      role TEXT NOT NULL,
-      type TEXT NOT NULL DEFAULT 'text',
-      content TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_messages_conv ON messages(conversation_id, id);
-  `);
-  return _db;
+async function getDb() {
+  const sql = getSql();
+  if (!_ready) {
+    await sql`
+      CREATE TABLE IF NOT EXISTS companion_conversations (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        created_at BIGINT NOT NULL,
+        updated_at BIGINT NOT NULL
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS companion_messages (
+        id SERIAL PRIMARY KEY,
+        conversation_id TEXT NOT NULL REFERENCES companion_conversations(id),
+        role TEXT NOT NULL,
+        type TEXT NOT NULL DEFAULT 'text',
+        content TEXT NOT NULL,
+        created_at BIGINT NOT NULL
+      )
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_companion_messages_conv
+      ON companion_messages(conversation_id, id)
+    `;
+    _ready = true;
+  }
+  return sql;
 }
 
 module.exports = { getDb };

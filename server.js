@@ -13,10 +13,13 @@ app.get('/companion/*', (_req, res) => {
 });
 
 // Companion API routes
-app.post('/api/companion/chat',              require('./api/companion-chat'));
-app.post('/api/companion/image',             require('./api/companion-image'));
-app.post('/api/companion/conversations',     require('./api/companion-conversations'));
-app.get('/api/companion/conversations/:id',  require('./api/companion-conversation'));
+app.post('/api/companion/chat',              require('./api/companion/chat'));
+app.post('/api/companion/image',             require('./api/companion/image'));
+app.post('/api/companion/conversations',     require('./api/companion/conversations'));
+app.get('/api/companion/conversations/:id',  (req, res) => {
+  req.query.id = req.params.id;
+  return require('./api/companion/conversations/[id]')(req, res);
+});
 
 // ── WAN Prompt Engine (existing) ───────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));

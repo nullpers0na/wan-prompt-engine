@@ -1,7 +1,7 @@
 const fs = require('fs');
-const { getDb } = require('./lib/companionDb');
-const { generateImage } = require('./lib/comfyClient');
-const { promptTemplate } = require('./lib/promptTemplate');
+const { getDb } = require('../lib/companionDb');
+const { generateImage } = require('../lib/comfyClient');
+const { promptTemplate } = require('../lib/promptTemplate');
 
 const CHAT_API_URL   = () => (process.env.CHAT_API_URL  || '').replace(/\/$/, '');
 const CHAT_API_KEY   = () => process.env.CHAT_API_KEY   || '';
@@ -29,18 +29,22 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'conversationId and message required' });
   }
 
-  const db = getDb();
-  const conv = db.prepare('SELECT id FROM conversations WHERE id = ?').get(conversationId);
-  if (!conv) return res.status(404).json({ error: 'Conversation not found' });
-
   const chatApiUrl = CHAT_API_URL();
   if (!chatApiUrl) return res.status(503).json({ error: 'CHAT_API_URL not configured' });
 
+  const sql = await getDb();
+  const [conv] = await sql`
+    SELECT id FROM companion_conversations WHERE id = ${conversationId}
+  `;
+  if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
   // Persist user message
   const now = Date.now();
-  db.prepare(`INSERT INTO messages (conversation_id, role, type, content, created_at) VALUES (?,?,?,?,?)`)
-    .run(conversationId, 'user', 'text', message, now);
-  db.prepare('UPDATE conversations SET updated_at = ? WHERE id = ?').run(now, conversationId);
+  await sql`
+    INSERT INTO companion_messages (conversation_id, role, type, content, created_at)
+    VALUES (${conversationId}, 'user', 'text', ${message}, ${now})
+  `;
+  await sql`UPDATE companion_conversations SET updated_at = ${now} WHERE id = ${conversationId}`;
 
   // Set up SSE
   res.setHeader('Content-Type', 'text/event-stream');
@@ -50,21 +54,21 @@ module.exports = async (req, res) => {
   res.flushHeaders();
 
   // Build message history from DB
-  const history = db.prepare(
-    `SELECT role, type, content FROM messages WHERE conversation_id = ? ORDER BY id ASC`
-  ).all(conversationId);
+  const history = await sql`
+    SELECT role, type, content FROM companion_messages
+    WHERE conversation_id = ${conversationId}
+    ORDER BY id ASC
+  `;
 
   const apiMessages = history
     .filter(m => m.type === 'text')
     .map(m => ({ role: m.role, content: m.content }));
 
   const systemPrompt = loadSystemPrompt();
-
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   let fullText = '';
-  let buffer = '';
 
   try {
     const response = await fetch(`${chatApiUrl}/chat/completions`, {
@@ -86,7 +90,9 @@ module.exports = async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      sendSSE(res, 'error', { message: `API error ${response.status}: ${errText.slice(0, 300)}` });
+      let msg;
+      try { msg = JSON.parse(errText).error?.message; } catch {}
+      sendSSE(res, 'error', { message: msg || `API error ${response.status}: ${errText.slice(0, 300)}` });
       res.end();
       return;
     }
@@ -110,19 +116,16 @@ module.exports = async (req, res) => {
           const delta = parsed.choices?.[0]?.delta?.content;
           if (!delta) continue;
           fullText += delta;
-          buffer += delta;
-
-          // Strip [IMAGE: ...] markers from visible stream, emit remaining text
-          const visible = buffer.replace(IMAGE_MARKER, '');
+          // Strip any [IMAGE: ...] markers from the visible stream
+          const visible = delta.replace(IMAGE_MARKER, '');
           if (visible) sendSSE(res, 'token', { text: visible });
-          buffer = '';
-        } catch (_) { /* skip malformed chunks */ }
+        } catch (_) {}
       }
     }
 
     clearTimeout(timer);
 
-    // Parse out all [IMAGE: ...] triggers from full response
+    // Extract image triggers and clean text
     const imageTriggers = [];
     let cleanText = fullText;
     let match;
@@ -132,24 +135,29 @@ module.exports = async (req, res) => {
       cleanText = cleanText.replace(match[0], '').trim();
     }
 
-    // Persist assistant text message
+    // Persist clean assistant text
     const assistantNow = Date.now();
-    db.prepare(`INSERT INTO messages (conversation_id, role, type, content, created_at) VALUES (?,?,?,?,?)`)
-      .run(conversationId, 'assistant', 'text', cleanText, assistantNow);
-    db.prepare('UPDATE conversations SET updated_at = ? WHERE id = ?').run(assistantNow, conversationId);
+    await sql`
+      INSERT INTO companion_messages (conversation_id, role, type, content, created_at)
+      VALUES (${conversationId}, 'assistant', 'text', ${cleanText}, ${assistantNow})
+    `;
+    await sql`UPDATE companion_conversations SET updated_at = ${assistantNow} WHERE id = ${conversationId}`;
 
     sendSSE(res, 'done', { text: cleanText });
 
-    // Trigger image generation for each [IMAGE: ...] marker
+    // Fire image generation for each [IMAGE: ...] trigger
     for (const description of imageTriggers) {
       sendSSE(res, 'image_start', { description });
       try {
         const finalPrompt = promptTemplate(description);
         const { base64, mimeType } = await generateImage(finalPrompt);
         const imgNow = Date.now();
-        db.prepare(`INSERT INTO messages (conversation_id, role, type, content, created_at) VALUES (?,?,?,?,?)`)
-          .run(conversationId, 'assistant', 'image', JSON.stringify({ base64, mimeType, prompt: finalPrompt }), imgNow);
-        db.prepare('UPDATE conversations SET updated_at = ? WHERE id = ?').run(imgNow, conversationId);
+        await sql`
+          INSERT INTO companion_messages (conversation_id, role, type, content, created_at)
+          VALUES (${conversationId}, 'assistant', 'image',
+                  ${JSON.stringify({ base64, mimeType, prompt: finalPrompt })}, ${imgNow})
+        `;
+        await sql`UPDATE companion_conversations SET updated_at = ${imgNow} WHERE id = ${conversationId}`;
         sendSSE(res, 'image_done', { base64, mimeType, prompt: finalPrompt });
       } catch (imgErr) {
         sendSSE(res, 'image_error', { description, message: imgErr.message });

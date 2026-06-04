@@ -74,13 +74,15 @@ To trigger image generation, instruct the model to emit `[IMAGE: <description>]`
 ### Pointing it at ComfyUI
 
 ```
-IMAGE_API_URL=http://localhost:8188
+IMAGE_API_URL=http://your-comfyui-host:8188
 COMFY_WORKFLOW_PATH=/path/to/my_workflow.json
 COMFY_PROMPT_NODE_ID=6     # node that receives the prompt text
 COMFY_SEED_NODE_ID=3       # node that receives the random seed
 ```
 
 The workflow JSON is the same file you'd export from the ComfyUI web interface. The app injects the prompt text and a fresh random seed on every call, then polls `/history/{id}` until the output image is ready.
+
+**On Vercel:** ComfyUI must be reachable from Vercel's servers, so `localhost` won't work. Expose it via a tunnel (e.g. `cloudflared tunnel` or `ngrok`) and set `IMAGE_API_URL` to the public URL.
 
 **Swapping the workflow:** change `COMFY_WORKFLOW_PATH` and update the node IDs if your new workflow uses different node numbers. No code changes required.
 
