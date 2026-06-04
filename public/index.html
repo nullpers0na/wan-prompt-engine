@@ -574,6 +574,7 @@
     // ── State ──────────────────────────────────────────
     let conversation = [];
     let pendingImage = null;
+    let conversationImage = null; // persists for the life of the conversation
     let isLoading = false;
     let currentChatId = null;
     let lastImgPayload = null;
@@ -729,6 +730,7 @@
       currentChatId = null;
       conversation = [];
       pendingImage = null;
+      conversationImage = null;
       clearAttachment();
       chatInner.innerHTML = '';
       appendMessage('assistant', GREETING);
@@ -809,7 +811,8 @@
       appendMessage('user', text, pendingImage);
       conversation.push({ role: 'user', content: text || '(image)' });
 
-      const imgPayload = pendingImage;
+      if (pendingImage) conversationImage = pendingImage; // remember image for this conversation
+      const imgPayload = conversationImage; // always send image context if we have one
       lastImgPayload = imgPayload;
       msgInput.value = '';
       autoResize();
