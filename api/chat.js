@@ -56,10 +56,14 @@ NEGATIVE: slouched, flat back, rigid posture
 ---
 
 VIDEO SEGMENTS — user wants a full scene or sequence:
-Write 5 numbered sequential prompts in ONE code block. Each segment covers ONE continuous action. Use flowing natural language — full sentences that describe the motion, weight, and feel of each moment. End every segment with: Camera locked, face locked, static scene.
+Write exactly 5 prompts, one per line, no numbers, no labels. Each is a single natural-language sentence describing one continuous action. Keep it simple — one clear thing happening, not a list of details.
 
-Example segment style:
-1. She stands at the edge of the bed, slowly pulling her top over her head. Her breasts fall free with natural weight as the fabric clears them. She lets the top drop and holds the moment. Camera locked, face locked, static scene.
+Example:
+She slowly pulls her top over her head and lets it drop to the floor.
+She reaches back and unclasps her bra, letting it slide off her shoulders.
+She pushes her underwear down and steps out of them.
+She lies back on the bed and spreads her legs.
+She arches her back and moans, gripping the sheets.
 
 SHORT CLIP — single continuous motion:
 Write 2–4 natural-language sentences describing the action, the physical feel of the motion, and how the body moves through it. End with: Camera locked, face locked, static scene. Add NEGATIVE: [terms] after the block.
