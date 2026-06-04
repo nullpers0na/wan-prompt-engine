@@ -101,43 +101,78 @@ module.exports = async (req, res) => {
     }
 
     const hasImage = image?.data && image?.mediaType;
-    const model = hasImage ? VISION_MODEL : TEXT_MODEL;
-
-    // Build message list — attach image to last user message if provided
-    const orMessages = messages.map((m, i) => {
-      const isLastUser = i === messages.length - 1 && m.role === 'user';
-      if (isLastUser && hasImage) {
-        return {
-          role: 'user',
-          content: [
-            { type: 'text', text: m.content || 'What do you see in this image?' },
-            { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
-          ],
-        };
-      }
-      return { role: m.role, content: m.content };
-    });
-
-    const body = JSON.stringify({
-      model,
-      max_tokens: 900,
-      safe_prompt: false,
-messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...orMessages],
-    });
+    const imageUrl = hasImage ? `data:${image.mediaType};base64,${image.data}` : null;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 55000);
+
+    const orHeaders = {
+      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+    };
+
     try {
+      // Step 1: if image present, get a factual description from qwen
+      let imageDescription = '';
+      if (hasImage) {
+        try {
+          const descRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            signal: controller.signal,
+            headers: orHeaders,
+            body: JSON.stringify({
+              model: VISION_MODEL,
+              max_tokens: 250,
+              messages: [{
+                role: 'user',
+                content: [
+                  { type: 'text', text: 'Describe this image factually and specifically: who is in it, their physical appearance (body type, breast size, hair, skin tone), their exact pose, what they are or are not wearing, and the setting. Be precise.' },
+                  { type: 'image_url', image_url: { url: imageUrl } },
+                ],
+              }],
+            }),
+          });
+          if (descRes.ok) {
+            const descData = await descRes.json();
+            imageDescription = descData.choices[0].message.content.trim();
+          }
+        } catch (_) { /* silently continue without description */ }
+      }
+
+      // Step 2: build enriched system prompt and message list for hermes
+      const systemPrompt = imageDescription
+        ? `${SYSTEM_PROMPT}\n\nIMAGE IN THIS CONVERSATION:\n${imageDescription}\n\nEvery prompt you write must reference these specific visual details. Do not invent details not present in the image.`
+        : SYSTEM_PROMPT;
+
+      const orMessages = messages.map((m, i) => {
+        const isLastUser = i === messages.length - 1 && m.role === 'user';
+        if (isLastUser && hasImage && !imageDescription) {
+          // fallback: attach image directly if describe step failed
+          return {
+            role: 'user',
+            content: [
+              { type: 'text', text: m.content || 'What do you see in this image?' },
+              { type: 'image_url', image_url: { url: imageUrl } },
+            ],
+          };
+        }
+        return { role: m.role, content: m.content };
+      });
+
+      const body = JSON.stringify({
+        model: TEXT_MODEL,
+        max_tokens: 900,
+        safe_prompt: false,
+        messages: [{ role: 'system', content: systemPrompt }, ...orMessages],
+      });
+
       let response;
       for (let attempt = 0; attempt < 3; attempt++) {
         if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 3000));
         response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           signal: controller.signal,
-          headers: {
-            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
+          headers: orHeaders,
           body,
         });
         if (response.status !== 429) break;
